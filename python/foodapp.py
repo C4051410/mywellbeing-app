@@ -24,7 +24,9 @@ def FoodApp():
     enter_salt = ft.TextField(hint_text = "Enter Your Salt Goal",input_filter=ft.InputFilter(allow=True,regex_string="^[0-9].*$",replacement_string=""))
     enter_protein = ft.TextField(hint_text ="Enter Your Protein Goal", input_filter = ft.InputFilter(allow=True,regex_string="^[0-9].*$",replacement_string=""))
     #is used to display the progress towards the users overall calorie goal
-    progress_bar = ft.ProgressBar(width = 200, height = 20,value = 0, color = "green")
+    calorie_bar = ft.ProgressBar(width = 200, height = 20,value = 0, color = "green")
+    salt_bar = ft.ProgressBar(width = 200, height = 20,value = 0, color = "blue")
+    protein_bar = ft.ProgressBar(width = 200, height = 20,value = 0, color = "red")
     #used to create a button to set goal
     set_goal_btn = ft.ElevatedButton("Set Goal")
     #used to set on_click before container using lambda
@@ -74,8 +76,10 @@ def FoodApp():
         global protein_goal
         global total_proteins
         global total_salts
-        # used to reference progress bar outside of function
-        nonlocal progress_bar
+        # used to reference progress bars outside of function
+        nonlocal calorie_bar
+        nonlocal salt_bar
+        nonlocal protein_bar
         #makes sure both fields have values in them
         if food_search.value != "" and calories_search.value != "" and calorie_goal != 0\
                 and salt_search.value != "" and salt_goal != 0 and protein_search.value != "" and protein_goal != 0:
@@ -84,7 +88,9 @@ def FoodApp():
             total_salts = total_salts + float(salt_search.value)
             total_proteins = total_proteins + float(protein_search.value)
             #updates the progress bar
-            progress_bar.value = total_calories/calorie_goal
+            calorie_bar.value = total_calories/calorie_goal
+            salt_bar.value = total_salts/salt_goal
+            protein_bar.value = total_proteins/protein_goal
             #retrieves and displays food and calorie values
             display_text = f"{food_search.value} - {calories_search.value}"
             food_list.controls.append(ft.ExpansionTile(width=300,title=food_search.value,expanded=True,
@@ -102,13 +108,15 @@ def FoodApp():
             calories_search.update()
             salt_search.update()
             protein_search.update()
-            progress_bar.update()
+            calorie_bar.update()
+            salt_bar.update()
+            protein_bar.update()
             e.page.update()
 
 
 
     return ft.Container(content =ft.Column([
                                             food_search,calories_search,salt_search,protein_search,
-                                            ft.FloatingActionButton("Enter",on_click=add_food),progress_bar
-                                            ,food_list,set_goal_btn,
+                                            ft.FloatingActionButton("Enter",on_click=add_food),ft.Text("Calories"),calorie_bar
+                                            ,ft.Text("Salts"),salt_bar,ft.Text("Proteins"),protein_bar,food_list,set_goal_btn,
     ]))
