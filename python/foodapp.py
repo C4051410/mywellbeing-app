@@ -1,5 +1,6 @@
 import flet as ft
-from flet import KeyboardType
+from flet import KeyboardType, ExpansionPanel
+
 #stores total calories
 total_calories = 0
 calorie_goal = 0
@@ -61,18 +62,21 @@ def FoodApp():
             progress_bar.value = total_calories/calorie_goal
             #retrieves and displays food and calorie values
             display_text = f"{food_search.value} - {calories_search.value}"
-            food_list.controls.append(ft.Text(display_text))
+            food_list.controls.append(ft.ExpansionTile(width=300,title=food_search.value,expanded=True,
+                                                       controls=[ft.ListTile(title=ft.Text("Calories"),
+                                                                             subtitle=ft.Text(calories_search.value),)]))
             #resets all values and updates all relevant fields.
             food_search.value = ""
             calories_search.value = ""
             food_search.update()
             calories_search.update()
             progress_bar.update()
+            e.page.update()
 
 
 
     return ft.Container(content =ft.Column([
                                             food_search,calories_search,
                                             ft.FloatingActionButton("Enter",on_click=add_food),progress_bar
-                                            ,food_list,set_goal_btn
+                                            ,food_list,set_goal_btn,
     ]))
