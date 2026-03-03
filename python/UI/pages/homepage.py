@@ -1,3 +1,7 @@
+'''
+File used for main homepage that logged-in users will be met with
+'''
+
 import flet as ft
 
 #TODO - Retrieve name of logged in user and pfp
@@ -29,7 +33,7 @@ class WorkoutApp(ft.Column):
 
         self.userpfp = ft.Container(
                         content=ft.Image(src=userpfp),
-                        border_radius=ft.border_radius.all(100),
+                        border_radius=ft.BorderRadius.all(100),
                         alignment=ft.Alignment.CENTER_RIGHT,
                         on_click=self.open_sidebar
                     )
@@ -90,5 +94,3 @@ def main(page: ft.Page):
     app = WorkoutApp()
 
     page.add(app)
-
-ft.run(main, assets_dir="assets")
