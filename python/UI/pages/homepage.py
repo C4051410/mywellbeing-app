@@ -4,77 +4,48 @@ File used for main homepage that logged-in users will be met with
 
 import flet as ft
 
+from components.userpfp import Userpfp
+from components.bottom_nav import navBar
+
 #TODO - Retrieve name of logged in user and pfp
 user = "Username"
-userpfp = "defaultUserimg.png"
 
 #Default style of all text on screen
 
-@ft.control
+#Welcome message to be displayed
+welcome_message = ft.Column(
+    controls=[
+        #Greeting for the user
+        ft.Text(
+            value=f"Welcome {user}!",
+            size=90,
+            color=ft.Colors.BLACK
+        ),
+        #Generic motivational message
+        ft.Text(
+            value="Lets crush your workout goals today!",
+            size=40,
+            color="grey"
+        )
+    ]
+)
+
+
 class WorkoutApp(ft.Column):
     def init(self):
-        #Welcome message and profile picture to be displayed
-        self.welcome_message = ft.Column(
-            controls=[
-                #Greeting for the user
-                ft.Text(
-                    value=f"Welcome {user}!",
-                    size=90,
-                    color=ft.Colors.BLACK
-                ),
-                #Generic motivational message
-                ft.Text(
-                    value="Lets crush your workout goals today!",
-                    size=40,
-                    color="grey"
-                )
-            ]
-        )
-
-        self.userpfp = ft.Container(
-                        content=ft.Image(src=userpfp),
-                        border_radius=ft.BorderRadius.all(100),
-                        alignment=ft.Alignment.CENTER_RIGHT,
-                        on_click=self.open_sidebar
-                    )
-
         self.controls=[
             ft.Row(
                 expand=True,
                 alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
                 controls=[
-                    self.welcome_message,
-                    self.userpfp
+                    welcome_message,
+                    Userpfp()
                 ],
             ),
-            ft.Column(
-                visible=True,
-                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-                controls=[
-                    ft.Container(
-                        content=ft.Column(
-                            controls=[
-                                self.userpfp,
-                                ft.ListView(
-                                    controls=[
-                                        #TODO - Add links to other pages
-                                        ft.Text(value="Settings"),
-                                        ft.Text(value="Page 2"),
-                                        ft.Text(value="Page 3")
-                                    ]
-                                )
-                            ]
-                        ),
-                        bgcolor=ft.Colors.GREY
-                    )
-                ]
-            )
+            navBar()
         ]
-
-    def open_sidebar(self, e):
-        #Open the sidebar
-        pass
-
+        self.expand = True
+        self.alignment = ft.MainAxisAlignment.SPACE_BETWEEN
 
 def main(page: ft.Page):
     page.title = "My Wellbeing"
