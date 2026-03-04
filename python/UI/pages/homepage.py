@@ -40,6 +40,9 @@ class WorkoutApp(ft.Column):
         #Create user profile picture image
         self.userpfp = Userpfp(page)
 
+        #Create navBar element
+        self.navBar = navBar(page)
+
         self.controls=[
             ft.Row(
                 expand=True,
@@ -58,7 +61,7 @@ class WorkoutApp(ft.Column):
                     self.userpfp
                 ],
             ),
-            navBar(page)
+            self.navBar
         ]
         #Expand, take all available space
         self.expand = True
@@ -76,8 +79,10 @@ class WorkoutApp(ft.Column):
         self.welcome_text.size = self.r.w(welcome_text_size)
         self.motivational_text.size = self.r.w(motivational_msg_size)
 
-        #Reize profile picture size
+        #Resize profile picture size
         self.userpfp.resize()
+        #Resize navBar
+        self.navBar.resize()
 
         #Update the page contents
         self.update()
@@ -97,6 +102,17 @@ def main(page: ft.Page):
     page.theme = ft.Theme(
         font_family = "Dubai",
     )
+
+    #TODO - REMOVE FROM FINAL BUILD - FOR TESTING ONLY
+    #Mobile phone like resolution
+    #page.window.width=360
+    #page.window.height=800
+    #page.window.resizable=False
+    #page.window.alignment = ft.Alignment.CENTER
+
+
+    #Ensures nav bar stretches across full screen
+    page.padding = 0
 
     page.update()
 
