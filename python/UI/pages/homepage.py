@@ -6,52 +6,90 @@ import flet as ft
 
 from components.userpfp import Userpfp
 from components.bottom_nav import navBar
+from components.responsive import Responsive
 
 #TODO - Retrieve name of logged in user and pfp
 user = "Username"
 
-#Default style of all text on screen
-
-#Welcome message to be displayed
-welcome_message = ft.Column(
-    controls=[
-        #Greeting for the user
-        ft.Text(
-            value=f"Welcome {user}!",
-            size=90,
-            color=ft.Colors.BLACK
-        ),
-        #Generic motivational message
-        ft.Text(
-            value="Lets crush your workout goals today!",
-            size=40,
-            color="grey"
-        )
-    ]
-)
-
+#Sizes of all elements on homepage (as percent of screen)
+welcome_text_size = 0.1
+motivational_msg_size = 0.03
 
 class WorkoutApp(ft.Column):
-    def init(self):
+    def __init__(self, page: ft.Page):
+        super().__init__()
+
+        self.r = Responsive(page)
+
+        #TODO-Add slight variations to the welcome and motivational message
+
+        #Welcome text to be shown to the user
+        self.welcome_text = ft.Text(
+            value=f"Welcome {user}!",
+            size=self.r.w(welcome_text_size),
+            color=ft.Colors.BLACK
+        )
+
+        #Motivational text to be shown to the user
+        self.motivational_text = ft.Text(
+            value="Lets crush your workout goals today!",
+            size=self.r.w(motivational_msg_size),
+            color="grey"
+        )
+
+        #Create user profile picture image
+        self.userpfp = Userpfp(page)
+
         self.controls=[
             ft.Row(
                 expand=True,
+                #Adds white space in-between text and profile pic
                 alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                #Ensures bot text and profile pic are aligned to the top of the screen
+                vertical_alignment=ft.CrossAxisAlignment.START,
                 controls=[
-                    welcome_message,
-                    Userpfp()
+                    ft.Column(
+                        expand=True,
+                        controls=[
+                            self.welcome_text,
+                            self.motivational_text
+                        ]
+                    ),
+                    self.userpfp
                 ],
             ),
-            navBar()
+            navBar(page)
         ]
+        #Expand, take all available space
         self.expand = True
+        #Spread the two elements apart
         self.alignment = ft.MainAxisAlignment.SPACE_BETWEEN
+
+        self.this_page = page
+        page.on_resize = self.resize
+
+    #Function to be ran when page resizes
+    def resize(self, e):
+        self.r = Responsive(self.this_page)
+
+        #Resize text size
+        self.welcome_text.size = self.r.w(welcome_text_size)
+        self.motivational_text.size = self.r.w(motivational_msg_size)
+
+        #Reize profile picture size
+        self.userpfp.resize()
+
+        #Update the page contents
+        self.update()
 
 def main(page: ft.Page):
     page.title = "My Wellbeing"
+
     #Default to light mode
     #TODO - Allow user to change mode in settings
     page.theme_mode = ft.ThemeMode.LIGHT
+
+    #Font to be used throughout app
     page.fonts = {
         "Dubai": "/assets/DUBAI-REGULAR.TTF"
     }
@@ -62,6 +100,6 @@ def main(page: ft.Page):
 
     page.update()
 
-    app = WorkoutApp()
+    app = WorkoutApp(page)
 
     page.add(app)
