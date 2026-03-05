@@ -182,7 +182,8 @@ class navBar(ft.Container):
     def home_pressed(self):
         print("Home Pressed")
 
-    def activities_pressed(self):
+    async def activities_pressed(self):
+        await self.page.push_route("/activities")
         print("Activities Pressed")
 
     def nutrition_pressed(self):

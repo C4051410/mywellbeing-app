@@ -165,35 +165,7 @@ class WorkoutApp(ft.Column):
         #Update the page contents
         self.update()
 
-def main(page: ft.Page):
-    page.title = "My Wellbeing"
+def main_homepage(page: ft.Page):
+    homepage = WorkoutApp(page)
 
-    #Default to light mode
-    #TODO - Allow user to change mode in settings
-    page.theme_mode = ft.ThemeMode.LIGHT
-
-    #Font to be used throughout app
-    page.fonts = {
-        "Dubai": "/assets/DUBAI-REGULAR.TTF"
-    }
-
-    page.theme = ft.Theme(
-        font_family = "Dubai",
-    )
-
-    #TODO - REMOVE FROM FINAL BUILD - FOR TESTING ONLY
-    #Mobile phone like resolution
-    page.window.width=360
-    page.window.height=800
-    page.window.resizable=False
-    page.window.alignment = ft.Alignment.CENTER
-
-
-    #Ensures nav bar stretches across full screen
-    page.padding = 10
-
-    page.update()
-
-    app = WorkoutApp(page)
-
-    page.add(app)
+    return homepage
