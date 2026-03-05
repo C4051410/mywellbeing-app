@@ -17,7 +17,7 @@ def LoginApp():
     login = ft.Text("Please enter your login details")
     username = ft.TextField(label="Enter your username")
     password = ft.TextField(label="Enter your password",password=True,can_reveal_password=True)
-    def check_login(e):
+    def check_login():
         conn = get_connection()
         if conn is None:
             return False
@@ -35,6 +35,8 @@ def LoginApp():
                 else:
                     print("Login successful")
                     return True
+            cur.close()
+            conn.close()
 
 
     return ft.Container(ft.Column([login,username,password,ft.ElevatedButton("Enter",on_click=check_login)]))
