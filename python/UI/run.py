@@ -11,6 +11,7 @@ from pages.activities import main_activities
 from pages.nutrition import main_nutrition
 from pages.social import main_social
 from pages.settings import main_settings
+from pages.map import main_map
 
 def main(page: ft.Page):
     page.title = "My Wellbeing"
@@ -29,6 +30,8 @@ def main(page: ft.Page):
                 page.add(main_social(page))
             if page.route == "/settings":
                 page.add(main_settings(page))
+            if page.route == "/map":
+                    page.add(main_map(page))
 
             page.update()
 
