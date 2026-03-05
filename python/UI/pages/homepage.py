@@ -8,12 +8,19 @@ from components.userpfp import Userpfp
 from components.bottom_nav import navBar
 from components.responsive import Responsive
 
-#TODO - Retrieve name of logged in user and pfp
+#TODO - Retrieve details of logged in user
 user = "Username"
+steps = 2000
+calories = 800
 
 #Sizes of all elements on homepage (as percent of screen)
 welcome_text_size = 0.1
 motivational_msg_size = 0.03
+widget_text_size = 0.035
+steps_h_size = 0.4
+calories_h_size = 0.4
+friends_v_size = 0.15
+streak_v_size = 0.225
 
 class WorkoutApp(ft.Column):
     def __init__(self, page: ft.Page):
@@ -37,6 +44,47 @@ class WorkoutApp(ft.Column):
             color="grey"
         )
 
+        #Text for steps widget
+        self.steps_text = ft.Text(
+            value=f'{steps}',
+            size=self.r.w(widget_text_size)
+        )
+
+        self.calories_text = ft.Text(
+            value=f'{calories}',
+            size=self.r.w(widget_text_size)
+        )
+
+        #Steps widget
+        self.steps_container = ft.Container(
+            border = ft.Border.all(width=2, color=ft.Colors.GREY_400),
+            content=ft.Column(
+                controls=[
+                    self.steps_text
+                ]
+            )
+        )
+
+        #Calories widget
+        self.calories_container = ft.Container(
+            border = ft.Border.all(width=2, color=ft.Colors.GREY_400),
+            content=ft.Column(
+                controls=[
+                    self.calories_text
+                ]
+            )
+        )
+
+        #Friends widget
+        self.friends_container = ft.Container(
+            bgcolor = ft.Colors.BLUE_300
+        )
+
+        #Streak widget
+        self.streak_container = ft.Container(
+            border=ft.Border.all(width=2, color=ft.Colors.GREY_400)
+        )
+
         #Create user profile picture image
         self.userpfp = Userpfp(page)
 
@@ -44,12 +92,12 @@ class WorkoutApp(ft.Column):
         self.navBar = navBar(page)
 
         self.controls=[
+            #Row with text and pfp
             ft.Row(
-                expand=True,
                 #Adds white space in-between text and profile pic
                 alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
-                #Ensures bot text and profile pic are aligned to the top of the screen
-                vertical_alignment=ft.CrossAxisAlignment.START,
+                #Ensures both text and profile pic are aligned to the top of the screen
+                #vertical_alignment=ft.CrossAxisAlignment.START,
                 controls=[
                     ft.Column(
                         expand=True,
@@ -61,15 +109,42 @@ class WorkoutApp(ft.Column):
                     self.userpfp
                 ],
             ),
+            #Row with steps and calories
+            ft.Row(
+                alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                #vertical_alignment = ft.CrossAxisAlignment.START,
+                controls=[
+                    self.steps_container,
+                    self.calories_container
+                ]
+            ),
+            self.friends_container,
+            self.streak_container,
             self.navBar
         ]
         #Expand, take all available space
         self.expand = True
-        #Spread the two elements apart
+        #Spread the elements apart
         self.alignment = ft.MainAxisAlignment.SPACE_BETWEEN
+
+        #Initially set the widget size
+        self.set_widget_size()
 
         self.this_page = page
         page.on_resize = self.resize
+
+    def set_widget_size(self):
+        #Set width and height of widgets
+        #Steps - Square
+        self.steps_container.width = self.r.w(steps_h_size)
+        self.steps_container.height = self.r.w(steps_h_size)
+        #Calories - Square
+        self.calories_container.width = self.r.w(calories_h_size)
+        self.calories_container.height = self.r.w(calories_h_size)
+        #Friends - Rectangle
+        self.friends_container.height = self.r.h(friends_v_size)
+        #Streak - Long rectange
+        self.streak_container.height = self.r.h(streak_v_size)
 
     #Function to be ran when page resizes
     def resize(self, e):
@@ -78,6 +153,9 @@ class WorkoutApp(ft.Column):
         #Resize text size
         self.welcome_text.size = self.r.w(welcome_text_size)
         self.motivational_text.size = self.r.w(motivational_msg_size)
+
+        #Resize all the widgets
+        self.set_widget_size()
 
         #Resize profile picture size
         self.userpfp.resize()
@@ -112,7 +190,7 @@ def main(page: ft.Page):
 
 
     #Ensures nav bar stretches across full screen
-    page.padding = 0
+    page.padding = 10
 
     page.update()
 

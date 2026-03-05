@@ -11,7 +11,7 @@ from components.responsive import Responsive
 userpfpImage = "defaultUserimg.png"
 
 #Size of all elements (as percent of screen size)
-pfp_size = 0.12
+pfp_size = 0.2
 
 class Userpfp(ft.Container):
     def __init__(self, page: ft.Page):
