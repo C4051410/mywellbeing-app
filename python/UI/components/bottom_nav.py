@@ -6,10 +6,11 @@ import flet as ft
 
 from components.responsive import Responsive
 
-#Size of all components on the page
+#Size of all components on the page (as percent of screen size)
 navbar_height = 0.12
 button_width = 0.15
-text_size =0.01
+text_size =0.025
+padding= 0.008
 
 #A container of all that is shown on the navBar
 class navBar(ft.Container):
@@ -24,7 +25,7 @@ class navBar(ft.Container):
         self.height = self.r.h(navbar_height)
 
         #Padding of elements from edge of nav bar
-        self.padding = self.r.w(0.008)
+        self.padding = self.r.w(padding)
 
         #Text elements for buttons - separated so they can be dynamically resized to page size
         self.home_text = ft.Text(
@@ -151,8 +152,31 @@ class navBar(ft.Container):
                 ]
             )
 
+    #Sets the size of all elements on the navbar according to the size of the screen
+    def set_size(self):
+        #Adjust the height of the actual nav bar
+        self.height = self.r.h(navbar_height)
+
+        #Adjust padding of buttons
+        self.padding = self.r.w(padding)
+
+        #Adjust the width of all the buttons
+        self.home_container.width = self.r.w(button_width)
+        self.activities_container.width = self.r.w(button_width)
+        self.nutrition_container.width = self.r.w(button_width)
+        self.social_container.width = self.r.w(button_width)
+        self.settings_container.width = self.r.w(button_width)
+
+        #Adjust size of text
+        self.home_text.size = self.r.w(text_size)
+        self.activities_text.size = self.r.w(text_size)
+        self.nutrition_text.size = self.r.w(text_size)
+        self.social_text.size = self.r.w(text_size)
+        self.settings_text.size = self.r.w(text_size)
+
     def resize(self):
-        print("Resizing navBar")
+        self.r = Responsive(self.page)
+        self.set_size()
 
     #TODO-Route user to correct page upon clicking taskbar
     def home_pressed(self):

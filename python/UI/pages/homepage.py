@@ -105,10 +105,10 @@ def main(page: ft.Page):
 
     #TODO - REMOVE FROM FINAL BUILD - FOR TESTING ONLY
     #Mobile phone like resolution
-    #page.window.width=360
-    #page.window.height=800
-    #page.window.resizable=False
-    #page.window.alignment = ft.Alignment.CENTER
+    page.window.width=360
+    page.window.height=800
+    page.window.resizable=False
+    page.window.alignment = ft.Alignment.CENTER
 
 
     #Ensures nav bar stretches across full screen
