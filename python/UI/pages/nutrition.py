@@ -14,10 +14,10 @@ class NutritionPage(ft.Column):
         self.main_page = page
         self.r = Responsive(page)
         #1. Page Header
-        header = ft.Container(content=ft.Text("Nutrition",size=32,weight=ft.FontWeight.BOLD),
-                              padding=ft.padding.only(top=20,left=10)
+        self.header = ft.Container(content=ft.Text("Nutrition",size=32,weight=ft.FontWeight.BOLD),
+                              padding=ft.padding.only(top=10,left=10)
         )
-        self.stats_card = ft.Container(bgcolor=ft.Colors.WHITE,border_radius=15,padding=5,
+        self.stats_card = ft.Container(bgcolor=ft.Colors.WHITE,border_radius=5,padding=5,
                                   shadow = ft.BoxShadow(spread_radius=1, blur_radius=10, color=ft.Colors.BLACK12),
                                   content = ft.Column([ft.Text("Today",size=12,weight=ft.FontWeight.BOLD,color=ft.Colors.GREY),
                                                        ft.Divider(height=10,color=ft.Colors.TRANSPARENT),
@@ -37,7 +37,7 @@ class NutritionPage(ft.Column):
                                                            ]
                                                        )])
         )
-        self.enter_foodlog = ft.Container(bgcolor=ft.Colors.WHITE,border_radius=15,padding=10,
+        self.enter_foodlog = ft.Container(bgcolor=ft.Colors.WHITE,border_radius=5,padding=10,
                                      content = ft.Column([
                                          ft.Text("Enter Food",size=10, weight=ft.FontWeight.BOLD, color=ft.Colors.BLACK),
                                          ft.TextField(hint_text="Food",height=40),
@@ -51,15 +51,28 @@ class NutritionPage(ft.Column):
 
                                      ])
                                      )
-        self.navBar = navBar(page)
-        self.expand = True
-        self.controls = [
-            header,
+        self.display_foodlog = ft.Container(bgcolor=ft.Colors.WHITE,border_radius=5,padding=10,
+                                            content = ft.Column([
+                                                ft.ExpansionTile(title="Fish and Chips",
+                                                                 controls=[ft.ListTile(title="Calories",subtitle="1324"),
+                                                                           ft.ListTile(title="Salts",subtitle="6.5"),
+                                                                           ft.ListTile(title="Calories",subtitle="10")])
+                                            ])
+                                            )
+        scrollable = ft.Column([
+            self.header,
             self.stats_card,
             self.enter_foodlog,
+            self.display_foodlog,
+        ],height=600,scroll=ft.ScrollMode.ALWAYS)
+        self.navBar = navBar(page)
+        self.controls = [
+            scrollable,
             self.navBar,
 
         ]
+        self.expand = True
+        self.alignment = ft.MainAxisAlignment.SPACE_BETWEEN
 
 def main_nutrition(page: ft.Page):
     nutrition_page = NutritionPage(page)
