@@ -17,7 +17,7 @@ class NutritionPage(ft.Column):
         header = ft.Container(content=ft.Text("Nutrition",size=32,weight=ft.FontWeight.BOLD),
                               padding=ft.padding.only(top=20,left=10)
         )
-        stats_card = ft.Container(bgcolor=ft.Colors.WHITE,border_radius=15,padding=20,
+        self.stats_card = ft.Container(bgcolor=ft.Colors.WHITE,border_radius=15,padding=5,
                                   shadow = ft.BoxShadow(spread_radius=1, blur_radius=10, color=ft.Colors.BLACK12),
                                   content = ft.Column([ft.Text("Today",size=12,weight=ft.FontWeight.BOLD,color=ft.Colors.GREY),
                                                        ft.Divider(height=10,color=ft.Colors.TRANSPARENT),
@@ -28,7 +28,7 @@ class NutritionPage(ft.Column):
                                                                    ft.Text("Calories",size=28, weight=ft.FontWeight.BOLD, color=ft.Colors.DEEP_ORANGE),
                                                                    ft.Text("1908",size=12, weight=ft.FontWeight.BOLD, color=ft.Colors.GREY_400)
                                                                ]),
-                                                               ft.Container(width=1,height=40,bgcolor=ft.Colors.GREY_200),
+                                                               ft.Container(width=1,height=20,bgcolor=ft.Colors.GREY_200),
 
                                                                ft.Column([
                                                                    ft.Text("Proteins",size=28, weight=ft.FontWeight.BOLD, color=ft.Colors.DEEP_ORANGE),
@@ -37,14 +37,28 @@ class NutritionPage(ft.Column):
                                                            ]
                                                        )])
         )
-        food_logs = ft.Container(expand=True,bgcolor=ft.Colors.WHITE,border_radius=15,padding=20,)
-        self.nav = navBar(page)
+        self.enter_foodlog = ft.Container(bgcolor=ft.Colors.WHITE,border_radius=15,padding=10,
+                                     content = ft.Column([
+                                         ft.Text("Enter Food",size=10, weight=ft.FontWeight.BOLD, color=ft.Colors.BLACK),
+                                         ft.TextField(hint_text="Food",height=40),
+                                         ft.Text("Enter Calories",size=10, weight=ft.FontWeight.BOLD, color=ft.Colors.BLACK),
+                                         ft.TextField(hint_text="Calories",input_filter=ft.InputFilter(allow=True,regex_string="^[0-9].*$",replacement_string=""),height=40),
+                                         ft.Text("Enter Salts",size=10, weight=ft.FontWeight.BOLD, color=ft.Colors.BLACK),
+                                         ft.TextField(hint_text="Salts",input_filter=ft.InputFilter(allow=True,regex_string="^[0-9]*$",replacement_string=""),height=40),
+                                         ft.Text("Enter Proteins",size=10, weight=ft.FontWeight.BOLD, color=ft.Colors.BLACK),
+                                         ft.TextField(hint_text="Proteins",input_filter=ft.InputFilter(allow=True,regex_string="^[0-9]*$",replacement_string=""),height=40),
+                                         ft.ElevatedButton("Enter Food")
+
+                                     ])
+                                     )
+        self.navBar = navBar(page)
         self.expand = True
         self.controls = [
             header,
-            stats_card,
-            food_logs,
-            self.nav
+            self.stats_card,
+            self.enter_foodlog,
+            self.navBar,
+
         ]
 
 def main_nutrition(page: ft.Page):
