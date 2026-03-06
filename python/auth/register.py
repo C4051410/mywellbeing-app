@@ -10,7 +10,16 @@ def register(username, full_name, password, email):
 
     conn = connect()
     cur = conn.cursor()
+
     try:
+        # check if email is already in use
+        cur.execute("SELECT id FROM users WHERE email = %s", (email,))
+        existing_user = cur.fetchone()
+
+        if existing_user:
+            if existing_user[0] == email:
+                return "Email already registered"
+
         # hash user password
         hashed_password = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensals(12).decode("utf-8")).decode("utf-8")
 
