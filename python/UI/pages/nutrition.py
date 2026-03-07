@@ -3,6 +3,8 @@ File for nutrition page - accessible by clicking 'nutrition' on nav bar
 '''
 
 import os
+from datetime import date
+
 import flet as ft
 import psycopg2
 from dotenv import load_dotenv
@@ -22,7 +24,6 @@ def get_connection():
         print(f"Error: {e}")
         return None
 conn = get_connection()
-
 class NutritionPage(ft.Column):
 
     def __init__(self, page: ft.Page):
@@ -50,30 +51,29 @@ class NutritionPage(ft.Column):
                                                                ]))
             if conn is not None:
                 cur = conn.cursor()
-                cur.execute("INSERT INTO foodlog (title,calories,salts,proteins,user_id) VALUES (%s,%s,%s,%s,1)  ",(food,calories,salts,proteins))
+                cur.execute("INSERT INTO foodlog (title,calories,salts,proteins,date,user_id) VALUES (%s,%s,%s,%s,%s,1)  ",(food,calories,salts,proteins,str(date.today()),))
                 print("Executed")
                 conn.commit()
                 cur.close()
             self.food_input.value = ""
-            self.calories_input = ""
-            self.salts_input = ""
-            self.proteins_input = ""
+            self.calories_input.value = ""
+            self.salts_input.value = ""
+            self.proteins_input.value = ""
             self.update()
 
 
         def retrieve_posts():
             if conn is not None:
                 cur = conn.cursor()
-                cur.execute("SELECT title,calories,salts,proteins FROM foodlog WHERE user_id = 1")
+                cur.execute("SELECT title,calories,salts,proteins,date FROM foodlog WHERE user_id = 1 ORDER BY date DESC")
                 rows = cur.fetchall()
                 for data in rows:
-                    self.foodlog_list.controls.append(ft.ExpansionTile(title=data[0],
+                    self.foodlog_list.controls.append(ft.ExpansionTile(title=data[0],subtitle=str(data[4]),
                                                                controls=[
                                                                    ft.ListTile(title="Calories",subtitle=str(data[1])),
                                                                    ft.ListTile(title="Salts",subtitle=str(data[2])),
                                                                    ft.ListTile(title="Proteins",subtitle=str(data[3])),
                                                                ]))
-                    print(data[0],data[1],data[2],data[3])
                 cur.close()
 
         retrieve_posts()
@@ -81,6 +81,21 @@ class NutritionPage(ft.Column):
         self.header = ft.Container(content=ft.Text("Nutrition",size=32,weight=ft.FontWeight.BOLD),
                               padding=ft.padding.only(top=10,left=10)
         )
+        def retrieve_daily_status():
+            total_c = 0
+            total_s = 0.0
+            total_p = 0.0
+            if conn is not None:
+                cur = conn.cursor()
+                cur.execute("SELECT calories,salts,proteins FROM foodlog WHERE user_id = 1 AND date = %s",(str(date.today()),))
+                rows = cur.fetchall()
+                for data in rows:
+                    total_c = total_c + data[0]
+                    total_s = total_s + data[1]
+                    total_p = total_p + data[2]
+                return total_c, total_s, total_p
+
+        total_calories, total_salts, total_proteins = retrieve_daily_status()
         self.stats_card = ft.Container(bgcolor=ft.Colors.WHITE,border_radius=5,padding=5,
                                   shadow = ft.BoxShadow(spread_radius=1, blur_radius=10, color=ft.Colors.BLACK12),
                                   content = ft.Column([ft.Text("Today",size=12,weight=ft.FontWeight.BOLD,color=ft.Colors.GREY),
@@ -90,13 +105,21 @@ class NutritionPage(ft.Column):
                                                            controls = [
                                                                ft.Column([
                                                                    ft.Text("Calories",size=28, weight=ft.FontWeight.BOLD, color=ft.Colors.DEEP_ORANGE),
-                                                                   ft.Text("1908",size=12, weight=ft.FontWeight.BOLD, color=ft.Colors.GREY_400)
+                                                                   ft.Text(f"{total_calories:.0f}",size=12, weight=ft.FontWeight.BOLD, color=ft.Colors.GREY_400)
                                                                ]),
                                                                ft.Container(width=1,height=20,bgcolor=ft.Colors.GREY_200),
 
                                                                ft.Column([
                                                                    ft.Text("Proteins",size=28, weight=ft.FontWeight.BOLD, color=ft.Colors.DEEP_ORANGE),
-                                                                   ft.Text("20.9",size=12, weight=ft.FontWeight.BOLD, color=ft.Colors.GREY_400)
+                                                                   ft.Text(f"{total_proteins:.2f}",size=12, weight=ft.FontWeight.BOLD, color=ft.Colors.GREY_400)
+                                                               ]),
+                                                               ft.Column([
+                                                                   ft.Text("Salts", size=28,
+                                                                           weight=ft.FontWeight.BOLD,
+                                                                           color=ft.Colors.DEEP_ORANGE),
+                                                                   ft.Text(f"{total_salts:.2f}", size=12,
+                                                                           weight=ft.FontWeight.BOLD,
+                                                                           color=ft.Colors.GREY_400)
                                                                ])
                                                            ]
                                                        )])
