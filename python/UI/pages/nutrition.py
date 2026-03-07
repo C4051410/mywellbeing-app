@@ -61,9 +61,22 @@ class NutritionPage(ft.Column):
             self.update()
 
 
+        def retrieve_posts():
+            if conn is not None:
+                cur = conn.cursor()
+                cur.execute("SELECT title,calories,salts,proteins FROM foodlog WHERE user_id = 1")
+                rows = cur.fetchall()
+                for data in rows:
+                    self.foodlog_list.controls.append(ft.ExpansionTile(title=data[0],
+                                                               controls=[
+                                                                   ft.ListTile(title="Calories",subtitle=str(data[1])),
+                                                                   ft.ListTile(title="Salts",subtitle=str(data[2])),
+                                                                   ft.ListTile(title="Proteins",subtitle=str(data[3])),
+                                                               ]))
+                    print(data[0],data[1],data[2],data[3])
+                cur.close()
 
-
-
+        retrieve_posts()
         #1. Page Header
         self.header = ft.Container(content=ft.Text("Nutrition",size=32,weight=ft.FontWeight.BOLD),
                               padding=ft.padding.only(top=10,left=10)
