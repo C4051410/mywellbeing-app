@@ -2,13 +2,26 @@
 File for nutrition page - accessible by clicking 'nutrition' on nav bar
 '''
 
+import os
 import flet as ft
+import psycopg2
+from dotenv import load_dotenv
 
 from components.userpfp import Userpfp
 from components.bottom_nav import navBar
 from components.responsive import Responsive
 
+load_dotenv()
+db_url = os.getenv('DATABASE_URL')
 
+def get_connection():
+    try:
+        conn = psycopg2.connect(db_url)
+        return conn
+    except Exception as e:
+        print(f"Error: {e}")
+        return None
+conn = get_connection()
 
 class NutritionPage(ft.Column):
 
@@ -35,6 +48,12 @@ class NutritionPage(ft.Column):
                                                                    ft.ListTile(title="Salts",subtitle=salts),
                                                                    ft.ListTile(title="Proteins",subtitle=proteins),
                                                                ]))
+            if conn is not None:
+                cur = conn.cursor()
+                cur.execute("INSERT INTO foodlog (title,calories,salts,proteins,user_id) VALUES (%s,%s,%s,%s,1)  ",(food,calories,salts,proteins))
+                print("Executed")
+                conn.commit()
+                cur.close()
             self.food_input.value = ""
             self.calories_input = ""
             self.salts_input = ""
