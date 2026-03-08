@@ -34,13 +34,19 @@ class NutritionPage(ft.Column):
         self.calories_input = ft.TextField(hint_text="Calories",input_filter=ft.InputFilter(allow=True,regex_string="^[0-9].*$",replacement_string=""),height=40)
         self.salts_input = ft.TextField(hint_text="Salts",input_filter=ft.InputFilter(allow=True,regex_string="^[0-9].*$",replacement_string=""),height=40)
         self.proteins_input = ft.TextField(hint_text="Proteins",input_filter=ft.InputFilter(allow=True,regex_string="^[0-9].*$",replacement_string=""),height=40)
+        self.meal_types = ft.Dropdown(hint_text="Enter Meal Type", width=200, options=[
+            ft.DropdownOption(key="Breakfast", text="Breakfast"),
+            ft.DropdownOption(key="Lunch", text="Lunch"),
+            ft.DropdownOption(key="Dinner", text="Dinner"),
+            ft.DropdownOption(key="Snack", text="Snack"),])
         self.foodlog_list = ft.Column()
         def handle_submit(e):
             food = self.food_input.value
             calories = self.calories_input.value
             salts = self.salts_input.value
             proteins = self.proteins_input.value
-            if not food or not calories or not salts or not proteins:
+            mealtype = self.meal_types.value
+            if not food or not calories or not salts or not proteins or not mealtype:
                 print("Nope")
                 return
             self.foodlog_list.controls.append(ft.ExpansionTile(title=food,
@@ -48,10 +54,11 @@ class NutritionPage(ft.Column):
                                                                    ft.ListTile(title="Calories",subtitle=calories),
                                                                    ft.ListTile(title="Salts",subtitle=salts),
                                                                    ft.ListTile(title="Proteins",subtitle=proteins),
+                                                                   ft.ListTile(title="Meal Type",subtitle=mealtype),
                                                                ]))
             if conn is not None:
                 cur = conn.cursor()
-                cur.execute("INSERT INTO foodlog (title,calories,salts,proteins,date,user_id) VALUES (%s,%s,%s,%s,%s,1)  ",(food,calories,salts,proteins,str(date.today()),))
+                cur.execute("INSERT INTO foodlog (title,calories,salts,proteins,date,mealtype,user_id,) VALUES (%s,%s,%s,%s,%s,%s,1)  ",(food,calories,salts,proteins,str(date.today()),mealtype,))
                 print("Executed")
                 conn.commit()
                 cur.close()
@@ -59,22 +66,24 @@ class NutritionPage(ft.Column):
             self.calories_input.value = ""
             self.salts_input.value = ""
             self.proteins_input.value = ""
+            self.meal_types.value = ""
             self.update()
 
 
         def retrieve_posts():
             if conn is not None:
                 cur = conn.cursor()
-                cur.execute("SELECT title,calories,salts,proteins,date FROM foodlog WHERE user_id = 1 ORDER BY date DESC")
+                cur.execute("SELECT title,calories,salts,proteins,mealtype,date FROM foodlog WHERE user_id = 1 ORDER BY date DESC")
                 rows = cur.fetchall()
                 for data in rows:
-                    self.foodlog_list.controls.append(ft.ExpansionTile(title=data[0],subtitle=str(data[4]),
+                    self.foodlog_list.controls.append(ft.ExpansionTile(title=data[0],subtitle=str(data[5]) + " " + str(data[4]),
                                                                controls=[
                                                                    ft.ListTile(title="Calories",subtitle=str(data[1])),
                                                                    ft.ListTile(title="Salts",subtitle=str(data[2])),
                                                                    ft.ListTile(title="Proteins",subtitle=str(data[3])),
                                                                ]))
                 cur.close()
+                page.update()
 
         retrieve_posts()
         #1. Page Header
@@ -134,6 +143,8 @@ class NutritionPage(ft.Column):
                                          self.salts_input,
                                          ft.Text("Enter Proteins",size=10, weight=ft.FontWeight.BOLD, color=ft.Colors.BLACK),
                                          self.proteins_input,
+                                         ft.Text("Enter Meal Type",size=10, weight=ft.FontWeight.BOLD, color=ft.Colors.BLACK),
+                                         self.meal_types,
                                          ft.ElevatedButton("Enter Food",on_click=handle_submit),
 
                                      ])
