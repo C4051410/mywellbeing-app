@@ -102,9 +102,25 @@ class NutritionPage(ft.Column):
                     total_c = total_c + data[0]
                     total_s = total_s + data[1]
                     total_p = total_p + data[2]
+                cur.close()
                 return total_c, total_s, total_p
 
+        def retrieve_user_goals():
+            goal_c = 0
+            goal_s = 0.0
+            goal_p = 0.0
+            if conn is not None:
+                cur = conn.cursor()
+                cur.execute("SELECT calories_goal, salts_goal, proteins_goal FROM foodgoals WHERE user_id = 1")
+                rows = cur.fetchall()
+                for data in rows:
+                    goal_c = goal_c + data[0]
+                    goal_s = goal_s + data[1]
+                    goal_p = goal_p + data[2]
+                return goal_c, goal_s, goal_p
+
         total_calories, total_salts, total_proteins = retrieve_daily_status()
+        goal_calories, goal_salts, goal_proteins = retrieve_user_goals()
         self.stats_card = ft.Container(bgcolor=ft.Colors.WHITE,border_radius=5,padding=5,
                                   shadow = ft.BoxShadow(spread_radius=1, blur_radius=10, color=ft.Colors.BLACK12),
                                   content = ft.Column([ft.Text("Today",size=12,weight=ft.FontWeight.BOLD,color=ft.Colors.GREY),
@@ -114,19 +130,19 @@ class NutritionPage(ft.Column):
                                                            controls = [
                                                                ft.Column([
                                                                    ft.Text("Calories",size=28, weight=ft.FontWeight.BOLD, color=ft.Colors.DEEP_ORANGE),
-                                                                   ft.Text(f"{total_calories:.0f}",size=12, weight=ft.FontWeight.BOLD, color=ft.Colors.GREY_400)
+                                                                   ft.Text(f"{total_calories:.0f} / {goal_calories:.0f}",size=12, weight=ft.FontWeight.BOLD, color=ft.Colors.GREY_400)
                                                                ]),
                                                                ft.Container(width=1,height=20,bgcolor=ft.Colors.GREY_200),
 
                                                                ft.Column([
                                                                    ft.Text("Proteins",size=28, weight=ft.FontWeight.BOLD, color=ft.Colors.DEEP_ORANGE),
-                                                                   ft.Text(f"{total_proteins:.2f}",size=12, weight=ft.FontWeight.BOLD, color=ft.Colors.GREY_400)
+                                                                   ft.Text(f"{total_proteins:.2f} / {goal_proteins:.2f}",size=12, weight=ft.FontWeight.BOLD, color=ft.Colors.GREY_400)
                                                                ]),
                                                                ft.Column([
                                                                    ft.Text("Salts", size=28,
                                                                            weight=ft.FontWeight.BOLD,
                                                                            color=ft.Colors.DEEP_ORANGE),
-                                                                   ft.Text(f"{total_salts:.2f}", size=12,
+                                                                   ft.Text(f"{total_salts:.2f} / {goal_salts:.2f}", size=12,
                                                                            weight=ft.FontWeight.BOLD,
                                                                            color=ft.Colors.GREY_400)
                                                                ])
