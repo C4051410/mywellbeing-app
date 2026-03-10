@@ -2,13 +2,13 @@ import flet as ft
 from auth.register import register
 from auth.login import login
 
-def authPage():
+def authPage(on_login_success):
     message = ft.Text()
     # signup fields
     username = ft.TextField(label="Username")
     fullname = ft.TextField(label="Full Name")
     email = ft.TextField(label="Email")
-    password = ft.TextField(label="Password")
+    password = ft.TextField(label="Password", password=True)
 
     # fields only show on the signup page
     signup = [username, fullname]
@@ -16,8 +16,11 @@ def authPage():
     def handle_login(e):
         # logs in users
         logged_in = login(email.value, password.value)
-        message.value = str(logged_in)
-        e.page.update()
+        if isinstance(logged_in, tuple):
+            on_login_success(logged_in[0])
+        else:
+            message.value = str(logged_in)
+            e.page.update()
 
     def handle_register(e):
         # registers users

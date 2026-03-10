@@ -28,7 +28,7 @@ def register(username, full_name, password, email):
         hashed_password = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt(12)).decode("utf-8")
 
         # insert row into database
-        cur.execute("INSERT INTO users (id, username, full_name, password_hash, email) VALUES (gen_random_uuid(), %s, %s, %s, %s)",(username, full_name, hashed_password, email))
+        cur.execute("INSERT INTO users (id, username, full_name, password_hash, email, role) VALUES (gen_random_uuid(), %s, %s, %s, %s, 'user')",(username, full_name, hashed_password, email))
         conn.commit()
         return "User registration successful"
     except Exception as e:
