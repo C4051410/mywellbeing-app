@@ -31,9 +31,9 @@ class NutritionPage(ft.Column):
         self.main_page = page
         self.r = Responsive(page)
         self.food_input = ft.TextField(hint_text="Food",height=40)
-        self.calories_input = ft.TextField(hint_text="Calories",input_filter=ft.InputFilter(allow=True,regex_string="^[0-9].*$",replacement_string=""),height=40)
-        self.salts_input = ft.TextField(hint_text="Salts",input_filter=ft.InputFilter(allow=True,regex_string="^[0-9].*$",replacement_string=""),height=40)
-        self.proteins_input = ft.TextField(hint_text="Proteins",input_filter=ft.InputFilter(allow=True,regex_string="^[0-9].*$",replacement_string=""),height=40)
+        self.calories_input = ft.TextField(hint_text="Calories",input_filter=ft.InputFilter(allow=True,regex_string=r"^[0-9]*$",replacement_string=""),height=40)
+        self.salts_input = ft.TextField(hint_text="Salts",input_filter=ft.InputFilter(allow=True,regex_string=r"^\d*\.?\d*$",replacement_string=""),height=40)
+        self.proteins_input = ft.TextField(hint_text="Proteins",input_filter=ft.InputFilter(allow=True,regex_string=r"^\d*\.?\d*$",replacement_string=""),height=40)
         self.meal_types = ft.Dropdown(hint_text="Enter Meal Type", width=200, options=[
             ft.DropdownOption(key="Breakfast", text="Breakfast"),
             ft.DropdownOption(key="Lunch", text="Lunch"),
@@ -58,7 +58,7 @@ class NutritionPage(ft.Column):
                                                                ]))
             if conn is not None:
                 cur = conn.cursor()
-                cur.execute("INSERT INTO foodlog (title,calories,salts,proteins,date,mealtype,user_id,) VALUES (%s,%s,%s,%s,%s,%s,1)  ",(food,calories,salts,proteins,str(date.today()),mealtype,))
+                cur.execute("INSERT INTO foodlog (title,calories,salts,proteins,date,mealtype,user_id) VALUES (%s,%s,%s,%s,%s,%s,1)  ",(food,calories,salts,proteins,str(date.today()),mealtype,))
                 print("Executed")
                 conn.commit()
                 cur.close()
