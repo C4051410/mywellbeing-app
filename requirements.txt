@@ -1,1 +1,5 @@
 flet
+flet-map
+flet-geolocator
+psycopg2
+dotenv
