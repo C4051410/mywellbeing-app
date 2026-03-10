@@ -20,6 +20,7 @@ def login(email,password):
             return "Invalid password."
 
         # if password matches login is succesful
+        # TODO: (UI) change it to redirect user to home page once logged in
         return user
 
     finally:

@@ -3,6 +3,11 @@ import bcrypt
 from database.connection import connect
 
 def register(username, full_name, password, email):
+    # TODO: (UI) add field level error messages next to each input
+    # eg: username.error = "Please enter a username"
+    if not all ([username, full_name, password, email]):
+        return "All fields are required"
+
     # password validation
     regex = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$"
     if not re.search(regex, password):
@@ -17,19 +22,18 @@ def register(username, full_name, password, email):
         existing_user = cur.fetchone()
 
         if existing_user:
-            if existing_user == email:
-                return "Email already registered"
+            return "Email already registered"
 
         # hash user password
-        hashed_password = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt(12).decode("utf-8")).decode("utf-8")
+        hashed_password = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt(12)).decode("utf-8")
 
         # insert row into database
-        cur.execute("INSERT INTO users (username, full_name, password, email) VALUES (%s, %s, %s, %s)",(username, full_name, hashed_password, email))
+        cur.execute("INSERT INTO users (id, username, full_name, password_hash, email) VALUES (gen_random_uuid(), %s, %s, %s, %s)",(username, full_name, hashed_password, email))
         conn.commit()
         return "User registration successful"
     except Exception as e:
         conn.rollback()
-        return "Error"
+        return str(e)
 
     finally:
         cur.close()
