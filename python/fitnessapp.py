@@ -1,4 +1,6 @@
 import flet as ft
+from database.user_queries import get_user, user_calories
+
 exercises = [
     "Push-ups",
     "Squats",
@@ -23,10 +25,13 @@ exercises = [
     "Running",
     "Walking"
 ]
-#store global goals
-total_calories = 0
-calorie_goal = 0
-def FitnessApp():
+
+def FitnessApp(user_id):
+    user_data = get_user(user_id) # loads user data
+    # loads users calorie goal and todays existing calories
+    calorie_goal = user_data[10] or 0
+    total_calories = user_data[6]or 0
+
     #used to create drop down menu for the search bar
     async def handle_change(e):
         #retrieve the value in the search bar
@@ -60,8 +65,7 @@ def FitnessApp():
     set_goal_btn.on_click = lambda e: open_dlg(e)
 
     def save_goal(e):
-        #used to retrieve calorie_goal
-        global calorie_goal
+        nonlocal calorie_goal
         #checks that calorie_set is not empty or 0
         if calorie_set.value != "" and calorie_set.value != 0:
             #sets calorie_goal and hides button
@@ -85,11 +89,10 @@ def FitnessApp():
         e.page.update()
     #add fitness goals and add them to page
     def add_fitness(e):
-        #retrieves total_calories and calories_ring
-        global total_calories
-        nonlocal calories_ring
+        nonlocal total_calories
         #makes sure the two fields aren't blank
-        if exercise_search.value != "" and calories_ring.value != "":
+        if exercise_search.value != "" and calories_search.value != "":
+            user_calories(user_id, int(calories_search.value))
             #add expansion_tile to display the exercise and number calories
             exercise_list.controls.append(ft.ExpansionTile(width=300,title=exercise_search.value,expanded=True,
                                                            controls=[ft.ListTile(title=ft.Text("Calories"),
@@ -98,7 +101,7 @@ def FitnessApp():
             #adds to total calories
             total_calories += int(calories_search.value)
             #adds to calorie_ring
-            calories_ring.value = total_calories/calorie_goal
+            calories_ring.value = total_calories/calorie_goal if calorie_goal else 0
             #updates all values and page
             exercise_search.value = ""
             calories_search.value = ""
