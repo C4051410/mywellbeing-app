@@ -8,6 +8,11 @@ def register(username, full_name, password, email):
     if not all ([username, full_name, password, email]):
         return "All fields are required"
 
+    # email validation
+    email_regex = "^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"
+    if not re.match(email_regex, email):
+        return "Please enter a valid email"
+
     # password validation
     regex = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$"
     if not re.search(regex, password):

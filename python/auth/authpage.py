@@ -24,6 +24,8 @@ def authPage(on_login_success):
 
     def handle_register(e):
         # registers users
+        message.value = ""
+        e.page.update()
         registered = register(username.value, fullname.value, password.value, email.value)
         message.value = str(registered)
         e.page.update()
