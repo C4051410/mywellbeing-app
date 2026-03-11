@@ -1,17 +1,24 @@
 import flet as ft
-from database.connection import connect
+from auth.authpage import authPage
 
 def main(page: ft.Page):
-    page.title = "Flet Application"
+    page.title = "My Wellbeing"
+    page.theme_mode = ft.ThemeMode.LIGHT
+    page.fonts = {"Dubai": "/assets/DUBAI-REGULAR.TTF"}
+    page.theme = ft.Theme(font_family="Dubai")
+    page.window.width = 360
+    page.window.height = 800
+    page.padding = 10
+    page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
+    page.vertical_alignment = ft.MainAxisAlignment.CENTER
+    page.update()
 
-    conn = connect()
-    cur = conn.cursor()
-    cur.execute("select * from users")
-    row = cur.fetchall()
-    cur.close()
-    conn.close()
+    def on_login_success(user_id):
+        from homepage import WorkoutApp
+        page.clean()
+        page.add(WorkoutApp(page, user_id))
+        page.update()
 
-    text = ft.Text("Hello World")
-    page.add(ft.Row(controls=[text]))
-    page.add(ft.Text(f"first row of db: {row}"))
+    page.add(authPage(on_login_success))
+
 ft.run(main)
