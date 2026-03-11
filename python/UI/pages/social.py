@@ -11,9 +11,9 @@ from components.responsive import Responsive
 #Sizes of all elements on homepage (as a percent of screen)
 page_title_size = 0.1
 page_desc_size = 0.03
-leaderboard_v_size = 0.25
-standings_v_size = 0.1
-activity_v_size=0.25
+leaderboard_v_size = 0.18
+standings_v_size = 0.08
+activity_v_size=0.18
 
 class SocialPage(ft.Column):
     def __init__(self, page: ft.Page):
@@ -112,13 +112,13 @@ class SocialPage(ft.Column):
     #Set width and height of all widgets on the screen
     def set_widget_size(self):
         #leaderboard widget - rectangle
-        self.rank_container = self.r.h(leaderboard_v_size)
+        self.rank_container.height = self.r.h(leaderboard_v_size)
         #Standings widgets - rectangle
-        self.first_container = self.r.h(standings_v_size)
-        self.second_container = self.r.h(standings_v_size)
-        self.third_container = self.r.h(standings_v_size)
+        self.first_container.height = self.r.h(standings_v_size)
+        self.second_container.height = self.r.h(standings_v_size)
+        self.third_container.height = self.r.h(standings_v_size)
         #Friends activity widget - rectangle
-        self.activity_container = self.r.h(activity_v_size)
+        self.activity_container.height = self.r.h(activity_v_size)
 
     def resize(self, e):
         self.r = Responsive(self.this_page)
