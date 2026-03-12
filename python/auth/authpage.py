@@ -6,12 +6,11 @@ def authPage(on_login_success):
     message = ft.Text()
     # signup fields
     username = ft.TextField(label="Username")
-    fullname = ft.TextField(label="Full Name")
     email = ft.TextField(label="Email")
     password = ft.TextField(label="Password", password=True)
 
     # fields only show on the signup page
-    signup = [username, fullname]
+    signup = [username]
 
     def handle_login(e):
         # logs in users
@@ -26,7 +25,7 @@ def authPage(on_login_success):
         # registers users
         message.value = ""
         e.page.update()
-        registered = register(username.value, fullname.value, password.value, email.value)
+        registered = register(username.value, password.value, email.value)
         message.value = str(registered)
         e.page.update()
 
@@ -60,6 +59,6 @@ def authPage(on_login_success):
 
     return ft.Container(
         content=ft.Column([
-            username, fullname, email, password,
+            username, email, password,
             signup_buttons, login_buttons, message
         ]))
