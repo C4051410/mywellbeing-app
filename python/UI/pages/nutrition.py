@@ -3,7 +3,7 @@ File for nutrition page - accessible by clicking 'nutrition' on nav bar
 '''
 
 import os
-from datetime import date
+from datetime import date, timedelta
 
 import flet as ft
 import psycopg2
@@ -87,9 +87,10 @@ class NutritionPage(ft.Column):
 
 
         def retrieve_posts():
+            two_days = date.today() - timedelta(days=2)
             if conn is not None:
                 cur = conn.cursor()
-                cur.execute("SELECT title,calories,salts,proteins,mealtype,date FROM foodlog WHERE user_id = 1 ORDER BY date DESC")
+                cur.execute("SELECT title,calories,salts,proteins,mealtype,date FROM foodlog WHERE user_id = 1 AND date > (%s) ORDER BY date DESC",(str(two_days),))
                 rows = cur.fetchall()
                 for data in rows:
                     self.foodlog_list.controls.append(ft.ExpansionTile(title=data[0],subtitle=str(data[5]) + " " + str(data[4]),
@@ -98,7 +99,7 @@ class NutritionPage(ft.Column):
                                                                    ft.ListTile(title="Salts",subtitle=str(data[2])),
                                                                    ft.ListTile(title="Proteins",subtitle=str(data[3])),
                                                                ]))
-                cur.execute("SELECT water,date FROM waterlog WHERE user_id = 1 ORDER BY date DESC")
+                cur.execute("SELECT water,date FROM waterlog WHERE user_id = 1 AND date > (%s) ORDER BY date DESC",(str(two_days),))
                 rows = cur.fetchall()
                 for data in rows:
                     self.waterlog_list.controls.append(ft.ListTile(title=str(data[0]) + " ml",subtitle=str(data[1])))
