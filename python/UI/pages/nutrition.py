@@ -25,93 +25,95 @@ def get_connection():
         print(f"Error: {e}")
         return None
 conn = get_connection()
+#used to generate the nutrition page
 class NutritionPage(ft.Column):
-
+    #constructor method used to create page
     def __init__(self, page: ft.Page):
         super().__init__()
         self.main_page = page
-        self.r = Responsive(page)
+        self.r = Responsive(page) # lets page access size and layout
         self.food_input = ft.TextField(hint_text="Food",height=40)
-        self.calories_input = ft.TextField(hint_text="Calories",input_filter=ft.InputFilter(allow=True,regex_string=r"^[0-9]*$",replacement_string=""),height=40)
-        self.salts_input = ft.TextField(hint_text="Salts",input_filter=ft.InputFilter(allow=True,regex_string=r"^\d*\.?\d*$",replacement_string=""),height=40)
+        self.calories_input = ft.TextField(hint_text="Calories",input_filter=ft.InputFilter(allow=True,regex_string=r"^[0-9]*$",replacement_string=""),height=40) # only allow numerical values
+        self.salts_input = ft.TextField(hint_text="Salts",input_filter=ft.InputFilter(allow=True,regex_string=r"^\d*\.?\d*$",replacement_string=""),height=40) # only allow numerical values + "."
         self.proteins_input = ft.TextField(hint_text="Proteins",input_filter=ft.InputFilter(allow=True,regex_string=r"^\d*\.?\d*$",replacement_string=""),height=40)
         self.water_input = ft.TextField(hint_text="ml",input_filter=ft.InputFilter(allow=True,regex_string=r"^[0-9]*$",replacement_string=""),height=40)
         self.meal_types = ft.Dropdown(hint_text="Enter Meal Type", width=200, options=[
             ft.DropdownOption(key="Breakfast", text="Breakfast"),
             ft.DropdownOption(key="Lunch", text="Lunch"),
             ft.DropdownOption(key="Dinner", text="Dinner"),
-            ft.DropdownOption(key="Snack", text="Snack"),])
+            ft.DropdownOption(key="Snack", text="Snack"),]) # allow users to only select given options
         self.foodlog_list = ft.Column()
         self.waterlog_list = ft.Column()
+        #used to handle when Enter Food button is pressed
         def handle_food_submit(e):
             food = self.food_input.value
             calories = self.calories_input.value
             salts = self.salts_input.value
             proteins = self.proteins_input.value
             mealtype = self.meal_types.value
-            if not food or not calories or not salts or not proteins or not mealtype:
+            if not food or not calories or not salts or not proteins or not mealtype: # makes sure values arent empty
                 print("Nope")
                 return
-            self.foodlog_list.controls.append(ft.ExpansionTile(title=food,
+            self.foodlog_list.controls.append(ft.ExpansionTile(title=food, subtitle = str(date.today()) ,
                                                                controls=[
                                                                    ft.ListTile(title="Calories",subtitle=calories),
                                                                    ft.ListTile(title="Salts",subtitle=salts),
                                                                    ft.ListTile(title="Proteins",subtitle=proteins),
                                                                    ft.ListTile(title="Meal Type",subtitle=mealtype),
-                                                               ]))
-            if conn is not None:
+                                                               ])) # adds all elements entered to foodlog_list
+            if conn is not None: #checks that database connection is valid
                 cur = conn.cursor()
                 cur.execute("INSERT INTO foodlog (title,calories,salts,proteins,date,mealtype,user_id) VALUES (%s,%s,%s,%s,%s,%s,1)  ",(food,calories,salts,proteins,str(date.today()),mealtype,))
                 print("Executed")
                 conn.commit()
                 cur.close()
-            self.food_input.value = ""
+            self.food_input.value = "" #used to empty textfield
             self.calories_input.value = ""
             self.salts_input.value = ""
             self.proteins_input.value = ""
             self.meal_types.value = ""
-            self.update()
-
+            self.update() #updates the page
+        #used to handle when Enter Water button is pressed
         def handle_water_submit(e):
             water = self.water_input.value
-            self.foodlog_list.controls.append(ft.ExpansionTile(title="Water",controls=[ft.ListTile(title="ml",subtitle=water),]))
-            if not water:
+            if not water: #checks water field isn't empty
                 print("Nope")
                 return
-            if conn is not None:
+            self.foodlog_list.controls.append(ft.ListTile(title=str(date.today()),subtitle=water)) #adds date and amount to tile
+            if conn is not None: #checks database connection is valid
                 cur = conn.cursor()
                 cur.execute("INSERT INTO waterlog (water,date,user_id) VALUES (%s,%s,1)",(water,str(date.today()),))
                 conn.commit()
                 cur.close()
-            self.update()
+            self.update() #updates the page
 
-
+        # used to retrieve posts from database
         def retrieve_posts():
-            two_days = date.today() - timedelta(days=2)
-            if conn is not None:
+            two_days = date.today() - timedelta(days=2) # used to find two days ago
+            if conn is not None: # makes sure database connection is valid
                 cur = conn.cursor()
                 cur.execute("SELECT title,calories,salts,proteins,mealtype,date FROM foodlog WHERE user_id = 1 AND date > (%s) ORDER BY date DESC",(str(two_days),))
-                rows = cur.fetchall()
+                rows = cur.fetchall() # retrieves all results from query
                 for data in rows:
                     self.foodlog_list.controls.append(ft.ExpansionTile(title=data[0],subtitle=str(data[5]) + " " + str(data[4]),
                                                                controls=[
                                                                    ft.ListTile(title="Calories",subtitle=str(data[1])),
                                                                    ft.ListTile(title="Salts",subtitle=str(data[2])),
                                                                    ft.ListTile(title="Proteins",subtitle=str(data[3])),
-                                                               ]))
+                                                               ])) #takes values from db and display them
                 cur.execute("SELECT water,date FROM waterlog WHERE user_id = 1 AND date > (%s) ORDER BY date DESC",(str(two_days),))
                 rows = cur.fetchall()
                 for data in rows:
-                    self.waterlog_list.controls.append(ft.ListTile(title=str(data[0]) + " ml",subtitle=str(data[1])))
+                    self.waterlog_list.controls.append(ft.ListTile(title=str(data[0]) + " ml",subtitle=str(data[1]))) #used to display water values from db
                 cur.close()
                 page.update()
 
-        retrieve_posts()
-        #1. Page Header
+        retrieve_posts() #used to retrieve posts before creating display
         self.header = ft.Container(content=ft.Text("Nutrition",size=32,weight=ft.FontWeight.BOLD),
-                              padding=ft.padding.only(top=10,left=10)
+                              padding=ft.padding.only(top=10,left=10) #creates header for page
         )
-        def retrieve_daily_status():
+        #used to retrieve daily stats
+        def retrieve_daily_stats():
             total_c = 0
             total_s = 0.0
             total_p = 0.0
@@ -120,17 +122,17 @@ class NutritionPage(ft.Column):
                 cur = conn.cursor()
                 cur.execute("SELECT calories,salts,proteins FROM foodlog WHERE user_id = 1 AND date = %s",(str(date.today()),))
                 rows = cur.fetchall()
-                for data in rows:
+                for data in rows: #retrieves stats from today and totals them
                     total_c = total_c + data[0]
                     total_s = total_s + data[1]
                     total_p = total_p + data[2]
                 cur.execute("SELECT water FROM waterlog WHERE user_id = 1 AND date = %s",(str(date.today()),))
                 rows = cur.fetchall()
-                for data in rows:
+                for data in rows: # find total water from today
                     total_w = total_w + data[0]
 
-                return total_c, total_s, total_p,total_w
-
+                return total_c, total_s, total_p,total_w # returns all variables
+        #used to retrieve the users set goals
         def retrieve_user_goals():
             goal_c = 0
             goal_s = 0.0
@@ -147,8 +149,9 @@ class NutritionPage(ft.Column):
                     goal_w = goal_w + data[3]
                 return goal_c, goal_s, goal_p, goal_w
 
-        total_calories, total_salts, total_proteins, total_water = retrieve_daily_status()
-        goal_calories, goal_salts, goal_proteins, goal_water = retrieve_user_goals()
+        total_calories, total_salts, total_proteins, total_water = retrieve_daily_stats() #retrieves users totals from today
+        goal_calories, goal_salts, goal_proteins, goal_water = retrieve_user_goals() # retrieves users goals
+        #creates container used to display the users totals from the day compared to their goals
         self.stats_card = ft.Container(bgcolor=ft.Colors.WHITE,border_radius=5,padding=5,
                                   shadow = ft.BoxShadow(spread_radius=1, blur_radius=10, color=ft.Colors.BLACK12),
                                   content = ft.Column([ft.Text("Today",size=12,
@@ -160,14 +163,14 @@ class NutritionPage(ft.Column):
                                                                ft.Column([
                                                                    ft.Text("Calories",size=28,
                                                                            weight=ft.FontWeight.BOLD,
-                                                                           color=ft.Colors.DEEP_ORANGE),
+                                                                           color=ft.Colors.DEEP_ORANGE),#displays the title
                                                                    ft.Text(f"{total_calories:.0f} / {goal_calories:.0f}",
                                                                            size=12,
                                                                            weight=ft.FontWeight.BOLD,
-                                                                           color=ft.Colors.GREY_400),
+                                                                           color=ft.Colors.GREY_400),#displays the numbers
                                                                    ft.ProgressBar(width = 100, height = 20,
                                                                                   color = ft.Colors.ORANGE_400,
-                                                                                  value = total_calories/goal_calories),
+                                                                                  value = total_calories/goal_calories),#visual representation
                                                                ]),
 
                                                                ft.Column([
@@ -213,6 +216,7 @@ class NutritionPage(ft.Column):
                                                               )
                                                        ])
         )
+        # creates tile that allows users to enter food logs
         self.enter_foodlog = ft.ExpansionTile(bgcolor=ft.Colors.WHITE,title="Enter Food",
                                      controls = [
                                          ft.Text("Enter Food",size=10, weight=ft.FontWeight.BOLD, color=ft.Colors.BLACK),
@@ -225,37 +229,40 @@ class NutritionPage(ft.Column):
                                          self.proteins_input,
                                          ft.Text("Enter Meal Type",size=10, weight=ft.FontWeight.BOLD, color=ft.Colors.BLACK),
                                          self.meal_types,
-                                         ft.ElevatedButton("Enter Food",on_click=handle_food_submit),
+                                         ft.ElevatedButton("Enter Food",on_click=handle_food_submit), #used to call on function when pressed
 
                                      ])
+        # creates tile that allow users to enter water logs
         self.enter_waterlog = ft.ExpansionTile(bgcolor=ft.Colors.WHITE,title="Enter Water",
                                                controls = [
                                                    ft.Text("Enter Amount"),
                                                    self.water_input,
                                                    ft.ElevatedButton("Enter",on_click=handle_water_submit),
                                                ])
+        #used to display food logs in tile
         self.display_foodlog = ft.ExpansionTile(bgcolor=ft.Colors.WHITE,title="Food Logs",
                                             controls = [self.foodlog_list])
-
+        #used to display water logs in tile
         self.display_waterlog = ft.ExpansionTile(bgcolor=ft.Colors.WHITE,title="Water Logs",
                                              controls = [self.waterlog_list])
-        scrollable = ft.Column([
+        scrollable = ft.Column([ #specifies the content which should be allowed to be scrolled
             self.header,
             self.stats_card,
             self.enter_foodlog,
             self.enter_waterlog,
             self.display_foodlog,
             self.display_waterlog,
-        ],height=600,scroll=ft.ScrollMode.HIDDEN)
+        ],height=600,scroll=ft.ScrollMode.HIDDEN) #sets height and scroll mode
         self.navBar = navBar(page)
-        self.controls = [
+        self.controls = [ #adds scrollable and navBar to page
             scrollable,
             self.navBar,
 
         ]
-        self.expand = True
-        self.alignment = ft.MainAxisAlignment.SPACE_BETWEEN
+        self.expand = True #expandeds pages when possible
+        self.alignment = ft.MainAxisAlignment.SPACE_BETWEEN #sets alignment for page
 
+#function called to call upon the page
 def main_nutrition(page: ft.Page):
-    nutrition_page = NutritionPage(page)
-    return nutrition_page
+    nutrition_page = NutritionPage(page) # creates page using class
+    return nutrition_page # returns page
