@@ -1,4 +1,6 @@
 flet
-psycopg2-binary
-python-dotenv
+flet-map
+flet-geolocator
+psycopg2
+dotenv
 bcrypt
