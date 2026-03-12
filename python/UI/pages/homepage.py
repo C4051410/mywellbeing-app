@@ -41,7 +41,7 @@ class WorkoutApp(ft.Column):
         self.motivational_text = ft.Text(
             value="Lets crush your workout goals today!",
             size=self.r.w(motivational_msg_size),
-            color="grey"
+            color=ft.Colors.GREY
         )
 
         #Text for steps widget
@@ -96,8 +96,6 @@ class WorkoutApp(ft.Column):
             ft.Row(
                 #Adds white space in-between text and profile pic
                 alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
-                #Ensures both text and profile pic are aligned to the top of the screen
-                #vertical_alignment=ft.CrossAxisAlignment.START,
                 controls=[
                     ft.Column(
                         expand=True,
@@ -127,11 +125,21 @@ class WorkoutApp(ft.Column):
         #Spread the elements apart
         self.alignment = ft.MainAxisAlignment.SPACE_BETWEEN
 
-        #Initially set the widget size
+        #Initially set the widget and text size
         self.set_widget_size()
+        self.set_text_size()
 
         self.this_page = page
         page.on_resize = self.resize
+
+    #Set text size of all text on the page
+    def set_text_size(self):
+        self.welcome_text.size = self.r.w(welcome_text_size)
+        self.motivational_text.size = self.r.w(motivational_msg_size)
+
+        self.steps_text.size = self.r.w(widget_text_size)
+        self.calories_text.size = self.r.w(widget_text_size)
+
 
     def set_widget_size(self):
         #Set width and height of widgets
@@ -151,8 +159,7 @@ class WorkoutApp(ft.Column):
         self.r = Responsive(self.this_page)
 
         #Resize text size
-        self.welcome_text.size = self.r.w(welcome_text_size)
-        self.motivational_text.size = self.r.w(motivational_msg_size)
+        self.set_text_size()
 
         #Resize all the widgets
         self.set_widget_size()

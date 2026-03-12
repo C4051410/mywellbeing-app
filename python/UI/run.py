@@ -19,7 +19,6 @@ def main(page: ft.Page):
     def route_change():
         page.clean()
         if page.route != current_page:
-            print("Changing")
             if page.route == "/home":
                 page.add(main_homepage(page))
             if page.route == "/activities":
@@ -57,7 +56,6 @@ def main(page: ft.Page):
     page.window.resizable = False
     page.window.alignment = ft.Alignment.CENTER
 
-    # Ensures nav bar stretches across full screen
     page.padding = 10
 
     page.update()
@@ -65,8 +63,5 @@ def main(page: ft.Page):
     page.add(main_homepage(page))
 
 current_page = "/homepage"
-
-def testFunc():
-    print("Someting")
 
 ft.run(main, assets_dir='assets')
