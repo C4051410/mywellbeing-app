@@ -9,3 +9,6 @@
 | **GUI: Clever and Interesting Design**       | (your text here)          |
 | **Testing Documentation**                    | (your text here)          |
 | **Functionality and Features**               | (your text here)          |
+
+
+<sub>* Some AI has been used in the development of this product *</sub>
