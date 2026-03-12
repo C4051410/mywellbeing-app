@@ -5,7 +5,7 @@ File for settings page - accessible by clicking 'settings' on nav bar
 import flet as ft
 
 from components.userpfp import Userpfp
-from components.bottom_nav import navBar
+from components.bottom_nav import NavBar
 from components.responsive import Responsive
 
 #Sizes of all elements on homepage (as a percent of screen)
@@ -47,7 +47,7 @@ class SettingsPage(ft.Column):
 
         self.userpfp = Userpfp(page)
 
-        self.navbar = navBar(page)
+        self.nav_bar = NavBar(page)
 
         self.controls=[
             ft.Row(
@@ -66,7 +66,7 @@ class SettingsPage(ft.Column):
             self.user_info_container,
             self.account_container,
             self.targets_conatiner,
-            self.navbar
+            self.nav_bar
         ]
 
         self.expand=True
@@ -94,7 +94,7 @@ class SettingsPage(ft.Column):
         self.set_widget_size()
 
         self.userpfp.resize()
-        self.navbar.resize()
+        self.nav_bar.resize()
 
         self.update()
 

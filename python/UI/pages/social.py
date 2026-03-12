@@ -5,7 +5,7 @@ File for social page - accessible by clicking 'social' on nav bar
 import flet as ft
 
 from components.userpfp import Userpfp
-from components.bottom_nav import navBar
+from components.bottom_nav import NavBar
 from components.responsive import Responsive
 
 #Sizes of all elements on homepage (as a percent of screen)
@@ -67,7 +67,7 @@ class SocialPage(ft.Column):
 
         self.userpfp = Userpfp(page)
 
-        self.navBar = navBar(page)
+        self.nav_bar = NavBar(page)
 
         self.controls =[
             #Header row
@@ -91,7 +91,7 @@ class SocialPage(ft.Column):
             self.third_container,
             self.activity_title,
             self.activity_container,
-            self.navBar
+            self.nav_bar
         ]
 
         self.expand=True
@@ -128,7 +128,7 @@ class SocialPage(ft.Column):
         self.set_widget_size()
 
         self.userpfp.resize()
-        self.navBar.resize()
+        self.nav_bar.resize()
 
         self.update()
 
