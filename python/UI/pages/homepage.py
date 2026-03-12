@@ -5,7 +5,7 @@ File used for main homepage that logged-in users will be met with
 import flet as ft
 
 from components.userpfp import Userpfp
-from components.bottom_nav import navBar
+from components.bottom_nav import NavBar
 from components.responsive import Responsive
 
 #TODO - Retrieve details of logged in user
@@ -88,8 +88,8 @@ class WorkoutApp(ft.Column):
         #Create user profile picture image
         self.userpfp = Userpfp(page)
 
-        #Create navBar element
-        self.navBar = navBar(page)
+        #Create NavBar element
+        self.nav_bar = NavBar(page)
 
         self.controls=[
             #Row with text and pfp
@@ -118,7 +118,7 @@ class WorkoutApp(ft.Column):
             ),
             self.friends_container,
             self.streak_container,
-            self.navBar
+            self.nav_bar
         ]
         #Expand, take all available space
         self.expand = True
@@ -166,8 +166,8 @@ class WorkoutApp(ft.Column):
 
         #Resize profile picture size
         self.userpfp.resize()
-        #Resize navBar
-        self.navBar.resize()
+        #Resize nav_bar
+        self.nav_bar.resize()
 
         #Update the page contents
         self.update()

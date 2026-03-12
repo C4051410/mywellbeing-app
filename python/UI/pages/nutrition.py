@@ -10,7 +10,7 @@ import psycopg2
 from dotenv import load_dotenv
 
 from components.userpfp import Userpfp
-from components.bottom_nav import navBar
+from components.bottom_nav import NavBar
 from components.responsive import Responsive
 from flet import control
 
@@ -256,11 +256,11 @@ class NutritionPage(ft.Column):
             self.enter_waterlog,
             self.display_foodlog,
             self.display_waterlog,
-        ],height=600,scroll=ft.ScrollMode.HIDDEN) #sets height and scroll mode
-        self.navBar = navBar(page)
-        self.controls = [ #adds scrollable and navBar to page
+        ],height=600,scroll=ft.ScrollMode.HIDDEN)
+        self.nav_bar = NavBar(page)
+        self.controls = [
             scrollable,
-            self.navBar,
+            self.nav_bar,
 
         ]
         self.expand = True #expandeds pages when possible
