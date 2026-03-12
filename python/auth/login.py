@@ -6,14 +6,14 @@ def login(email,password):
     cur = conn.cursor()
 
     try:
-        cur.execute("SELECT id, username, full_name, email, password_hash FROM users WHERE email = %s", (email,))
+        cur.execute("SELECT id, username, email, password FROM users WHERE email = %s", (email,))
         user = cur.fetchone()
         # if no user exists with that email, login fails
         if not user:
             return "Invalid email."
 
         # retrieve stored password
-        stored_password = user[4].encode()
+        stored_password = user[3].encode()
 
         # compare entered password with stored password
         if not bcrypt.checkpw(password.encode(), stored_password):
