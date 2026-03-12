@@ -33,9 +33,10 @@ def register(username, password, email):
         hashed_password = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt(12)).decode("utf-8")
 
         # insert row into database
-        cur.execute("INSERT INTO users (username, password, email, role) VALUES (%s, %s, %s, %s)",(username, hashed_password, email, "user"))
+        cur.execute("INSERT INTO users (username, password, email, role) VALUES (%s, %s, %s, %s) RETURNING id",(username, hashed_password, email, "user"))
+        user_id = cur.fetchone()[0]
         conn.commit()
-        return "User registration successful"
+        return (user_id,)
     except Exception as e:
         conn.rollback()
         return str(e)
