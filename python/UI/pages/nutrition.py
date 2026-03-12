@@ -155,7 +155,7 @@ class NutritionPage(ft.Column):
         self.stats_card = ft.Container(bgcolor=ft.Colors.WHITE,border_radius=5,padding=5,
                                   shadow = ft.BoxShadow(spread_radius=1, blur_radius=10, color=ft.Colors.BLACK12),
                                   content = ft.Column([ft.Text("Today",size=12,
-                                                               weight=ft.FontWeight.BOLD,color=ft.Colors.GREY),
+                                                        weight=ft.FontWeight.BOLD,color=ft.Colors.GREY),
                                                        ft.Divider(height=10,color=ft.Colors.TRANSPARENT),
                                                        ft.Row(
                                                            alignment=ft.MainAxisAlignment.SPACE_EVENLY,
@@ -218,6 +218,7 @@ class NutritionPage(ft.Column):
         )
         # creates tile that allows users to enter food logs
         self.enter_foodlog = ft.ExpansionTile(bgcolor=ft.Colors.WHITE,title="Enter Food",
+                                              collapsed_bgcolor = ft.Colors.GREY_400,
                                      controls = [
                                          ft.Text("Enter Food",size=10, weight=ft.FontWeight.BOLD, color=ft.Colors.BLACK),
                                          self.food_input,
@@ -234,6 +235,7 @@ class NutritionPage(ft.Column):
                                      ])
         # creates tile that allow users to enter water logs
         self.enter_waterlog = ft.ExpansionTile(bgcolor=ft.Colors.WHITE,title="Enter Water",
+                                               collapsed_bgcolor=ft.Colors.GREY_400,
                                                controls = [
                                                    ft.Text("Enter Amount"),
                                                    self.water_input,
@@ -241,9 +243,11 @@ class NutritionPage(ft.Column):
                                                ])
         #used to display food logs in tile
         self.display_foodlog = ft.ExpansionTile(bgcolor=ft.Colors.WHITE,title="Food Logs",
+                                                collapsed_bgcolor=ft.Colors.GREY_400,
                                             controls = [self.foodlog_list])
         #used to display water logs in tile
         self.display_waterlog = ft.ExpansionTile(bgcolor=ft.Colors.WHITE,title="Water Logs",
+                                                 collapsed_bgcolor=ft.Colors.GREY_400,
                                              controls = [self.waterlog_list])
         scrollable = ft.Column([ #specifies the content which should be allowed to be scrolled
             self.header,
