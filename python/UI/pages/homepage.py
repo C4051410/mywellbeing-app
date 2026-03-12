@@ -3,139 +3,176 @@ File used for main homepage that logged-in users will be met with
 '''
 
 import flet as ft
+
 from components.userpfp import Userpfp
 from components.bottom_nav import NavBar
 from components.responsive import Responsive
 
-# Mock Data
+#TODO - Retrieve details of logged in user
 user = "Username"
-steps = 4250
-step_goal = 10000
+steps = 2000
+calories = 800
 
-# Sizes of all elements on homepage (as percent of screen)
-welcome_text_size = 0.08
-motivational_msg_size = 0.035
+#Sizes of all elements on homepage (as percent of screen)
+welcome_text_size = 0.1
+motivational_msg_size = 0.03
+widget_text_size = 0.035
+steps_h_size = 0.4
+calories_h_size = 0.4
+friends_v_size = 0.15
+streak_v_size = 0.225
 
 class WorkoutApp(ft.Column):
     def __init__(self, page: ft.Page):
         super().__init__()
 
         self.r = Responsive(page)
-        self.this_page = page
 
-        # --- 1. DATA LOADING ---
-        # Get your real goal from the settings page session!
-        cal_goal = page.session.store.get("cal_goal") if page.session.store else "2500"
+        #TODO-Add slight variations to the welcome and motivational message
 
-        # --- 2. HEADER SECTION ---
+        #Welcome text to be shown to the user
         self.welcome_text = ft.Text(
-            value=f"Hi, {user}!",
+            value=f"Welcome {user}!",
             size=self.r.w(welcome_text_size),
-            weight=ft.FontWeight.BOLD,
             color=ft.Colors.BLACK
         )
 
+        #Motivational text to be shown to the user
         self.motivational_text = ft.Text(
-            value="You're doing great today!",
+            value="Lets crush your workout goals today!",
             size=self.r.w(motivational_msg_size),
-            color=ft.Colors.GREY_600
+            color=ft.Colors.GREY
         )
 
+        #Text for steps widget
+        self.steps_text = ft.Text(
+            value=f'{steps}',
+            size=self.r.w(widget_text_size)
+        )
+
+        self.calories_text = ft.Text(
+            value=f'{calories}',
+            size=self.r.w(widget_text_size)
+        )
+
+        #Steps widget
+        self.steps_container = ft.Container(
+            border = ft.Border.all(width=2, color=ft.Colors.GREY_400),
+            content=ft.Column(
+                controls=[
+                    self.steps_text
+                ]
+            )
+        )
+
+        #Calories widget
+        self.calories_container = ft.Container(
+            border = ft.Border.all(width=2, color=ft.Colors.GREY_400),
+            content=ft.Column(
+                controls=[
+                    self.calories_text
+                ]
+            )
+        )
+
+        #Friends widget
+        self.friends_container = ft.Container(
+            bgcolor = ft.Colors.BLUE_300
+        )
+
+        #Streak widget
+        self.streak_container = ft.Container(
+            border=ft.Border.all(width=2, color=ft.Colors.GREY_400)
+        )
+
+        #Create user profile picture image
         self.userpfp = Userpfp(page)
 
-        # --- 3. DAILY PROGRESS CARD ---
-        # Replacing PieChart with a clean ProgressBar
-        self.step_progress = ft.ProgressBar(
-            value=steps/step_goal,
-            color=ft.Colors.DEEP_ORANGE,
-            bgcolor=ft.Colors.GREY_200,
-            height=10,
-            border_radius=5
-        )
-
-        self.daily_status_card = ft.Container(
-            bgcolor=ft.Colors.WHITE,
-            border_radius=15,
-            padding=20,
-            shadow=ft.BoxShadow(spread_radius=1, blur_radius=10, color=ft.Colors.BLACK12),
-            content=ft.Column([
-                ft.Row([
-                    ft.Icon(ft.Icons.DIRECTIONS_RUN_ROUNDED, color=ft.Colors.DEEP_ORANGE),
-                    ft.Text("DAILY STEPS", size=12, weight=ft.FontWeight.BOLD, color=ft.Colors.GREY_500),
-                ]),
-                ft.Text(f"{steps:,}", size=32, weight=ft.FontWeight.BOLD),
-                self.step_progress,
-                ft.Text(f"{int((steps/step_goal)*100)}% of your {step_goal:,} goal", size=12, color=ft.Colors.GREY_400)
-            ], spacing=10)
-        )
-
-        # --- 4. STATS GRID (Calories & Streak) ---
-        self.calories_box = ft.Container(
-            expand=1, bgcolor=ft.Colors.ORANGE_50, border_radius=15, padding=15,
-            content=ft.Column([
-                ft.Icon(ft.Icons.LOCAL_FIRE_DEPARTMENT, color=ft.Colors.ORANGE_700),
-                ft.Text("Target", size=12, color=ft.Colors.ORANGE_700, weight=ft.FontWeight.BOLD),
-                ft.Text(f"{cal_goal} kcal", size=18, weight=ft.FontWeight.BOLD)
-            ], spacing=2)
-        )
-
-        self.streak_box = ft.Container(
-            expand=1, bgcolor=ft.Colors.BLUE_50, border_radius=15, padding=15,
-            content=ft.Column([
-                ft.Icon(ft.Icons.BOLT, color=ft.Colors.BLUE_700),
-                ft.Text("Streak", size=12, color=ft.Colors.BLUE_700, weight=ft.FontWeight.BOLD),
-                ft.Text("5 Days", size=18, weight=ft.FontWeight.BOLD)
-            ], spacing=2)
-        )
-
-        # --- 5. ACTIVITY SUMMARY ---
-        # Replacing BarChart with a simple horizontal summary
-        self.summary_card = ft.Container(
-            bgcolor=ft.Colors.WHITE, border_radius=15, padding=20,
-            shadow=ft.BoxShadow(spread_radius=1, blur_radius=10, color=ft.Colors.BLACK12),
-            content=ft.Column([
-                ft.Text("RECENT ACTIVITY", size=12, weight=ft.FontWeight.BOLD, color=ft.Colors.GREY_500),
-                ft.ListTile(
-                    leading=ft.Icon(ft.Icons.CHECK_CIRCLE, color=ft.Colors.GREEN),
-                    title=ft.Text("Yesterday: Goal Reached!"),
-                    subtitle=ft.Text("10,240 steps logged")
-                )
-            ])
-        )
-
+        #Create NavBar element
         self.nav_bar = NavBar(page)
 
-        # --- LAYOUT ASSEMBLY ---
-        self.controls = [
-            ft.Row([
-                ft.Column([self.welcome_text, self.motivational_text], expand=True),
-                self.userpfp
-            ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
-
-            self.daily_status_card,
-
-            ft.Row([self.calories_box, self.streak_box], spacing=15),
-
-            self.summary_card,
-
+        self.controls=[
+            #Row with text and pfp
+            ft.Row(
+                #Adds white space in-between text and profile pic
+                alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                controls=[
+                    ft.Column(
+                        expand=True,
+                        controls=[
+                            self.welcome_text,
+                            self.motivational_text
+                        ]
+                    ),
+                    self.userpfp
+                ],
+            ),
+            #Row with steps and calories
+            ft.Row(
+                alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                #vertical_alignment = ft.CrossAxisAlignment.START,
+                controls=[
+                    self.steps_container,
+                    self.calories_container
+                ]
+            ),
+            self.friends_container,
+            self.streak_container,
             self.nav_bar
         ]
-
+        #Expand, take all available space
         self.expand = True
+        #Spread the elements apart
         self.alignment = ft.MainAxisAlignment.SPACE_BETWEEN
+
+        #Initially set the widget and text size
+        self.set_widget_size()
         self.set_text_size()
+
+        self.this_page = page
         page.on_resize = self.resize
 
+    #Set text size of all text on the page
     def set_text_size(self):
         self.welcome_text.size = self.r.w(welcome_text_size)
         self.motivational_text.size = self.r.w(motivational_msg_size)
 
+        self.steps_text.size = self.r.w(widget_text_size)
+        self.calories_text.size = self.r.w(widget_text_size)
+
+
+    def set_widget_size(self):
+        #Set width and height of widgets
+        #Steps - Square
+        self.steps_container.width = self.r.w(steps_h_size)
+        self.steps_container.height = self.r.w(steps_h_size)
+        #Calories - Square
+        self.calories_container.width = self.r.w(calories_h_size)
+        self.calories_container.height = self.r.w(calories_h_size)
+        #Friends - Rectangle
+        self.friends_container.height = self.r.h(friends_v_size)
+        #Streak - Long rectange
+        self.streak_container.height = self.r.h(streak_v_size)
+
+    #Function to be ran when page resizes
     def resize(self, e):
         self.r = Responsive(self.this_page)
+
+        #Resize text size
         self.set_text_size()
+
+        #Resize all the widgets
+        self.set_widget_size()
+
+        #Resize profile picture size
         self.userpfp.resize()
+        #Resize nav_bar
         self.nav_bar.resize()
+
+        #Update the page contents
         self.update()
 
 def main_homepage(page: ft.Page):
-    return WorkoutApp(page)
+    homepage = WorkoutApp(page)
+
+    return homepage
