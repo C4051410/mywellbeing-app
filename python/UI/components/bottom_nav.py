@@ -7,12 +7,11 @@ button_width = 0.15
 text_size = 0.025
 padding = 0.008
 
-
-class navBar(ft.Container):
+# FIX: Changed 'navBar' to 'NavBar' (PascalCase for classes)
+class NavBar(ft.Container):
     def __init__(self, page: ft.Page):
         super().__init__()
 
-        # FIX: Renamed to main_page to avoid overwriting Flet's built-in property!
         self.main_page = page
 
         self.r = Responsive(page)
@@ -86,11 +85,9 @@ class navBar(ft.Container):
         self.settings_text.size = self.r.w(text_size)
 
     def resize(self):
-        # FIX: Use main_page here too
         self.r = Responsive(self.main_page)
         self.set_size()
 
-    # --- ALL UPDATED ROUTING FUNCTIONS ---
     async def home_pressed(self, e):
         await self.main_page.push_route("/home")
 
