@@ -151,19 +151,35 @@ class NutritionPage(ft.Column):
         goal_calories, goal_salts, goal_proteins, goal_water = retrieve_user_goals()
         self.stats_card = ft.Container(bgcolor=ft.Colors.WHITE,border_radius=5,padding=5,
                                   shadow = ft.BoxShadow(spread_radius=1, blur_radius=10, color=ft.Colors.BLACK12),
-                                  content = ft.Column([ft.Text("Today",size=12,weight=ft.FontWeight.BOLD,color=ft.Colors.GREY),
+                                  content = ft.Column([ft.Text("Today",size=12,
+                                                               weight=ft.FontWeight.BOLD,color=ft.Colors.GREY),
                                                        ft.Divider(height=10,color=ft.Colors.TRANSPARENT),
                                                        ft.Row(
                                                            alignment=ft.MainAxisAlignment.SPACE_EVENLY,
                                                            controls = [
                                                                ft.Column([
-                                                                   ft.Text("Calories",size=28, weight=ft.FontWeight.BOLD, color=ft.Colors.DEEP_ORANGE),
-                                                                   ft.Text(f"{total_calories:.0f} / {goal_calories:.0f}",size=12, weight=ft.FontWeight.BOLD, color=ft.Colors.GREY_400)
+                                                                   ft.Text("Calories",size=28,
+                                                                           weight=ft.FontWeight.BOLD,
+                                                                           color=ft.Colors.DEEP_ORANGE),
+                                                                   ft.Text(f"{total_calories:.0f} / {goal_calories:.0f}",
+                                                                           size=12,
+                                                                           weight=ft.FontWeight.BOLD,
+                                                                           color=ft.Colors.GREY_400),
+                                                                   ft.ProgressBar(width = 100, height = 20,
+                                                                                  color = ft.Colors.ORANGE_400,
+                                                                                  value = total_calories/goal_calories),
                                                                ]),
 
                                                                ft.Column([
-                                                                   ft.Text("Proteins",size=28, weight=ft.FontWeight.BOLD, color=ft.Colors.DEEP_ORANGE),
-                                                                   ft.Text(f"{total_proteins:.2f} / {goal_proteins:.2f}",size=12, weight=ft.FontWeight.BOLD, color=ft.Colors.GREY_400)
+                                                                   ft.Text("Proteins",size=28,
+                                                                           weight=ft.FontWeight.BOLD,
+                                                                           color=ft.Colors.RED_ACCENT),
+                                                                   ft.Text(f"{total_proteins:.2f} / {goal_proteins:.2f}",
+                                                                           size=12, weight=ft.FontWeight.BOLD,
+                                                                           color=ft.Colors.GREY_400),
+                                                                   ft.ProgressBar(width = 100, height = 20,
+                                                                                  color = ft.Colors.RED_400,
+                                                                                  value = total_proteins/goal_proteins),
                                                                ]),
                                                            ]
                                                        ),
@@ -172,20 +188,26 @@ class NutritionPage(ft.Column):
                                                                   ft.Column([
                                                                       ft.Text("Salts", size=28,
                                                                               weight=ft.FontWeight.BOLD,
-                                                                              color=ft.Colors.DEEP_ORANGE),
+                                                                              color=ft.Colors.GREEN_ACCENT),
                                                                       ft.Text(f"{total_salts:.2f} / {goal_salts:.2f}",
                                                                               size=12,
                                                                               weight=ft.FontWeight.BOLD,
-                                                                              color=ft.Colors.GREY_400)
+                                                                              color=ft.Colors.GREY_400),
+                                                                      ft.ProgressBar(width = 100, height = 20,
+                                                                                     color = ft.Colors.LIGHT_GREEN_400,
+                                                                                     value = total_salts/goal_salts),
                                                                   ]),
                                                                   ft.Column([
                                                                       ft.Text("Water", size=28,
                                                                               weight=ft.FontWeight.BOLD,
-                                                                              color=ft.Colors.DEEP_ORANGE),
+                                                                              color=ft.Colors.LIGHT_BLUE_ACCENT),
                                                                       ft.Text(f"{total_water:.0f} / {goal_water:.0f}",
                                                                               size=12,
                                                                               weight=ft.FontWeight.BOLD,
-                                                                              color=ft.Colors.GREY_400)
+                                                                              color=ft.Colors.GREY_400),
+                                                                      ft.ProgressBar(width = 100, height = 20,
+                                                                                     color=ft.Colors.LIGHT_BLUE_400,
+                                                                                     value=total_water/goal_water),
                                                                   ])
                                                               ]
                                                               )
