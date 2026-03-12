@@ -211,11 +211,11 @@ class NutritionPage(ft.Column):
                                                    self.water_input,
                                                    ft.ElevatedButton("Enter",on_click=handle_water_submit),
                                                ])
-        self.display_foodlog = ft.Container(bgcolor=ft.Colors.WHITE,border_radius=5,padding=10,
-                                            content = self.foodlog_list)
+        self.display_foodlog = ft.ExpansionTile(bgcolor=ft.Colors.WHITE,title="Food Logs",
+                                            controls = [self.foodlog_list])
 
-        self.display_waterlog = ft.Container(bgcolor=ft.Colors.WHITE,border_radius=5,padding=10,
-                                             content = self.waterlog_list)
+        self.display_waterlog = ft.ExpansionTile(bgcolor=ft.Colors.WHITE,title="Water Logs",
+                                             controls = [self.waterlog_list])
         scrollable = ft.Column([
             self.header,
             self.stats_card,
