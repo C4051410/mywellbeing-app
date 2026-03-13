@@ -174,7 +174,7 @@ class WorkoutApp(ft.Column):
         #Update the page contents
         self.update()
 
-def main_homepage(page: ft.Page):
-    homepage = WorkoutApp(page)
+def main_homepage(page: ft.Page,user_id):
+    homepage = WorkoutApp(page,user_id)
 
     return homepage

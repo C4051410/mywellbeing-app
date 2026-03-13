@@ -9,9 +9,9 @@ import flet as ft
 import psycopg2
 from dotenv import load_dotenv
 
-from components.userpfp import Userpfp
-from components.bottom_nav import NavBar
-from components.responsive import Responsive
+from UI.components.userpfp import Userpfp
+from UI.components.bottom_nav import NavBar
+from UI.components.responsive import Responsive
 from flet import control
 
 load_dotenv()
@@ -28,7 +28,7 @@ conn = get_connection()
 #used to generate the nutrition page
 class NutritionPage(ft.Column):
     #constructor method used to create page
-    def __init__(self, page: ft.Page):
+    def __init__(self, page: ft.Page,user_id):
         super().__init__()
         self.main_page = page
         self.r = Responsive(page) # lets page access size and layout
@@ -63,7 +63,7 @@ class NutritionPage(ft.Column):
                                                                ])) # adds all elements entered to foodlog_list
             if conn is not None: #checks that database connection is valid
                 cur = conn.cursor()
-                cur.execute("INSERT INTO foodlog (title,calories,salts,proteins,date,mealtype,user_id) VALUES (%s,%s,%s,%s,%s,%s,1)  ",(food,calories,salts,proteins,str(date.today()),mealtype,))
+                cur.execute("INSERT INTO foodlog (title,calories,salts,proteins,date,mealtype,user_id) VALUES (%s,%s,%s,%s,%s,%s,%s)  ",(food,calories,salts,proteins,str(date.today()),mealtype,user_id,))
                 print("Executed")
                 conn.commit()
                 cur.close()
@@ -82,7 +82,7 @@ class NutritionPage(ft.Column):
             self.foodlog_list.controls.append(ft.ListTile(title=str(date.today()),subtitle=water)) #adds date and amount to tile
             if conn is not None: #checks database connection is valid
                 cur = conn.cursor()
-                cur.execute("INSERT INTO waterlog (water,date,user_id) VALUES (%s,%s,1)",(water,str(date.today()),))
+                cur.execute("INSERT INTO waterlog (water,date,user_id) VALUES (%s,%s,%s)",(water,str(date.today()),user_id,))
                 conn.commit()
                 cur.close()
             self.update() #updates the page
@@ -92,7 +92,7 @@ class NutritionPage(ft.Column):
             two_days = date.today() - timedelta(days=2) # used to find two days ago
             if conn is not None: # makes sure database connection is valid
                 cur = conn.cursor()
-                cur.execute("SELECT title,calories,salts,proteins,mealtype,date FROM foodlog WHERE user_id = 1 AND date > (%s) ORDER BY date DESC",(str(two_days),))
+                cur.execute("SELECT title,calories,salts,proteins,mealtype,date FROM foodlog WHERE user_id = %s AND date > (%s) ORDER BY date DESC",(user_id,str(two_days),))
                 rows = cur.fetchall() # retrieves all results from query
                 for data in rows:
                     self.foodlog_list.controls.append(ft.ExpansionTile(title=data[0],subtitle=str(data[5]) + " " + str(data[4]),
@@ -101,7 +101,7 @@ class NutritionPage(ft.Column):
                                                                    ft.ListTile(title="Salts",subtitle=str(data[2])),
                                                                    ft.ListTile(title="Proteins",subtitle=str(data[3])),
                                                                ])) #takes values from db and display them
-                cur.execute("SELECT water,date FROM waterlog WHERE user_id = 1 AND date > (%s) ORDER BY date DESC",(str(two_days),))
+                cur.execute("SELECT water,date FROM waterlog WHERE user_id = %s AND date > (%s) ORDER BY date DESC",(user_id,str(two_days),))
                 rows = cur.fetchall()
                 for data in rows:
                     self.waterlog_list.controls.append(ft.ListTile(title=str(data[0]) + " ml",subtitle=str(data[1]))) #used to display water values from db
@@ -120,13 +120,13 @@ class NutritionPage(ft.Column):
             total_w = 0
             if conn is not None:
                 cur = conn.cursor()
-                cur.execute("SELECT calories,salts,proteins FROM foodlog WHERE user_id = 1 AND date = %s",(str(date.today()),))
+                cur.execute("SELECT calories,salts,proteins FROM foodlog WHERE user_id = %s AND date = %s",(user_id,str(date.today()),))
                 rows = cur.fetchall()
                 for data in rows: #retrieves stats from today and totals them
                     total_c = total_c + data[0]
                     total_s = total_s + data[1]
                     total_p = total_p + data[2]
-                cur.execute("SELECT water FROM waterlog WHERE user_id = 1 AND date = %s",(str(date.today()),))
+                cur.execute("SELECT water FROM waterlog WHERE user_id = %s AND date = %s",(user_id,str(date.today()),))
                 rows = cur.fetchall()
                 for data in rows: # find total water from today
                     total_w = total_w + data[0]
@@ -140,7 +140,7 @@ class NutritionPage(ft.Column):
             goal_w = 0
             if conn is not None:
                 cur = conn.cursor()
-                cur.execute("SELECT calories_goal, salts_goal, proteins_goal,water_goal FROM foodgoals WHERE user_id = 1")
+                cur.execute("SELECT calories_goal, salts_goal, proteins_goal,water_goal FROM foodgoals WHERE user_id = %s",(user_id,))
                 rows = cur.fetchall()
                 for data in rows:
                     goal_c = goal_c + data[0]
@@ -267,6 +267,6 @@ class NutritionPage(ft.Column):
         self.alignment = ft.MainAxisAlignment.SPACE_BETWEEN #sets alignment for page
 
 #function called to call upon the page
-def main_nutrition(page: ft.Page):
-    nutrition_page = NutritionPage(page) # creates page using class
+def main_nutrition(page: ft.Page,user_id):
+    nutrition_page = NutritionPage(page,user_id) # creates page using class
     return nutrition_page # returns page
