@@ -2,6 +2,7 @@ import os
 import csv
 import math
 import time
+import asyncio
 from datetime import datetime
 import flet as ft
 import flet_map as ftm
@@ -22,13 +23,33 @@ def main_map(page: ft.Page):
     total_dist = 0.0
     is_tracking = False
 
-    # NEW: Timer variables
+    # Timer & Location variables
     activity_start_time = 0.0
     total_time_seconds = 0.0
+    current_gps_loc = ftm.MapLatitudeLongitude(54.9783, -1.6178)  # Default fallback
 
     # --- UI Elements ---
-    distance_value = ft.Text(value="0.00", size=48, weight=ft.FontWeight.BOLD)
+    distance_value = ft.Text(value="0.00", size=48, weight=ft.FontWeight.BOLD, color=ft.Colors.DEEP_ORANGE)
     distance_label = ft.Text(value="KILOMETERS", size=12, color=ft.Colors.GREY_700, weight=ft.FontWeight.BOLD)
+
+    # Live Stopwatch & Speed Elements
+    timer_value = ft.Text(value="00:00:00", size=24, weight=ft.FontWeight.BOLD)
+    speed_value = ft.Text(value="0.0 km/h", size=24, weight=ft.FontWeight.BOLD, color=ft.Colors.BLUE_600)
+
+    # Activity Selector
+    activity_dropdown = ft.Dropdown(
+        value="Run",
+        options=[
+            ft.dropdown.Option("Walk"),
+            ft.dropdown.Option("Run"),
+            ft.dropdown.Option("Cycle"),
+        ],
+        width=150,
+        height=45,
+        content_padding=10,
+        text_size=14,
+        border_radius=10
+    )
 
     marker_layer = ftm.MarkerLayer(markers=[])
     polyline_layer = ftm.PolylineLayer(
@@ -37,7 +58,7 @@ def main_map(page: ft.Page):
 
     map_ctrl = ftm.Map(
         expand=True,
-        initial_center=ftm.MapLatitudeLongitude(54.9783, -1.6178),
+        initial_center=current_gps_loc,
         initial_zoom=14,
         layers=[
             ftm.TileLayer(url_template="https://a.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png"),
@@ -46,23 +67,27 @@ def main_map(page: ft.Page):
         ]
     )
 
+    # --- CORE LOGIC ---
     def on_position_change(e):
-        nonlocal total_dist, is_tracking
+        nonlocal total_dist, is_tracking, current_gps_loc
         lat = e.latitude if hasattr(e, 'latitude') else e.position.latitude
         lon = e.longitude if hasattr(e, 'longitude') else e.position.longitude
 
-        new_loc = ftm.MapLatitudeLongitude(lat, lon)
+        current_gps_loc = ftm.MapLatitudeLongitude(lat, lon)
         marker_layer.markers.clear()
         marker_layer.markers.append(
-            ftm.Marker(content=ft.Icon(ft.Icons.MY_LOCATION, color=ft.Colors.BLUE, size=30), coordinates=new_loc))
-        map_ctrl.center = new_loc
+            ftm.Marker(content=ft.Icon(ft.Icons.MY_LOCATION, color=ft.Colors.BLUE, size=30),
+                       coordinates=current_gps_loc))
 
         if is_tracking:
+            map_ctrl.center = current_gps_loc
+
             if path_points:
                 prev = path_points[-1]
-                total_dist += calculate_distance(prev.latitude, prev.longitude, new_loc.latitude, new_loc.longitude)
+                total_dist += calculate_distance(prev.latitude, prev.longitude, current_gps_loc.latitude,
+                                                 current_gps_loc.longitude)
 
-            path_points.append(new_loc)
+            path_points.append(current_gps_loc)
             distance_value.value = f"{total_dist:.2f}"
 
             if len(path_points) > 1:
@@ -78,20 +103,46 @@ def main_map(page: ft.Page):
             gl = next(c for c in page.overlay if isinstance(c, Geolocator))
             gl.on_position_change = on_position_change
 
+    # Background task to tick the stopwatch every second!
+    async def run_stopwatch():
+        while page.route in ["/map", "/map/"]:
+            if is_tracking:
+                elapsed = total_time_seconds + (time.time() - activity_start_time)
+
+                h = int(elapsed // 3600)
+                m = int((elapsed % 3600) // 60)
+                s = int(elapsed % 60)
+                timer_value.value = f"{h:02d}:{m:02d}:{s:02d}"
+
+                if elapsed > 0:
+                    speed = total_dist / (elapsed / 3600)
+                    speed_value.value = f"{speed:.1f} km/h"
+
+                try:
+                    page.update()
+                except Exception:
+                    pass
+            await asyncio.sleep(1)
+
+    page.run_task(run_stopwatch)
+
+    # --- BUTTON HANDLERS ---
     def go_back(e):
-        # FIX: Updated to official Flet routing command
         page.go("/activities")
+
+    def recenter_map(e):
+        map_ctrl.center = current_gps_loc
+        page.update()
 
     async def start_tracking(e):
         nonlocal is_tracking, activity_start_time
         is_tracking = True
-
-        # Start the stopwatch!
         activity_start_time = time.time()
 
         start_btn.visible = False
         tracking_row.visible = True
         paused_row.visible = False
+        activity_dropdown.disabled = True
         page.update()
 
         if gl is not None:
@@ -112,8 +163,6 @@ def main_map(page: ft.Page):
     def pause_tracking(e):
         nonlocal is_tracking, total_time_seconds
         is_tracking = False
-
-        # Stop the stopwatch and add to total
         total_time_seconds += time.time() - activity_start_time
 
         tracking_row.visible = False
@@ -123,8 +172,6 @@ def main_map(page: ft.Page):
     def resume_tracking(e):
         nonlocal is_tracking, activity_start_time
         is_tracking = True
-
-        # Start the stopwatch again!
         activity_start_time = time.time()
 
         paused_row.visible = False
@@ -134,29 +181,28 @@ def main_map(page: ft.Page):
     def finish_and_save(e):
         nonlocal is_tracking, total_dist, total_time_seconds, activity_start_time
 
-        # If they hit finish without pausing first, add the final time chunk
         if is_tracking:
             total_time_seconds += time.time() - activity_start_time
             is_tracking = False
 
         final_distance = total_dist
         final_seconds = int(total_time_seconds)
+        selected_activity = activity_dropdown.value
 
-        # --- NEW DATA SAVING LOGIC (WITH TIME) ---
         file_path = "activities_history.csv"
         file_exists = os.path.isfile(file_path)
 
         with open(file_path, mode='a', newline='') as file:
             writer = csv.writer(file)
             if not file_exists:
-                # Add Duration_Seconds to the headers!
-                writer.writerow(["Date", "Distance_KM", "Duration_Seconds"])
+                writer.writerow(["Date", "Distance_KM", "Duration_Seconds", "Activity_Type"])
 
             current_date = datetime.now().strftime("%Y-%m-%d %H:%M")
-            writer.writerow([current_date, round(final_distance, 2), final_seconds])
+            writer.writerow([current_date, round(final_distance, 2), final_seconds, selected_activity])
 
         page.overlay.append(ft.SnackBar(
-            content=ft.Text(f"Saved! Dist: {final_distance:.2f}km | Time: {final_seconds}s", weight=ft.FontWeight.BOLD),
+            content=ft.Text(f"{selected_activity} Saved! Dist: {final_distance:.2f}km | Time: {final_seconds}s",
+                            weight=ft.FontWeight.BOLD),
             bgcolor=ft.Colors.GREEN, open=True))
 
         # Reset everything for next time
@@ -164,17 +210,38 @@ def main_map(page: ft.Page):
         total_dist = 0.0
         total_time_seconds = 0.0
         distance_value.value = "0.00"
+        timer_value.value = "00:00:00"
+        speed_value.value = "0.0 km/h"
+        activity_dropdown.disabled = False
+
         if polyline_layer.polylines:
             polyline_layer.polylines[0].coordinates.clear()
 
         paused_row.visible = False
         tracking_row.visible = False
         start_btn.visible = True
-        page.update()
 
+        # FIX: Send the user instantly back to their activities dashboard!
+        page.go("/activities")
+
+    # --- UI LAYOUT ---
     top_back_button = ft.Container(
         content=ft.FloatingActionButton(icon=ft.Icons.ARROW_BACK, bgcolor=ft.Colors.WHITE, on_click=go_back, mini=True),
-        alignment=ft.Alignment.TOP_LEFT, padding=ft.padding.only(top=40, left=20))
+        alignment=ft.Alignment.TOP_LEFT, padding=ft.padding.only(top=40, left=20)
+    )
+
+    # Recenter Button (Bulletproof Icon Color Fix)
+    recenter_button = ft.Container(
+        content=ft.FloatingActionButton(
+            content=ft.Icon(ft.Icons.MY_LOCATION, color=ft.Colors.BLUE_600),
+            bgcolor=ft.Colors.WHITE,
+            on_click=recenter_map,
+            mini=True
+        ),
+        alignment=ft.Alignment.TOP_RIGHT,
+        padding=ft.padding.only(top=40, right=20)
+    )
+
     start_btn = ft.FloatingActionButton(content=ft.Text("START", weight=ft.FontWeight.BOLD, color=ft.Colors.WHITE),
                                         icon=ft.Icons.FIBER_MANUAL_RECORD, bgcolor=ft.Colors.DEEP_ORANGE, width=150,
                                         on_click=start_tracking)
@@ -189,15 +256,29 @@ def main_map(page: ft.Page):
     paused_row = ft.Row(controls=[resume_btn, finish_btn], alignment=ft.MainAxisAlignment.CENTER, visible=False,
                         spacing=15)
 
+    # Sleek Dashboard
     map_dashboard = ft.Container(
-        content=ft.Column(
-            [ft.Column([distance_label, distance_value], horizontal_alignment=ft.CrossAxisAlignment.CENTER, spacing=0),
-             start_btn, tracking_row, paused_row], horizontal_alignment=ft.CrossAxisAlignment.CENTER, spacing=20),
+        content=ft.Column([
+            ft.Row([activity_dropdown], alignment=ft.MainAxisAlignment.CENTER),
+            ft.Column([distance_label, distance_value], horizontal_alignment=ft.CrossAxisAlignment.CENTER, spacing=0),
+
+            # Stopwatch and Speed side-by-side
+            ft.Row([
+                ft.Column([ft.Icon(ft.Icons.TIMER, color=ft.Colors.GREY_500), timer_value],
+                          horizontal_alignment=ft.CrossAxisAlignment.CENTER, spacing=0),
+                ft.Container(width=1, height=40, bgcolor=ft.Colors.GREY_300),
+                ft.Column([ft.Icon(ft.Icons.SPEED, color=ft.Colors.BLUE_500), speed_value],
+                          horizontal_alignment=ft.CrossAxisAlignment.CENTER, spacing=0),
+            ], alignment=ft.MainAxisAlignment.SPACE_EVENLY),
+
+            ft.Divider(height=10, color=ft.Colors.TRANSPARENT),
+            start_btn, tracking_row, paused_row
+        ], horizontal_alignment=ft.CrossAxisAlignment.CENTER, spacing=10),
         bgcolor=ft.Colors.WHITE,
         border_radius=ft.BorderRadius(top_left=30, top_right=30, bottom_left=0, bottom_right=0), padding=30,
         shadow=ft.BoxShadow(spread_radius=1, blur_radius=15, color=ft.Colors.BLACK26)
     )
 
-    return ft.Stack(controls=[map_ctrl, top_back_button,
+    return ft.Stack(controls=[map_ctrl, top_back_button, recenter_button,
                               ft.Container(content=map_dashboard, alignment=ft.Alignment.BOTTOM_CENTER, bottom=0,
                                            left=0, right=0)], expand=True)

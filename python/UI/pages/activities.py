@@ -15,7 +15,7 @@ class ActivitiesPage(ft.Column):
         self.r = Responsive(page)
 
         # --- LOAD REAL DATA FROM CSV ---
-        dist_str, time_str, runs_str = self.calculate_weekly_stats()
+        tot_dist, tot_time, runs_count, activities_list = self.load_activity_data()
 
         # 1. Page Header
         header = ft.Container(
@@ -23,91 +23,134 @@ class ActivitiesPage(ft.Column):
             padding=ft.padding.only(top=20, left=10)
         )
 
-        # 2. Weekly Stats Dashboard
+        # 2. Weekly Stats Dashboard (Totals Only)
         stats_card = ft.Container(
             bgcolor=ft.Colors.WHITE,
             border_radius=15,
             padding=20,
             shadow=ft.BoxShadow(spread_radius=1, blur_radius=10, color=ft.Colors.BLACK12),
             content=ft.Column([
-                ft.Text("THIS WEEK", size=12, weight=ft.FontWeight.BOLD, color=ft.Colors.GREY_500),
-                ft.Divider(height=10, color=ft.Colors.TRANSPARENT),
+                ft.Text("THIS WEEK'S TOTALS", size=12, weight=ft.FontWeight.BOLD, color=ft.Colors.GREY_500),
+                ft.Divider(height=5, color=ft.Colors.TRANSPARENT),
                 ft.Row(
                     alignment=ft.MainAxisAlignment.SPACE_EVENLY,
                     controls=[
-                        # Distance Stat
                         ft.Column([
-                            ft.Text(dist_str, size=28, weight=ft.FontWeight.BOLD, color=ft.Colors.DEEP_ORANGE),
+                            ft.Text(tot_dist, size=28, weight=ft.FontWeight.BOLD, color=ft.Colors.DEEP_ORANGE),
                             ft.Text("KM", size=12, weight=ft.FontWeight.BOLD, color=ft.Colors.GREY_400)
                         ], horizontal_alignment=ft.CrossAxisAlignment.CENTER, spacing=0),
 
                         ft.Container(width=1, height=40, bgcolor=ft.Colors.GREY_200),
 
-                        # Time Stat
                         ft.Column([
-                            ft.Text(time_str, size=28, weight=ft.FontWeight.BOLD),
+                            ft.Text(tot_time, size=28, weight=ft.FontWeight.BOLD),
                             ft.Text("TIME", size=12, weight=ft.FontWeight.BOLD, color=ft.Colors.GREY_400)
                         ], horizontal_alignment=ft.CrossAxisAlignment.CENTER, spacing=0),
 
                         ft.Container(width=1, height=40, bgcolor=ft.Colors.GREY_200),
 
-                        # Activities Stat
                         ft.Column([
-                            ft.Text(runs_str, size=28, weight=ft.FontWeight.BOLD),
-                            ft.Text("RUNS", size=12, weight=ft.FontWeight.BOLD, color=ft.Colors.GREY_400)
+                            ft.Text(runs_count, size=28, weight=ft.FontWeight.BOLD),
+                            ft.Text("ACTIVITIES", size=12, weight=ft.FontWeight.BOLD, color=ft.Colors.GREY_400)
                         ], horizontal_alignment=ft.CrossAxisAlignment.CENTER, spacing=0),
                     ]
                 )
             ])
         )
 
-        # 3. Strava-Style Empty State
-        record_prompt = ft.Container(
-            expand=True,
-            alignment=ft.Alignment.CENTER,
-            content=ft.Column(
-                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-                alignment=ft.MainAxisAlignment.CENTER,
-                controls=[
-                    ft.Icon(ft.Icons.MAP_OUTLINED, size=80, color=ft.Colors.GREY_300),
-                    ft.Text("Ready to crush it?", size=24, weight=ft.FontWeight.BOLD),
-                    ft.Text("Track your runs, walks, and rides.", color=ft.Colors.GREY_500, size=14),
-                    ft.Container(height=30),
-                    ft.Button(
-                        content=ft.Row(
-                            controls=[
-                                ft.Icon(ft.Icons.FIBER_MANUAL_RECORD, color=ft.Colors.WHITE),
-                                ft.Text("RECORD ACTIVITY", size=16, weight=ft.FontWeight.BOLD, color=ft.Colors.WHITE)
-                            ],
-                            alignment=ft.MainAxisAlignment.CENTER
-                        ),
-                        bgcolor=ft.Colors.DEEP_ORANGE,
-                        width=280,
-                        height=60,
-                        style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=30)),
-                        on_click=self.start_activity
-                    )
-                ]
-            )
+        # 3. Individual Activities Feed OR Empty State
+        feed_column = ft.Column(scroll=ft.ScrollMode.HIDDEN, expand=True, spacing=15)
+
+        record_btn = ft.ElevatedButton(
+            content=ft.Row([
+                ft.Icon(ft.Icons.FIBER_MANUAL_RECORD, color=ft.Colors.WHITE),
+                ft.Text("RECORD NEW ACTIVITY", size=14, weight=ft.FontWeight.BOLD, color=ft.Colors.WHITE)
+            ], alignment=ft.MainAxisAlignment.CENTER),
+            bgcolor=ft.Colors.DEEP_ORANGE,
+            height=50,
+            style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=25)),
+            on_click=self.start_activity
         )
 
-        # 4. Add Navigation Bar
-        self.nav = NavBar(page)
+        if not activities_list:
+            # Empty State
+            feed_column.controls.append(
+                ft.Container(
+                    expand=True,
+                    alignment=ft.Alignment.CENTER,
+                    content=ft.Column(
+                        horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                        alignment=ft.MainAxisAlignment.CENTER,
+                        controls=[
+                            ft.Icon(ft.Icons.MAP_OUTLINED, size=80, color=ft.Colors.GREY_300),
+                            ft.Text("Ready to crush it?", size=24, weight=ft.FontWeight.BOLD),
+                            ft.Text("Track your runs, walks, and rides.", color=ft.Colors.GREY_500, size=14),
+                            ft.Container(height=20),
+                            record_btn
+                        ]
+                    )
+                )
+            )
+        else:
+            # Populated History Feed
+            feed_column.controls.append(
+                ft.Container(content=record_btn, padding=ft.padding.only(bottom=10))
+            )
+            feed_column.controls.append(
+                ft.Text("ALL RECENT ACTIVITIES", size=12, weight=ft.FontWeight.BOLD, color=ft.Colors.GREY_500)
+            )
 
-        self.controls = [header, ft.Container(content=stats_card, padding=ft.padding.symmetric(horizontal=15)),
-                         record_prompt, self.nav]
+            # Map the activity types to unique icons!
+            icon_map = {
+                "Run": ft.Icons.DIRECTIONS_RUN,
+                "Walk": ft.Icons.DIRECTIONS_WALK,
+                "Cycle": ft.Icons.DIRECTIONS_BIKE
+            }
+
+            for act in reversed(activities_list):  # Read newest first
+                act_icon = icon_map.get(act["type"], ft.Icons.FITNESS_CENTER)
+                feed_column.controls.append(
+                    ft.Container(
+                        bgcolor=ft.Colors.WHITE,
+                        border_radius=10,
+                        padding=5,
+                        shadow=ft.BoxShadow(spread_radius=1, blur_radius=5, color=ft.Colors.BLACK12),
+                        content=ft.ListTile(
+                            leading=ft.Container(content=ft.Icon(act_icon, color=ft.Colors.WHITE), bgcolor=ft.Colors.BLUE_400, padding=10, border_radius=25),
+                            title=ft.Text(f"{act['type']} • {act['date']}", weight=ft.FontWeight.BOLD, size=14),
+                            subtitle=ft.Text(f"{act['dist']} km in {act['time']}", color=ft.Colors.GREY_600, size=12),
+                        )
+                    )
+                )
+
+        # 4. Add Navigation Bar
+        self.nav_bar = NavBar(page)
+
+        # Main Layout Assembly
+        content_column = ft.Column(
+            controls=[
+                header,
+                ft.Container(content=stats_card, padding=ft.padding.symmetric(horizontal=15)),
+                ft.Container(content=feed_column, padding=ft.padding.symmetric(horizontal=15), expand=True)
+            ],
+            expand=True
+        )
+
+        self.controls = [content_column, self.nav_bar]
         self.expand = True
         self.alignment = ft.MainAxisAlignment.SPACE_BETWEEN
 
-    # --- MONDAY TO SUNDAY DATA CALCULATION ---
-    def calculate_weekly_stats(self):
+
+    # --- DATA CALCULATION & FORMATTING ---
+    def load_activity_data(self):
         total_distance = 0.0
         total_runs = 0
         total_seconds = 0
+        activities_list = []
         file_path = "activities_history.csv"
 
         if not os.path.isfile(file_path):
-            return "0.0", "0s", "0"
+            return "0.0", "0s", "0", activities_list
 
         now = datetime.now()
         start_of_week = (now - timedelta(days=now.weekday())).replace(hour=0, minute=0, second=0, microsecond=0)
@@ -117,33 +160,49 @@ class ActivitiesPage(ft.Column):
                 reader = csv.reader(file)
                 next(reader)  # Skip the header row
                 for row in reader:
-                    if len(row) >= 3:  # Make sure we have Date, Dist, AND Time
-                        run_date = datetime.strptime(row[0], "%Y-%m-%d %H:%M")
+                    if len(row) >= 3:
+                        date_str = row[0]
+                        dist = float(row[1])
+                        secs = int(row[2])
+                        act_type = row[3] if len(row) >= 4 else "Run"
 
+                        run_date = datetime.strptime(date_str, "%Y-%m-%d %H:%M")
+
+                        # 1. Add to THIS WEEK'S totals
                         if run_date >= start_of_week:
-                            total_distance += float(row[1])
+                            total_distance += dist
+                            total_seconds += secs
                             total_runs += 1
-                            total_seconds += int(row[2])  # Add the real seconds!
+
+                        # 2. Append to the visual history feed
+                        activities_list.append({
+                            "date": run_date.strftime("%b %d, %H:%M"),
+                            "dist": f"{dist:.2f}",
+                            "time": self.format_time(secs),
+                            "type": act_type
+                        })
         except Exception as e:
             print(f"Error reading stats: {e}")
 
-        # Smart Time Formatter
-        hours = total_seconds // 3600
-        minutes = (total_seconds % 3600) // 60
-        seconds = total_seconds % 60
+        tot_time_str = self.format_time(total_seconds)
 
+        return f"{total_distance:.1f}", tot_time_str, str(total_runs), activities_list
+
+    def format_time(self, seconds):
+        if seconds == 0:
+            return "0s"
+        hours = seconds // 3600
+        minutes = (seconds % 3600) // 60
+        secs = seconds % 60
         if hours > 0:
-            time_display = f"{hours}h {minutes}m"
+            return f"{hours}h {minutes}m"
         elif minutes > 0:
-            time_display = f"{minutes}m {seconds}s"
+            return f"{minutes}m {secs}s"
         else:
-            time_display = f"{seconds}s"  # If under a minute, just show seconds!
-
-        return f"{total_distance:.1f}", time_display, str(total_runs)
+            return f"{secs}s"
 
     # --- EVENT HANDLERS ---
     def start_activity(self, e):
-        # FIX: Updated to official Flet routing command
         self.main_page.go("/map")
 
 def main_activities(page: ft.Page):
