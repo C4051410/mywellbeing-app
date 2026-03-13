@@ -181,3 +181,69 @@ def get_comments(target_type, target_id):
     finally:
         cur.close()
         conn.close()
+
+
+def get_social_feed(user_id):
+    """
+    Retrieve recent activity (workouts & meals(foodlog)) from user's friends.
+    """
+    conn = connect()
+    cur = conn.cursor()
+    try:
+        # first retrieve friend IDs
+        cur.execute(
+            "SELECT friend_id FROM friends WHERE user_id = %s",
+            (user_id,)
+        )
+        friend_rows = cur.fetchall()
+        # convert rows into simple list of ids
+        friend_ids = [row[0] for row in friend_rows]
+        # if user has no friends return empty feed
+        if not friend_ids:
+            return []
+        # convert to tuple for SQL IN clause
+        friend_ids_tuple = tuple(friend_ids)
+        # retrieve workout activities
+        cur.execute(
+            f"""
+            SELECT
+                'workout' AS activity_type,
+                u.username,
+                w.title,
+                w.calories,
+                w.id,
+                w.user_id
+            FROM workouts w
+            JOIN users u ON w.user_id = u.id
+            WHERE w.user_id IN %s
+            ORDER BY w.id DESC
+            LIMIT 5
+            """,
+            (friend_ids_tuple,)
+        )
+        workouts = cur.fetchall()
+        # retrieve meal activities
+        cur.execute(
+            f"""
+            SELECT
+                'meal' AS activity_type,
+                u.username,
+                f.title,
+                f.calories,
+                f.id,
+                f.user_id
+            FROM foodlog f
+            JOIN users u ON f.user_id = u.id
+            WHERE f.user_id IN %s
+            ORDER BY f.id DESC
+            LIMIT 5
+            """,
+            (friend_ids_tuple,)
+        )
+        meals = cur.fetchall()
+        # combine activities
+        activity_feed = workouts + meals
+        return activity_feed
+    finally:
+        cur.close()
+        conn.close()
