@@ -247,3 +247,27 @@ def get_social_feed(user_id):
     finally:
         cur.close()
         conn.close()
+
+
+def get_leaderboard():
+    """
+    Retrieve top users based on total workout calories.
+    """
+    conn = connect()
+    cur = conn.cursor()
+    try:
+        cur.execute("""
+            SELECT
+                u.username,
+                SUM(w.calories) AS total_calories
+            FROM workouts w
+            JOIN users u ON w.user_id = u.id
+            GROUP BY u.username
+            ORDER BY total_calories DESC
+            LIMIT 3
+            """)
+        leaderboard = cur.fetchall()
+        return leaderboard
+    finally:
+        cur.close()
+        conn.close()
