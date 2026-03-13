@@ -1,12 +1,15 @@
 from database.connection import connect
 
-
+# User lookup
 def get_user_by_username(username):
+    """
+    Find a user by username.
+    """
     conn = connect()
     cur = conn.cursor()
     try:
         cur.execute(
-            "SELECT id, username, full_name FROM users WHERE username = %s",
+            "SELECT id, username, email FROM users WHERE username = %s",
             (username,)
         )
         return cur.fetchone()
@@ -14,22 +17,25 @@ def get_user_by_username(username):
         cur.close()
         conn.close()
 
-
+# Friend management
 def add_friend(user_id, friend_id):
+    """
+    Create a mutual friendship.
+    """
     conn = connect()
     cur = conn.cursor()
     try:
         cur.execute(
             """
-            INSERT INTO friends (id, user_id, friend_id)
-            VALUES (gen_random_uuid(), %s, %s)
+            INSERT INTO friends (user_id, friend_id)
+            VALUES (%s, %s)
             """,
             (user_id, friend_id)
         )
         cur.execute(
             """
-            INSERT INTO friends (id, user_id, friend_id)
-            VALUES (gen_random_uuid(), %s, %s)
+            INSERT INTO friends (user_id, friend_id)
+            VALUES (%s, %s)
             """,
             (friend_id, user_id)
         )
@@ -44,6 +50,9 @@ def add_friend(user_id, friend_id):
 
 
 def remove_friend(user_id, friend_id):
+    """
+    Remove a mutual friendship.
+    """
     conn = connect()
     cur = conn.cursor()
     try:
@@ -66,12 +75,15 @@ def remove_friend(user_id, friend_id):
 
 
 def get_friends(user_id):
+    """
+    Retrieve all friends for the given user.
+    """
     conn = connect()
     cur = conn.cursor()
     try:
         cur.execute(
             """
-            SELECT u.id, u.username, u.full_name
+            SELECT u.id, u.username, u.email
             FROM friends f
             JOIN users u ON f.friend_id = u.id
             WHERE f.user_id = %s
@@ -86,6 +98,10 @@ def get_friends(user_id):
 
 
 def get_friend_ids(user_id):
+    """
+    Retrieve only the friend ids for the given user.
+    Useful when building the social activity feed.
+    """
     conn = connect()
     cur = conn.cursor()
     try:
@@ -99,15 +115,18 @@ def get_friend_ids(user_id):
         cur.close()
         conn.close()
 
-
+# Likes and comments
 def like_target(user_id, target_type, target_id):
+    """
+    Add a like to a workout or meal.
+    """
     conn = connect()
     cur = conn.cursor()
     try:
         cur.execute(
             """
             INSERT INTO social_likes (id, target_type, target_id, user_id)
-            VALUES (gen_random_uuid(), %s, %s, %s)
+            VALUES (%s, %s, %s)
             """,
             (target_type, target_id, user_id)
         )
@@ -122,6 +141,9 @@ def like_target(user_id, target_type, target_id):
 
 
 def unlike_target(user_id, target_type, target_id):
+    """
+    Remove a like from a workout or meal.
+    """
     conn = connect()
     cur = conn.cursor()
     try:
@@ -143,13 +165,16 @@ def unlike_target(user_id, target_type, target_id):
 
 
 def add_comment(user_id, target_type, target_id, content):
+    """
+    Add a comment to a workout or meal.
+    """
     conn = connect()
     cur = conn.cursor()
     try:
         cur.execute(
             """
             INSERT INTO social_comments (id, target_type, target_id, user_id, content)
-            VALUES (gen_random_uuid(), %s, %s, %s, %s)
+            VALUES (%s, %s, %s, %s)
             """,
             (target_type, target_id, user_id, content)
         )
@@ -164,6 +189,9 @@ def add_comment(user_id, target_type, target_id, content):
 
 
 def get_comments(target_type, target_id):
+    """
+    Retrieve comments for a workout or meal.
+    """
     conn = connect()
     cur = conn.cursor()
     try:
@@ -182,7 +210,7 @@ def get_comments(target_type, target_id):
         cur.close()
         conn.close()
 
-
+# Social feed
 def get_social_feed(user_id):
     """
     Retrieve recent activity (workouts & meals(foodlog)) from user's friends.
@@ -190,18 +218,15 @@ def get_social_feed(user_id):
     conn = connect()
     cur = conn.cursor()
     try:
-        # first retrieve friend IDs
         cur.execute(
             "SELECT friend_id FROM friends WHERE user_id = %s",
             (user_id,)
         )
         friend_rows = cur.fetchall()
-        # convert rows into simple list of ids
         friend_ids = [row[0] for row in friend_rows]
         # if user has no friends return empty feed
         if not friend_ids:
             return []
-        # convert to tuple for SQL IN clause
         friend_ids_tuple = tuple(friend_ids)
         # retrieve workout activities
         cur.execute(
