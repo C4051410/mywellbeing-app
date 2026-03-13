@@ -17,6 +17,22 @@ def get_user_by_username(username):
         cur.close()
         conn.close()
 
+def get_user_by_id(user_id):
+    """
+    Retrieve a single user by id.
+    """
+    conn = connect()
+    cur = conn.cursor()
+    try:
+        cur.execute(
+            "SELECT id, username, email FROM users WHERE id = %s",
+            (user_id,)
+        )
+        return cur.fetchone()
+    finally:
+        cur.close()
+        conn.close()
+
 # Friend management
 def add_friend(user_id, friend_id):
     """
