@@ -3,9 +3,9 @@ import csv
 from datetime import datetime, timedelta
 import flet as ft
 
-from components.userpfp import Userpfp
-from components.bottom_nav import NavBar
-from components.responsive import Responsive
+from UI.components.userpfp import Userpfp
+from UI.components.bottom_nav import NavBar
+from UI.components.responsive import Responsive
 
 
 class ActivitiesPage(ft.Column):
