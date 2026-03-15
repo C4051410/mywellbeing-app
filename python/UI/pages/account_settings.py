@@ -11,7 +11,7 @@ class AccountSettingsPage(ft.Column):
         self.user_id = user_id
         self.r = Responsive(page)
 
-        # 1. Reset Password Fields
+        # 1. Reset Password Fields.
         self.new_pw = ft.TextField(label="New Password", password=True, can_reveal_password=True)
         self.confirm_pw = ft.TextField(label="Confirm Password", password=True)
 
