@@ -44,6 +44,7 @@ class NutritionPage(ft.Column):
             ft.DropdownOption(key="Snack", text="Snack"),]) # allow users to only select given options
         self.foodlog_list = ft.Column()
         self.waterlog_list = ft.Column()
+        self.userpfp = Userpfp(page)
         #used to handle when Enter Food button is pressed
         def handle_food_submit(e):
             food = self.food_input.value
@@ -109,9 +110,7 @@ class NutritionPage(ft.Column):
                 page.update()
 
         retrieve_posts() #used to retrieve posts before creating display
-        self.header = ft.Container(content=ft.Text("Nutrition",size=32,weight=ft.FontWeight.BOLD),
-                              padding=ft.padding.only(top=10,left=10) #creates header for page
-        )
+        self.header = ft.Container(content=ft.Row(controls=[ft.Text("Nutrition",size=32,weight=ft.FontWeight.BOLD),self.userpfp],alignment=ft.MainAxisAlignment.SPACE_BETWEEN))
         #used to retrieve daily stats
         def retrieve_daily_stats():
             total_c = 0
