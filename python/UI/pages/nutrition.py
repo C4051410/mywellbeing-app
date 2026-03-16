@@ -73,6 +73,7 @@ class NutritionPage(ft.Column):
             self.salts_input.value = ""
             self.proteins_input.value = ""
             self.meal_types.value = ""
+            refresh_stats()
             self.update() #updates the page
         #used to handle when Enter Water button is pressed
         def handle_water_submit(e):
@@ -80,12 +81,13 @@ class NutritionPage(ft.Column):
             if not water: #checks water field isn't empty
                 print("Nope")
                 return
-            self.foodlog_list.controls.append(ft.ListTile(title=str(date.today()),subtitle=water)) #adds date and amount to tile
+            self.waterlog_list.controls.append(ft.ListTile(title=str(date.today()),subtitle=water)) #adds date and amount to tile
             if conn is not None: #checks database connection is valid
                 cur = conn.cursor()
                 cur.execute("INSERT INTO waterlog (water,date,user_id) VALUES (%s,%s,%s)",(water,str(date.today()),user_id,))
                 conn.commit()
                 cur.close()
+            refresh_stats()
             self.update() #updates the page
 
         # used to retrieve posts from database
@@ -150,6 +152,14 @@ class NutritionPage(ft.Column):
 
         total_calories, total_salts, total_proteins, total_water = retrieve_daily_stats() #retrieves users totals from today
         goal_calories, goal_salts, goal_proteins, goal_water = retrieve_user_goals() # retrieves users goals
+        self.calories_text = ft.Text(f"{total_calories:.0f} / {goal_calories:.0f}",size=12,weight=ft.FontWeight.BOLD,color=ft.Colors.GREY_400)
+        self.calories_bar = ft.ProgressBar(width=100, height=20,color=ft.Colors.ORANGE_400,value=total_calories / goal_calories)
+        self.protein_text = ft.Text(f"{total_proteins:.2f} / {goal_proteins:.2f}",size=12, weight=ft.FontWeight.BOLD,color=ft.Colors.GREY_400)
+        self.protein_bar = ft.ProgressBar(width=100, height=20,color=ft.Colors.RED_400,value=total_proteins / goal_proteins)
+        self.salts_text = ft.Text(f"{total_salts:.2f} / {goal_salts:.2f}",size=12,weight=ft.FontWeight.BOLD,color=ft.Colors.GREY_400)
+        self.salts_bar = ft.ProgressBar(width=100, height=20,color=ft.Colors.LIGHT_GREEN_400,value=total_salts / goal_salts)
+        self.water_text = ft.Text(f"{total_water:.0f} / {goal_water:.0f}", size=12, weight=ft.FontWeight.BOLD, color=ft.Colors.GREY_400)
+        self.water_bar = ft.ProgressBar(width=100, height=20, color=ft.Colors.LIGHT_BLUE_400,value=total_water / goal_water)
         #creates container used to display the users totals from the day compared to their goals
         self.stats_card = ft.Container(bgcolor=ft.Colors.WHITE,border_radius=10,padding=10,
                                   shadow = ft.BoxShadow(spread_radius=1, blur_radius=10, color=ft.Colors.BLACK12),
@@ -163,25 +173,16 @@ class NutritionPage(ft.Column):
                                                                    ft.Text("Calories",size=28,
                                                                            weight=ft.FontWeight.BOLD,
                                                                            color=ft.Colors.DEEP_ORANGE),#displays the title
-                                                                   ft.Text(f"{total_calories:.0f} / {goal_calories:.0f}",
-                                                                           size=12,
-                                                                           weight=ft.FontWeight.BOLD,
-                                                                           color=ft.Colors.GREY_400),#displays the numbers
-                                                                   ft.ProgressBar(width = 100, height = 20,
-                                                                                  color = ft.Colors.ORANGE_400,
-                                                                                  value = total_calories/goal_calories),#visual representation
+                                                                   self.calories_text,
+                                                                   self.calories_bar
                                                                ]),
 
                                                                ft.Column([
                                                                    ft.Text("Proteins",size=28,
                                                                            weight=ft.FontWeight.BOLD,
                                                                            color=ft.Colors.RED_ACCENT),
-                                                                   ft.Text(f"{total_proteins:.2f} / {goal_proteins:.2f}",
-                                                                           size=12, weight=ft.FontWeight.BOLD,
-                                                                           color=ft.Colors.GREY_400),
-                                                                   ft.ProgressBar(width = 100, height = 20,
-                                                                                  color = ft.Colors.RED_400,
-                                                                                  value = total_proteins/goal_proteins),
+                                                                   self.protein_text,
+                                                                   self.protein_bar
                                                                ]),
                                                            ]
                                                        ),
@@ -191,30 +192,34 @@ class NutritionPage(ft.Column):
                                                                       ft.Text("Salts", size=28,
                                                                               weight=ft.FontWeight.BOLD,
                                                                               color=ft.Colors.GREEN_ACCENT),
-                                                                      ft.Text(f"{total_salts:.2f} / {goal_salts:.2f}",
-                                                                              size=12,
-                                                                              weight=ft.FontWeight.BOLD,
-                                                                              color=ft.Colors.GREY_400),
-                                                                      ft.ProgressBar(width = 100, height = 20,
-                                                                                     color = ft.Colors.LIGHT_GREEN_400,
-                                                                                     value = total_salts/goal_salts),
+                                                                      self.salts_text,
+                                                                      self.salts_bar
                                                                   ]),
                                                                   ft.Column([
                                                                       ft.Text("Water", size=28,
                                                                               weight=ft.FontWeight.BOLD,
                                                                               color=ft.Colors.LIGHT_BLUE_ACCENT),
-                                                                      ft.Text(f"{total_water:.0f} / {goal_water:.0f}",
-                                                                              size=12,
-                                                                              weight=ft.FontWeight.BOLD,
-                                                                              color=ft.Colors.GREY_400),
-                                                                      ft.ProgressBar(width = 100, height = 20,
-                                                                                     color=ft.Colors.LIGHT_BLUE_400,
-                                                                                     value=total_water/goal_water),
+                                                                      self.water_text,
+                                                                      self.water_bar
                                                                   ])
                                                               ]
                                                               )
                                                        ])
         )
+        def refresh_stats():
+            total_calories, total_salts, total_proteins, total_water = retrieve_daily_stats()
+            goal_calories, goal_salts, goal_proteins, goal_water = retrieve_user_goals()
+            self.calories_text.value = f"{total_calories:.0f} / {goal_calories:.0f}"
+            self.protein_text.value = f"{total_proteins:.2f} / {goal_proteins:.2f}"
+            self.salts_text.value = f"{total_salts:.2f} / {goal_salts:.2f}"
+            self.water_text.value = f"{total_water:.0f} / {goal_water:.0f}"
+            self.calories_bar.value = total_calories / goal_calories
+            self.protein_bar.value = total_proteins / goal_proteins
+            self.salts_bar.value = total_salts / goal_salts
+            self.water_bar.value = total_water / goal_water
+
+            self.update()
+
         # creates tile that allows users to enter food logs
         self.enter_foodlog = ft.ExpansionTile(bgcolor=ft.Colors.WHITE,title="Enter Food",
                                               collapsed_bgcolor = ft.Colors.GREY_400,
