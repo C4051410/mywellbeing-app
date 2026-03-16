@@ -6,6 +6,7 @@ from python.UI.pages.map import main_map
 from python.UI.pages.nutrition import main_nutrition
 from python.UI.pages.settings import main_settings
 from python.UI.pages.social import main_social
+from UI.pages.account_settings import main_account_settings
 
 
 def main(page: ft.Page):
@@ -29,6 +30,8 @@ def main(page: ft.Page):
                 page.add(main_settings(page))
             if page.route == "/map":
                     page.add(main_map(page))
+            if page.route == "/account-settings":
+                page.add(main_account_settings(page, getattr(page, "user_id", None)))
 
             page.update()
     page.on_route_change = route_change
