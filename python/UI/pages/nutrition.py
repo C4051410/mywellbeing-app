@@ -74,6 +74,8 @@ class NutritionPage(ft.Column):
             self.proteins_input.value = ""
             self.meal_types.value = ""
             refresh_stats()
+            page.overlay.append(ft.SnackBar(
+                content=ft.Text("Food Entered",weight=ft.FontWeight.BOLD),bgcolor=ft.Colors.GREEN, open=True))
             self.update() #updates the page
         #used to handle when Enter Water button is pressed
         def handle_water_submit(e):
@@ -88,6 +90,8 @@ class NutritionPage(ft.Column):
                 conn.commit()
                 cur.close()
             refresh_stats()
+            page.overlay.append(ft.SnackBar(
+                content=ft.Text("Water Entered", weight=ft.FontWeight.BOLD), bgcolor=ft.Colors.GREEN, open=True))
             self.update() #updates the page
 
         # used to retrieve posts from database
