@@ -159,47 +159,36 @@ class NutritionPage(ft.Column):
         self.stats_card = ft.Container(bgcolor=ft.Colors.WHITE,border_radius=10,padding=10,
                                   shadow = ft.BoxShadow(spread_radius=1, blur_radius=10, color=ft.Colors.BLACK12),
                                   content = ft.Column([ft.Text("Today",size=20,
-                                                        weight=ft.FontWeight.BOLD,color=ft.Colors.BLACK),
-                                                       ft.Divider(height=5,color=ft.Colors.TRANSPARENT),
-                                                       ft.Row(
-                                                           alignment=ft.MainAxisAlignment.SPACE_EVENLY,
-                                                           controls = [
-                                                               ft.Column([
-                                                                   ft.Text("Calories",size=28,
-                                                                           weight=ft.FontWeight.BOLD,
-                                                                           color=ft.Colors.DEEP_ORANGE),#displays the title
-                                                                   self.calories_text,
-                                                                   self.calories_bar
-                                                               ]),
+                                        weight=ft.FontWeight.BOLD,color=ft.Colors.BLACK),
+                                       ft.Divider(height=5,color=ft.Colors.TRANSPARENT),
+                                       ft.Row(alignment=ft.MainAxisAlignment.SPACE_EVENLY,
+                                           controls = [
+                                               ft.Column([
+                                                   ft.Text("Calories",size=28,weight=ft.FontWeight.BOLD, color=ft.Colors.DEEP_ORANGE),#displays the title
+                                                   self.calories_text,
+                                                   self.calories_bar
+                                               ]),
 
-                                                               ft.Column([
-                                                                   ft.Text("Proteins",size=28,
-                                                                           weight=ft.FontWeight.BOLD,
-                                                                           color=ft.Colors.RED_ACCENT),
-                                                                   self.protein_text,
-                                                                   self.protein_bar
-                                                               ]),
-                                                           ]
-                                                       ),
-                                                       ft.Row(alignment=ft.MainAxisAlignment.SPACE_EVENLY,
-                                                              controls = [
-                                                                  ft.Column([
-                                                                      ft.Text("Salts", size=28,
-                                                                              weight=ft.FontWeight.BOLD,
-                                                                              color=ft.Colors.GREEN_ACCENT),
-                                                                      self.salts_text,
-                                                                      self.salts_bar
-                                                                  ]),
-                                                                  ft.Column([
-                                                                      ft.Text("Water", size=28,
-                                                                              weight=ft.FontWeight.BOLD,
-                                                                              color=ft.Colors.LIGHT_BLUE_ACCENT),
-                                                                      self.water_text,
-                                                                      self.water_bar
-                                                                  ])
-                                                              ]
-                                                              )
-                                                       ])
+                                               ft.Column([
+                                                   ft.Text("Proteins",size=28,weight=ft.FontWeight.BOLD,color=ft.Colors.RED_ACCENT),
+                                                   self.protein_text,
+                                                   self.protein_bar
+                                               ]),
+                                           ]),
+                                       ft.Row(alignment=ft.MainAxisAlignment.SPACE_EVENLY,
+                                              controls = [
+                                                  ft.Column([
+                                                      ft.Text("Salts", size=28,weight=ft.FontWeight.BOLD,color=ft.Colors.GREEN_ACCENT),
+                                                      self.salts_text,
+                                                      self.salts_bar
+                                                  ]),
+                                                  ft.Column([
+                                                      ft.Text("Water", size=28,weight=ft.FontWeight.BOLD,color=ft.Colors.LIGHT_BLUE_ACCENT),
+                                                      self.water_text,
+                                                      self.water_bar
+                                                  ])
+                                              ])
+                                       ])
         )
         def refresh_stats():
             total_calories, total_salts, total_proteins, total_water = retrieve_daily_stats()
@@ -231,7 +220,9 @@ class NutritionPage(ft.Column):
                                          self.proteins_input,
                                          ft.Text("Enter Meal Type",size=10, weight=ft.FontWeight.BOLD, color=ft.Colors.BLACK),
                                          self.meal_types,
+                                         ft.Divider(height=5, color=ft.Colors.TRANSPARENT),
                                          ft.ElevatedButton("Enter Food",on_click=handle_food_submit), #used to call on function when pressed
+                                         ft.Divider(height=5,color=ft.Colors.TRANSPARENT)
 
                                      ])
         # creates tile that allow users to enter water logs
@@ -242,7 +233,9 @@ class NutritionPage(ft.Column):
                                                controls = [
                                                    ft.Text("Enter Amount"),
                                                    self.water_input,
+                                                   ft.Divider(height=5, color=ft.Colors.TRANSPARENT),
                                                    ft.ElevatedButton("Enter",on_click=handle_water_submit),
+                                                   ft.Divider(height=5, color=ft.Colors.TRANSPARENT),
                                                ])
         #used to display food logs in tile
         self.display_foodlog = ft.ExpansionTile(bgcolor=ft.Colors.WHITE,title="Food Logs",
