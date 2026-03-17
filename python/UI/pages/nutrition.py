@@ -13,18 +13,9 @@ from UI.components.userpfp import Userpfp
 from UI.components.bottom_nav import NavBar
 from UI.components.responsive import Responsive
 from flet import control
+from python.database.connection import connect
 
-load_dotenv()
-db_url = os.getenv('DATABASE_URL')
-
-def get_connection():
-    try:
-        conn = psycopg2.connect(db_url)
-        return conn
-    except Exception as e:
-        print(f"Error: {e}")
-        return None
-conn = get_connection()
+conn = connect()
 #used to generate the nutrition page
 class NutritionPage(ft.Column):
     #constructor method used to create page
