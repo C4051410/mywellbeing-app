@@ -7,7 +7,7 @@ import flet as ft
 from UI.components.userpfp import Userpfp
 from UI.components.bottom_nav import NavBar
 from UI.components.responsive import Responsive
-from database.queries import get_user
+from database.user_queries import get_user
 
 #Sizes of all elements on homepage (as percent of screen)
 welcome_text_size = 0.1

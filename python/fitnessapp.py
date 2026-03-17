@@ -1,5 +1,5 @@
 import flet as ft
-from database.user_queries import get_user, user_calories
+from database.user_queries import get_user
 
 exercises = [
     "Push-ups",
@@ -92,7 +92,7 @@ def FitnessApp(user_id):
         nonlocal total_calories
         #makes sure the two fields aren't blank
         if exercise_search.value != "" and calories_search.value != "":
-            user_calories(user_id, int(calories_search.value))
+            calories = int(calories_search.value)
             #add expansion_tile to display the exercise and number calories
             exercise_list.controls.append(ft.ExpansionTile(width=300,title=exercise_search.value,expanded=True,
                                                            controls=[ft.ListTile(title=ft.Text("Calories"),
