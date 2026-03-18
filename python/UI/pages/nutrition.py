@@ -46,12 +46,11 @@ class NutritionPage(ft.Column):
             if not food or not calories or not salts or not proteins or not mealtype: # makes sure values arent empty
                 print("Nope")
                 return
-            self.foodlog_list.controls.append(ft.ExpansionTile(title=food, subtitle = str(date.today()) ,
+            self.foodlog_list.controls.append(ft.ExpansionTile(title=food, subtitle = str(date.today()) + " " + mealtype ,
                                                                controls=[
                                                                    ft.ListTile(title="Calories",subtitle=calories),
                                                                    ft.ListTile(title="Salts",subtitle=salts),
                                                                    ft.ListTile(title="Proteins",subtitle=proteins),
-                                                                   ft.ListTile(title="Meal Type",subtitle=mealtype),
                                                                ])) # adds all elements entered to foodlog_list
             if conn is not None: #checks that database connection is valid
                 cur = conn.cursor()
