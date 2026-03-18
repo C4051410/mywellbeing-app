@@ -13,18 +13,9 @@ from UI.components.userpfp import Userpfp
 from UI.components.bottom_nav import NavBar
 from UI.components.responsive import Responsive
 from flet import control
+from python.database.connection import connect
 
-load_dotenv()
-db_url = os.getenv('DATABASE_URL')
-
-def get_connection():
-    try:
-        conn = psycopg2.connect(db_url)
-        return conn
-    except Exception as e:
-        print(f"Error: {e}")
-        return None
-conn = get_connection()
+conn = connect()
 #used to generate the nutrition page
 class NutritionPage(ft.Column):
     #constructor method used to create page
@@ -44,6 +35,7 @@ class NutritionPage(ft.Column):
             ft.DropdownOption(key="Snack", text="Snack"),]) # allow users to only select given options
         self.foodlog_list = ft.Column()
         self.waterlog_list = ft.Column()
+        self.userpfp = Userpfp(page)
         #used to handle when Enter Food button is pressed
         def handle_food_submit(e):
             food = self.food_input.value
@@ -54,12 +46,11 @@ class NutritionPage(ft.Column):
             if not food or not calories or not salts or not proteins or not mealtype: # makes sure values arent empty
                 print("Nope")
                 return
-            self.foodlog_list.controls.append(ft.ExpansionTile(title=food, subtitle = str(date.today()) ,
+            self.foodlog_list.controls.append(ft.ExpansionTile(title=food, subtitle = str(date.today()) + " " + mealtype ,
                                                                controls=[
                                                                    ft.ListTile(title="Calories",subtitle=calories),
                                                                    ft.ListTile(title="Salts",subtitle=salts),
                                                                    ft.ListTile(title="Proteins",subtitle=proteins),
-                                                                   ft.ListTile(title="Meal Type",subtitle=mealtype),
                                                                ])) # adds all elements entered to foodlog_list
             if conn is not None: #checks that database connection is valid
                 cur = conn.cursor()
@@ -72,6 +63,9 @@ class NutritionPage(ft.Column):
             self.salts_input.value = ""
             self.proteins_input.value = ""
             self.meal_types.value = ""
+            refresh_stats()
+            page.overlay.append(ft.SnackBar(
+                content=ft.Text("Food Entered",weight=ft.FontWeight.BOLD),bgcolor=ft.Colors.GREEN, open=True))
             self.update() #updates the page
         #used to handle when Enter Water button is pressed
         def handle_water_submit(e):
@@ -79,12 +73,15 @@ class NutritionPage(ft.Column):
             if not water: #checks water field isn't empty
                 print("Nope")
                 return
-            self.foodlog_list.controls.append(ft.ListTile(title=str(date.today()),subtitle=water)) #adds date and amount to tile
+            self.waterlog_list.controls.append(ft.ListTile(title=str(date.today()),subtitle=water)) #adds date and amount to tile
             if conn is not None: #checks database connection is valid
                 cur = conn.cursor()
                 cur.execute("INSERT INTO waterlog (water,date,user_id) VALUES (%s,%s,%s)",(water,str(date.today()),user_id,))
                 conn.commit()
                 cur.close()
+            refresh_stats()
+            page.overlay.append(ft.SnackBar(
+                content=ft.Text("Water Entered", weight=ft.FontWeight.BOLD), bgcolor=ft.Colors.GREEN, open=True))
             self.update() #updates the page
 
         # used to retrieve posts from database
@@ -109,9 +106,7 @@ class NutritionPage(ft.Column):
                 page.update()
 
         retrieve_posts() #used to retrieve posts before creating display
-        self.header = ft.Container(content=ft.Text("Nutrition",size=32,weight=ft.FontWeight.BOLD),
-                              padding=ft.padding.only(top=10,left=10) #creates header for page
-        )
+        self.header = ft.Container(content=ft.Row(controls=[ft.Text("Nutrition",size=32,weight=ft.FontWeight.BOLD),self.userpfp],alignment=ft.MainAxisAlignment.SPACE_BETWEEN))
         #used to retrieve daily stats
         def retrieve_daily_stats():
             total_c = 0
@@ -151,74 +146,68 @@ class NutritionPage(ft.Column):
 
         total_calories, total_salts, total_proteins, total_water = retrieve_daily_stats() #retrieves users totals from today
         goal_calories, goal_salts, goal_proteins, goal_water = retrieve_user_goals() # retrieves users goals
+        self.calories_text = ft.Text(f"{total_calories:.0f} / {goal_calories:.0f}",size=12,weight=ft.FontWeight.BOLD,color=ft.Colors.GREY_400)
+        self.calories_bar = ft.ProgressBar(width=100, height=20,color=ft.Colors.ORANGE_400,value=total_calories / goal_calories)
+        self.protein_text = ft.Text(f"{total_proteins:.2f} / {goal_proteins:.2f}",size=12, weight=ft.FontWeight.BOLD,color=ft.Colors.GREY_400)
+        self.protein_bar = ft.ProgressBar(width=100, height=20,color=ft.Colors.RED_400,value=total_proteins / goal_proteins)
+        self.salts_text = ft.Text(f"{total_salts:.2f} / {goal_salts:.2f}",size=12,weight=ft.FontWeight.BOLD,color=ft.Colors.GREY_400)
+        self.salts_bar = ft.ProgressBar(width=100, height=20,color=ft.Colors.LIGHT_GREEN_400,value=total_salts / goal_salts)
+        self.water_text = ft.Text(f"{total_water:.0f} / {goal_water:.0f}", size=12, weight=ft.FontWeight.BOLD, color=ft.Colors.GREY_400)
+        self.water_bar = ft.ProgressBar(width=100, height=20, color=ft.Colors.LIGHT_BLUE_400,value=total_water / goal_water)
         #creates container used to display the users totals from the day compared to their goals
-        self.stats_card = ft.Container(bgcolor=ft.Colors.WHITE,border_radius=5,padding=5,
+        self.stats_card = ft.Container(bgcolor=ft.Colors.WHITE,border_radius=10,padding=10,
                                   shadow = ft.BoxShadow(spread_radius=1, blur_radius=10, color=ft.Colors.BLACK12),
-                                  content = ft.Column([ft.Text("Today",size=12,
-                                                        weight=ft.FontWeight.BOLD,color=ft.Colors.GREY),
-                                                       ft.Divider(height=10,color=ft.Colors.TRANSPARENT),
-                                                       ft.Row(
-                                                           alignment=ft.MainAxisAlignment.SPACE_EVENLY,
-                                                           controls = [
-                                                               ft.Column([
-                                                                   ft.Text("Calories",size=28,
-                                                                           weight=ft.FontWeight.BOLD,
-                                                                           color=ft.Colors.DEEP_ORANGE),#displays the title
-                                                                   ft.Text(f"{total_calories:.0f} / {goal_calories:.0f}",
-                                                                           size=12,
-                                                                           weight=ft.FontWeight.BOLD,
-                                                                           color=ft.Colors.GREY_400),#displays the numbers
-                                                                   ft.ProgressBar(width = 100, height = 20,
-                                                                                  color = ft.Colors.ORANGE_400,
-                                                                                  value = total_calories/goal_calories),#visual representation
-                                                               ]),
+                                  content = ft.Column([ft.Text("Today",size=20,
+                                        weight=ft.FontWeight.BOLD,color=ft.Colors.BLACK),
+                                       ft.Divider(height=5,color=ft.Colors.TRANSPARENT),
+                                       ft.Row(alignment=ft.MainAxisAlignment.SPACE_EVENLY,
+                                           controls = [
+                                               ft.Column([
+                                                   ft.Text("Calories",size=28,weight=ft.FontWeight.BOLD, color=ft.Colors.DEEP_ORANGE),#displays the title
+                                                   self.calories_text,
+                                                   self.calories_bar
+                                               ]),
 
-                                                               ft.Column([
-                                                                   ft.Text("Proteins",size=28,
-                                                                           weight=ft.FontWeight.BOLD,
-                                                                           color=ft.Colors.RED_ACCENT),
-                                                                   ft.Text(f"{total_proteins:.2f} / {goal_proteins:.2f}",
-                                                                           size=12, weight=ft.FontWeight.BOLD,
-                                                                           color=ft.Colors.GREY_400),
-                                                                   ft.ProgressBar(width = 100, height = 20,
-                                                                                  color = ft.Colors.RED_400,
-                                                                                  value = total_proteins/goal_proteins),
-                                                               ]),
-                                                           ]
-                                                       ),
-                                                       ft.Row(alignment=ft.MainAxisAlignment.SPACE_EVENLY,
-                                                              controls = [
-                                                                  ft.Column([
-                                                                      ft.Text("Salts", size=28,
-                                                                              weight=ft.FontWeight.BOLD,
-                                                                              color=ft.Colors.GREEN_ACCENT),
-                                                                      ft.Text(f"{total_salts:.2f} / {goal_salts:.2f}",
-                                                                              size=12,
-                                                                              weight=ft.FontWeight.BOLD,
-                                                                              color=ft.Colors.GREY_400),
-                                                                      ft.ProgressBar(width = 100, height = 20,
-                                                                                     color = ft.Colors.LIGHT_GREEN_400,
-                                                                                     value = total_salts/goal_salts),
-                                                                  ]),
-                                                                  ft.Column([
-                                                                      ft.Text("Water", size=28,
-                                                                              weight=ft.FontWeight.BOLD,
-                                                                              color=ft.Colors.LIGHT_BLUE_ACCENT),
-                                                                      ft.Text(f"{total_water:.0f} / {goal_water:.0f}",
-                                                                              size=12,
-                                                                              weight=ft.FontWeight.BOLD,
-                                                                              color=ft.Colors.GREY_400),
-                                                                      ft.ProgressBar(width = 100, height = 20,
-                                                                                     color=ft.Colors.LIGHT_BLUE_400,
-                                                                                     value=total_water/goal_water),
-                                                                  ])
-                                                              ]
-                                                              )
-                                                       ])
+                                               ft.Column([
+                                                   ft.Text("Proteins",size=28,weight=ft.FontWeight.BOLD,color=ft.Colors.RED_ACCENT),
+                                                   self.protein_text,
+                                                   self.protein_bar
+                                               ]),
+                                           ]),
+                                       ft.Row(alignment=ft.MainAxisAlignment.SPACE_EVENLY,
+                                              controls = [
+                                                  ft.Column([
+                                                      ft.Text("Salts", size=28,weight=ft.FontWeight.BOLD,color=ft.Colors.GREEN_ACCENT),
+                                                      self.salts_text,
+                                                      self.salts_bar
+                                                  ]),
+                                                  ft.Column([
+                                                      ft.Text("Water", size=28,weight=ft.FontWeight.BOLD,color=ft.Colors.LIGHT_BLUE_ACCENT),
+                                                      self.water_text,
+                                                      self.water_bar
+                                                  ])
+                                              ])
+                                       ])
         )
+        def refresh_stats():
+            total_calories, total_salts, total_proteins, total_water = retrieve_daily_stats()
+            goal_calories, goal_salts, goal_proteins, goal_water = retrieve_user_goals()
+            self.calories_text.value = f"{total_calories:.0f} / {goal_calories:.0f}"
+            self.protein_text.value = f"{total_proteins:.2f} / {goal_proteins:.2f}"
+            self.salts_text.value = f"{total_salts:.2f} / {goal_salts:.2f}"
+            self.water_text.value = f"{total_water:.0f} / {goal_water:.0f}"
+            self.calories_bar.value = total_calories / goal_calories
+            self.protein_bar.value = total_proteins / goal_proteins
+            self.salts_bar.value = total_salts / goal_salts
+            self.water_bar.value = total_water / goal_water
+
+            self.update()
+
         # creates tile that allows users to enter food logs
         self.enter_foodlog = ft.ExpansionTile(bgcolor=ft.Colors.WHITE,title="Enter Food",
                                               collapsed_bgcolor = ft.Colors.GREY_400,
+                                              shape=ft.RoundedRectangleBorder(radius=15),
+                                              collapsed_shape=ft.RoundedRectangleBorder(radius=15),
                                      controls = [
                                          ft.Text("Enter Food",size=10, weight=ft.FontWeight.BOLD, color=ft.Colors.BLACK),
                                          self.food_input,
@@ -230,24 +219,34 @@ class NutritionPage(ft.Column):
                                          self.proteins_input,
                                          ft.Text("Enter Meal Type",size=10, weight=ft.FontWeight.BOLD, color=ft.Colors.BLACK),
                                          self.meal_types,
+                                         ft.Divider(height=5, color=ft.Colors.TRANSPARENT),
                                          ft.ElevatedButton("Enter Food",on_click=handle_food_submit), #used to call on function when pressed
+                                         ft.Divider(height=5,color=ft.Colors.TRANSPARENT)
 
                                      ])
         # creates tile that allow users to enter water logs
         self.enter_waterlog = ft.ExpansionTile(bgcolor=ft.Colors.WHITE,title="Enter Water",
                                                collapsed_bgcolor=ft.Colors.GREY_400,
+                                               shape=ft.RoundedRectangleBorder(radius=15),
+                                               collapsed_shape=ft.RoundedRectangleBorder(radius=15),
                                                controls = [
                                                    ft.Text("Enter Amount"),
                                                    self.water_input,
+                                                   ft.Divider(height=5, color=ft.Colors.TRANSPARENT),
                                                    ft.ElevatedButton("Enter",on_click=handle_water_submit),
+                                                   ft.Divider(height=5, color=ft.Colors.TRANSPARENT),
                                                ])
         #used to display food logs in tile
         self.display_foodlog = ft.ExpansionTile(bgcolor=ft.Colors.WHITE,title="Food Logs",
                                                 collapsed_bgcolor=ft.Colors.GREY_400,
+                                                shape=ft.RoundedRectangleBorder(radius=15),
+                                                collapsed_shape=ft.RoundedRectangleBorder(radius=15),
                                             controls = [self.foodlog_list])
         #used to display water logs in tile
         self.display_waterlog = ft.ExpansionTile(bgcolor=ft.Colors.WHITE,title="Water Logs",
                                                  collapsed_bgcolor=ft.Colors.GREY_400,
+                                                 shape=ft.RoundedRectangleBorder(radius=15),
+                                                 collapsed_shape=ft.RoundedRectangleBorder(radius=15),
                                              controls = [self.waterlog_list])
         scrollable = ft.Column([ #specifies the content which should be allowed to be scrolled
             self.header,
