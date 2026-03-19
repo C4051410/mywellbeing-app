@@ -49,8 +49,10 @@ sys.modules['UI.components.userpfp'] = MagicMock()
 sys.modules['UI.components.bottom_nav'] = MagicMock()
 sys.modules['UI.components.responsive'] = MagicMock()
 
-import python.UI.pages.nutrition as nutrition_module
-from python.UI.pages.nutrition import main_nutrition
+import UI.pages.nutrition as nutrition_module
+from UI.pages.nutrition import main_nutrition
+
+# 1. THIS IS THE KEY: Override the global 'conn' in the file with your mock
 nutrition_module.conn = mock_conn
 #used to create a mock flet page
 class MockPage:
@@ -62,7 +64,8 @@ class MockPage:
 @pytest.fixture
 def nutrition_page():
     page = MockPage()
-    return main_nutrition(page,user_id=1)
+    result = main_nutrition(page,user_id=1)
+    return result
 
 
 def test_nutrition_initial_load(nutrition_page):

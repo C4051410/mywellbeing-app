@@ -31,7 +31,7 @@ sys.modules['python.UI.pages.social'].main_social = lambda *args, **kwargs: "soc
 sys.modules['UI.pages.account_settings'] = types.ModuleType('account_settings')
 sys.modules['UI.pages.account_settings'].main_account_settings = lambda *args, **kwargs: "account"
 
-from python.main import main
+from main import main
 
 class MockPage:
     def __init__(self):
