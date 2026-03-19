@@ -32,7 +32,8 @@ class AdminApp(ft.Column):
                     content=ft.Text("DEL", size=10),
                     on_click=lambda e,u_id=user_id: self.delete_user(u_id))
                 moderator_button=ft.ElevatedButton(
-                    content=ft.Text("MOD", size=10))
+                    content=ft.Text("MOD", size=10),
+                    on_click = lambda e, u_id=user_id: self.make_moderator(u_id))
                 user_row = (ft.Row(controls = [
                     ft.Text(str(data[0]),expand=2,size=10),
                     ft.Text(str(data[1]), expand=2,size=10),
@@ -54,6 +55,15 @@ class AdminApp(ft.Column):
         if conn is not None:
             cur = conn.cursor()
             cur.execute("DELETE FROM users WHERE id = %s",(user_id,))
+            conn.commit()
+            cur.close()
+            self.user_list.controls.clear()
+            self.retrieve_users()
+
+    def make_moderator(self,user_id: int):
+        if conn is not None:
+            cur = conn.cursor()
+            cur.execute("UPDATE users SET role = %s WHERE id = %s", ("moderator",user_id,))
             conn.commit()
             cur.close()
             self.user_list.controls.clear()
