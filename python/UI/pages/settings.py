@@ -4,9 +4,9 @@ File for settings page - accessible by clicking 'settings' on nav bar
 
 import flet as ft
 
-from components.userpfp import Userpfp
-from components.bottom_nav import NavBar
-from components.responsive import Responsive
+from UI.components.userpfp import Userpfp
+from UI.components.bottom_nav import NavBar
+from UI.components.responsive import Responsive
 
 #Sizes of all elements on homepage (as a percent of screen)
 page_title_size = 0.1
@@ -37,8 +37,15 @@ class SettingsPage(ft.Column):
             bgcolor=ft.Colors.BLUE_300
         )
 
+        # Updated account container to include the button for the new page
         self.account_container = ft.Container(
-            border=ft.Border.all(width=2, color=ft.Colors.GREY_400)
+            border=ft.Border.all(width=2, color=ft.Colors.GREY_400),
+            alignment=ft.alignment.center,
+            content=ft.ElevatedButton(
+                "Manage Account & Goals",
+                on_click=lambda _: self.this_page.go("/account-settings")
+            ),
+            padding=10
         )
 
         self.targets_conatiner = ft.Container(

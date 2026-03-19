@@ -4,9 +4,9 @@ File for social page - accessible by clicking 'social' on nav bar
 
 import flet as ft
 
-from components.userpfp import Userpfp
-from components.bottom_nav import NavBar
-from components.responsive import Responsive
+from UI.components.userpfp import Userpfp
+from UI.components.bottom_nav import NavBar
+from UI.components.responsive import Responsive
 
 #Sizes of all elements on homepage (as a percent of screen)
 page_title_size = 0.1
@@ -19,58 +19,87 @@ class SocialPage(ft.Column):
     def __init__(self, page: ft.Page):
         super().__init__()
 
+        self.this_page = page
         self.r = Responsive(page)
+
+            # placeholder data
+        self.user_name = "User"
+        self.user_rank = 4
+        self.user_points = 320
+
+        self.leaderboard_data = [
+           {"name": "User A", "points": 520},
+           {"name": "User B", "points": 470},
+           {"name": "User C", "points": 410},
+           {"name": "User", "points": 320},
+                ]
+        self.activity_data = [
+            {"name": "User 1", "activity": "completed a workout", "time": "Today"},
+            {"name": "User 2", "activity": "logged nutrition", "time": "Today"},
+            {"name": "User 3", "activity": "recorded a run", "time": "Yesterday"},
+                ]
 
         self.page_title = ft.Text(
             value="Social",
             size=self.r.w(page_title_size),
+            weight=ft.FontWeight.BOLD,
             color=ft.Colors.BLACK
-        )
+            )
 
         self.page_desc = ft.Text(
-            value="Connect with friends",
+            value="Connect with other users",
             size=self.r.w(page_desc_size),
             color=ft.Colors.GREY
-        )
-
-        self.rank_container = ft.Container(
-            bgcolor = ft.Colors.ORANGE_200
-        )
-
-        self.leaderboard_title = ft.Text(
-            value = "Leaderboard",
-            size = self.r.w(page_desc_size),
-            color=ft.Colors.BLACK
-        )
-
-        self.first_container = ft.Container(
-            border = ft.Border.all(width=2, color=ft.Colors.GREY_400)
-        )
-
-        self.second_container = ft.Container(
-            border = ft.Border.all(width=2, color=ft.Colors.GREY_400)
-        )
-
-        self.third_container = ft.Container(
-            border=ft.Border.all(width=2, color=ft.Colors.GREY_400)
-        )
-
-        self.activity_title = ft.Text(
-            value = "Friends Activity",
-            size = self.r.w(page_desc_size),
-            color=ft.Colors.BLACK
-        )
-
-        self.activity_container = ft.Container(
-            border = ft.Border.all(width=2, color=ft.Colors.GREY_400)
-        )
-
+                )
         self.userpfp = Userpfp(page)
 
-        self.nav_bar = NavBar(page)
+        self.rank_container = ft.Container(bgcolor=ft.Colors.ORANGE_200, border_radius=10, padding=20,
+                                                   content=ft.Row(alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                                                                  controls=[
+                                                                      ft.Text(f"Rank #{self.user_rank}", size=20,
+                                                                              weight=ft.FontWeight.BOLD),
+                                                                      ft.Text(f"{self.user_points} pts", size=18)]))
+        self.leaderboard_title = ft.Text(
+            value="Leaderboard",
+            size=self.r.w(page_desc_size),
+            weight=ft.FontWeight.BOLD,
+            color=ft.Colors.BLACK
+            )
 
-        self.controls =[
-            #Header row
+        self.first_container = ft.Container(
+             border=ft.Border.all(width=2, color=ft.Colors.GREY_400),
+             border_radius=8,
+             padding=10
+             )
+
+        self.second_container = ft.Container(
+             border=ft.Border.all(width=2, color=ft.Colors.GREY_400),
+             border_radius=8,
+             padding=10
+             )
+
+        self.third_container = ft.Container(
+             border=ft.Border.all(width=2, color=ft.Colors.GREY_400),
+             border_radius=8,
+             padding=10
+             )
+
+        self.activity_title = ft.Text(
+             value="Recent Activity",
+             size=self.r.w(page_desc_size),
+             weight=ft.FontWeight.BOLD,
+             color=ft.Colors.BLACK
+            )
+
+        self.activity_container = ft.Container(
+             border=ft.Border.all(width=2, color=ft.Colors.GREY_400),
+             border_radius=8,
+             padding=10
+
+            )
+
+        self.nav_bar = NavBar(page)
+        self.controls = [
             ft.Row(
                 alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
                 controls=[
@@ -94,19 +123,54 @@ class SocialPage(ft.Column):
             self.nav_bar
         ]
 
-        self.expand=True
+        self.expand = True
         self.alignment = ft.MainAxisAlignment.SPACE_BETWEEN
         self.set_widget_size()
-
-        self.this_page = page
+        self.load_leaderboard()
+        self.load_activity()
         page.on_resize = self.resize
+
+        # Load leaderboard data into the 3 containers
+    def load_leaderboard(self):
+            sorted_users = sorted(
+                self.leaderboard_data,
+                key=lambda x: x["points"],
+                reverse=True
+            )
+
+            self.first_container.content = ft.Text(
+                f"1. {sorted_users[0]['name']} - {sorted_users[0]['points']} pts"
+            )
+
+            self.second_container.content = ft.Text(
+                f"2. {sorted_users[1]['name']} - {sorted_users[1]['points']} pts"
+            )
+
+            self.third_container.content = ft.Text(
+                f"3. {sorted_users[2]['name']} - {sorted_users[2]['points']} pts"
+            )
+
+        # Load activity feed into activity container
+    def load_activity(self):
+            activity_controls = []
+
+            for item in self.activity_data:
+                activity_controls.append(
+                    ft.ListTile(
+                        title=ft.Text(item["name"]),
+                        subtitle=ft.Text(item["activity"]),
+                        trailing=ft.Text(item["time"])
+                    )
+                )
+
+            self.activity_container.content = ft.Column(activity_controls)
 
     #Set size of all text on screen
     def set_text_size(self):
         self.page_title.size = self.r.w(page_title_size)
         self.page_desc.size = self.r.w(page_desc_size)
-        self.activity_title = self.r.w(page_desc_size)
-        self.leaderboard_title = self.r.w(page_desc_size)
+        self.activity_title.size = self.r.w(page_desc_size)
+        self.leaderboard_title.size = self.r.w(page_desc_size)
 
 
     #Set width and height of all widgets on the screen

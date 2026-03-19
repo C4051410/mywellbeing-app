@@ -4,7 +4,7 @@ File for re-usable profile picture component which will be used throughout the a
 
 import flet as ft
 
-from components.responsive import Responsive
+from .responsive import Responsive
 
 #Source of the user profile picture
 #TODO- obtain user pfp from DB

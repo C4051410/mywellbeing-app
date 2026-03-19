@@ -25,9 +25,15 @@ cal_goal = 2500
 class WorkoutApp(ft.Column):
     def __init__(self, page: ft.Page, user_id: int):
         super().__init__()
-
         self.r = Responsive(page)
         self.this_page = page
+        # retrieves logged in users data
+        user_data = get_user(user_id)
+
+        # order of unpacked values: id, username, email, role
+        user = user_data[1]
+        calories = user_data[9] or 0
+        steps = user_data[11] or 0
 
         # Make the entire homepage scrollable!
         self.scroll = ft.ScrollMode.HIDDEN
@@ -236,6 +242,7 @@ class WorkoutApp(ft.Column):
         self.nav_bar.resize()
         self.update()
 
-def main_homepage(page: ft.Page):
-    homepage = WorkoutApp(page, 1)
+def main_homepage(page: ft.Page,user_id):
+    homepage = WorkoutApp(page,user_id)
+
     return homepage

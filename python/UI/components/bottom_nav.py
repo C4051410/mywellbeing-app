@@ -1,5 +1,5 @@
 import flet as ft
-from components.responsive import Responsive
+from .responsive import Responsive
 
 # Size of all components on the page (as percent of screen size)
 navbar_height = 0.12
