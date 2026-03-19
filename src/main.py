@@ -6,6 +6,7 @@ from activities.map import main_map
 from nutrition.nutrition import main_nutrition
 from settings.settings import main_settings
 from settings.account_settings import main_account_settings
+from social.social import main_social
 
 
 def main(page: ft.Page):

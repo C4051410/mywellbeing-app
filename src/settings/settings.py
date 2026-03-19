@@ -40,7 +40,7 @@ class SettingsPage(ft.Column):
         # Updated account container to include the button for the new page
         self.account_container = ft.Container(
             border=ft.Border.all(width=2, color=ft.Colors.GREY_400),
-            alignment=ft.alignment.center,
+            alignment=ft.Alignment.CENTER,
             content=ft.ElevatedButton(
                 "Manage Account & Goals",
                 on_click=lambda _: self.this_page.go("/account-settings")
