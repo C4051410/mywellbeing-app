@@ -12,6 +12,8 @@ class AdminApp(ft.Column):
         self.r = Responsive(page)
         self.Title = ft.Text("ADMIN PAGE")
         self.user_list = ft.Column(controls=[ft.Text("Users")])
+        self.delete_button = ft.ElevatedButton(content=ft.Text("DEL", size=10))
+        self.moderator_button = ft.ElevatedButton(content=ft.Text("MOD", size=10))
         self.retrieve_users()
         self.controls = [
             self.Title,
@@ -24,8 +26,20 @@ class AdminApp(ft.Column):
             cur.execute("SELECT username,email,role FROM users WHERE role != %s",("admin",))
             rows = cur.fetchall()
             for data in rows:
-                self.user_list.controls.append(ft.Row(controls = [ft.Text(str(data[0])),ft.Text(str(data[1])),ft.Text(str(data[2]))]))
-                print()
+                user_row = (ft.Row(controls = [
+                ft.Text(str(data[0])),
+                ft.Text(str(data[1])),
+                ft.Text(str(data[2])),
+                ft.Column(controls=[self.delete_button,
+                self.moderator_button])]))
+
+                row_outline = (ft.Container(
+                    content = user_row,
+                    border = ft.border.all(1, ft.Colors.OUTLINE_VARIANT),
+                    padding = 10,
+                    border_radius = 5
+                ))
+                self.user_list.controls.append(row_outline)
             cur.close()
 
 def main_admin(page: ft.Page):
