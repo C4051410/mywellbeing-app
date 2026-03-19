@@ -128,7 +128,7 @@ def main_map(page: ft.Page):
 
     # --- BUTTON HANDLERS ---
     def go_back(e):
-        page.go("/activities")
+        page.go("/home")
 
     def recenter_map(e):
         map_ctrl.center = current_gps_loc
@@ -221,16 +221,21 @@ def main_map(page: ft.Page):
         tracking_row.visible = False
         start_btn.visible = True
 
-        # FIX: Send the user instantly back to their activities dashboard!
         page.go("/activities")
 
     # --- UI LAYOUT ---
+
     top_back_button = ft.Container(
-        content=ft.FloatingActionButton(icon=ft.Icons.ARROW_BACK, bgcolor=ft.Colors.WHITE, on_click=go_back, mini=True),
-        alignment=ft.Alignment.TOP_LEFT, padding=ft.padding.only(top=40, left=20)
+        content=ft.FloatingActionButton(
+            content=ft.Icon(ft.Icons.ARROW_BACK, color=ft.Colors.BLACK),
+            bgcolor=ft.Colors.WHITE,
+            on_click=go_back,
+            mini=True
+        ),
+        top=40,
+        left=20
     )
 
-    # Recenter Button (Bulletproof Icon Color Fix)
     recenter_button = ft.Container(
         content=ft.FloatingActionButton(
             content=ft.Icon(ft.Icons.MY_LOCATION, color=ft.Colors.BLUE_600),
@@ -238,8 +243,8 @@ def main_map(page: ft.Page):
             on_click=recenter_map,
             mini=True
         ),
-        alignment=ft.Alignment.TOP_RIGHT,
-        padding=ft.padding.only(top=40, right=20)
+        top=40,
+        right=20
     )
 
     start_btn = ft.FloatingActionButton(content=ft.Text("START", weight=ft.FontWeight.BOLD, color=ft.Colors.WHITE),
@@ -256,13 +261,11 @@ def main_map(page: ft.Page):
     paused_row = ft.Row(controls=[resume_btn, finish_btn], alignment=ft.MainAxisAlignment.CENTER, visible=False,
                         spacing=15)
 
-    # Sleek Dashboard
     map_dashboard = ft.Container(
         content=ft.Column([
             ft.Row([activity_dropdown], alignment=ft.MainAxisAlignment.CENTER),
             ft.Column([distance_label, distance_value], horizontal_alignment=ft.CrossAxisAlignment.CENTER, spacing=0),
 
-            # Stopwatch and Speed side-by-side
             ft.Row([
                 ft.Column([ft.Icon(ft.Icons.TIMER, color=ft.Colors.GREY_500), timer_value],
                           horizontal_alignment=ft.CrossAxisAlignment.CENTER, spacing=0),
@@ -279,6 +282,13 @@ def main_map(page: ft.Page):
         shadow=ft.BoxShadow(spread_radius=1, blur_radius=15, color=ft.Colors.BLACK26)
     )
 
-    return ft.Stack(controls=[map_ctrl, top_back_button, recenter_button,
-                              ft.Container(content=map_dashboard, alignment=ft.Alignment.BOTTOM_CENTER, bottom=0,
-                                           left=0, right=0)], expand=True)
+    # FIX: Pinned the map container to all 4 corners so it never collapses!
+    return ft.Stack(
+        controls=[
+            ft.Container(content=map_ctrl, top=0, bottom=0, left=0, right=0),
+            top_back_button,
+            recenter_button,
+            ft.Container(content=map_dashboard, bottom=0, left=0, right=0)
+        ],
+        expand=True
+    )
