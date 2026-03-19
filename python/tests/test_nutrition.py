@@ -49,7 +49,9 @@ sys.modules['UI.components.userpfp'] = MagicMock()
 sys.modules['UI.components.bottom_nav'] = MagicMock()
 sys.modules['UI.components.responsive'] = MagicMock()
 
+import python.UI.pages.nutrition as nutrition_module
 from python.UI.pages.nutrition import main_nutrition
+nutrition_module.conn = mock_conn
 #used to create a mock flet page
 class MockPage:
     def __init__(self):
