@@ -1,7 +1,7 @@
 import flet as ft
-from UI.components.bottom_nav import NavBar
-from UI.components.responsive import Responsive
-from database.settings_queries import update_password, update_goals
+from components.bottom_nav import NavBar
+from components.responsive import Responsive
+from settings.settings_queries import update_password, update_goals
 
 
 class AccountSettingsPage(ft.Column):

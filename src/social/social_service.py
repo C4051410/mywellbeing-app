@@ -4,7 +4,7 @@ This file contains the business logic for the social module.
 It sits between the UI and the database queries.
 """
 
-from database.social_queries import (
+from social.social_queries import (
     get_user_by_username,
     get_user_by_id,
     add_friend,

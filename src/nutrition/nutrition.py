@@ -2,18 +2,14 @@
 File for nutrition page - accessible by clicking 'nutrition' on nav bar
 '''
 
-import os
 from datetime import date, timedelta
 
 import flet as ft
-import psycopg2
-from dotenv import load_dotenv
 
-from UI.components.userpfp import Userpfp
-from UI.components.bottom_nav import NavBar
-from UI.components.responsive import Responsive
-from flet import control
-from python.database.connection import connect
+from components.userpfp import Userpfp
+from components.bottom_nav import NavBar
+from components.responsive import Responsive
+from src.database.connection import connect
 
 conn = connect()
 #used to generate the nutrition page

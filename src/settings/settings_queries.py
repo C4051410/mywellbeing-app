@@ -21,3 +21,7 @@ def update_password(user_id, new_password):
     finally:
         cur.close()
         conn.close()
+
+
+def update_goals(user_id, goals):
+    return

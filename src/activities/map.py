@@ -189,7 +189,7 @@ def main_map(page: ft.Page):
         final_seconds = int(total_time_seconds)
         selected_activity = activity_dropdown.value
 
-        file_path = "activities_history.csv"
+        file_path = "../database/activities_history.csv"
         file_exists = os.path.isfile(file_path)
 
         with open(file_path, mode='a', newline='') as file:

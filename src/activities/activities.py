@@ -3,9 +3,8 @@ import csv
 from datetime import datetime, timedelta
 import flet as ft
 
-from UI.components.userpfp import Userpfp
-from UI.components.bottom_nav import NavBar
-from UI.components.responsive import Responsive
+from components.bottom_nav import NavBar
+from components.responsive import Responsive
 
 
 class ActivitiesPage(ft.Column):
@@ -147,7 +146,7 @@ class ActivitiesPage(ft.Column):
         total_runs = 0
         total_seconds = 0
         activities_list = []
-        file_path = "activities_history.csv"
+        file_path = "../database/activities_history.csv"
 
         if not os.path.isfile(file_path):
             return "0.0", "0s", "0", activities_list

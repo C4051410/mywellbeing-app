@@ -20,15 +20,15 @@ jobs:
       #check the repository is valid
       - name: "Checks Repository"
         uses: actions/checkout@v4
-      #makes sure python is set up properly
+      #makes sure src is set up properly
       - name: "Set Up Python"
-        uses: actions/setup-python@v5
+        uses: actions/setup-src@v5
         with:
-          #specifies python version
+          #specifies src version
           python-version: "3.11"
       #install dependencies code needs to run
       - name: "Install Dependencies"
-        #uses python to make sure pip is up to date and install requirements.txt
+        #uses src to make sure pip is up to date and install requirements.txt
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt

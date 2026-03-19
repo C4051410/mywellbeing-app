@@ -13,6 +13,7 @@ def register(username, password, email):
     if not re.match(email_regex, email):
         return "Please enter a valid email"
 
+    # TODO: accept other special characters
     # password validation
     password_regex = r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$"
     if not re.search(password_regex, password):

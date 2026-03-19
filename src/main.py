@@ -1,12 +1,11 @@
 import flet as ft
 from auth.authpage import authPage
-from python.UI.pages.activities import main_activities
-from python.UI.pages.homepage import main_homepage
-from python.UI.pages.map import main_map
-from python.UI.pages.nutrition import main_nutrition
-from python.UI.pages.settings import main_settings
-from python.UI.pages.social import main_social
-from UI.pages.account_settings import main_account_settings
+from activities.activities import main_activities
+from home.homepage import main_homepage
+from activities.map import main_map
+from nutrition.nutrition import main_nutrition
+from settings.settings import main_settings
+from settings.account_settings import main_account_settings
 
 
 def main(page: ft.Page):
@@ -48,7 +47,7 @@ def main(page: ft.Page):
     page.update()
 
     def on_login_success(user_id):
-        from UI.pages.homepage import WorkoutApp
+        from home.homepage import WorkoutApp
         page.user_id = user_id
 
         page.clean()
@@ -56,7 +55,7 @@ def main(page: ft.Page):
         page.update()
 
     def on_register_success(user_id):
-        from UI.pages.setup import setupGoalsPage
+        from auth.setup import setupGoalsPage
         page.user_id = user_id
 
         page.clean()
@@ -64,7 +63,6 @@ def main(page: ft.Page):
         page.update()
 
     def on_setup_complete(user_id, age, gender, height, current_weight, goal_weight):
-        from UI.pages.homepage import WorkoutApp
         page.user_id = user_id
 
         page.clean()
@@ -75,4 +73,4 @@ def main(page: ft.Page):
 
 current_page = "/homepage"
 
-ft.run(main,assets_dir="UI/assets")
+ft.run(main, assets_dir="assets")
