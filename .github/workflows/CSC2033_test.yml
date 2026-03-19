@@ -22,7 +22,7 @@ jobs:
         uses: actions/checkout@v4
       #makes sure src is set up properly
       - name: "Set Up Python"
-        uses: actions/setup-src@v5
+        uses: actions/setup-python@v5
         with:
           #specifies src version
           python-version: "3.11"
@@ -35,7 +35,7 @@ jobs:
 
       - name: "Run Tests with pytest"
         env:
-          PYTHONPATH: ${{ github.workspace }}/python
+          PYTHONPATH: ${{ github.workspace }}/src
         run: |
-          pytest python/tests
+          pytest src/tests
           
