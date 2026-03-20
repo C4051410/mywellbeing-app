@@ -19,7 +19,7 @@ def get_user_by_username(username):
 
 def get_user_by_id(user_id):
     """
-    Retrieve a single user by id.
+    Retrieve a user by id.
     """
     conn = connect()
     cur = conn.cursor()
@@ -38,13 +38,18 @@ def add_friend(user_id, friend_id):
     """
     Create a mutual friendship.
     """
+    # Prevent user to add themselves
+    if str(user_id) == str(friend_id):
+        return "You cannot add yourself"
     conn = connect()
     cur = conn.cursor()
     try:
+        # Insert the two direction of the friendship
         cur.execute(
             """
             INSERT INTO friends (user_id, friend_id)
             VALUES (%s, %s)
+            ON CONFLICT (user_id, friend_id) DO NOTHING
             """,
             (user_id, friend_id)
         )
@@ -52,6 +57,7 @@ def add_friend(user_id, friend_id):
             """
             INSERT INTO friends (user_id, friend_id)
             VALUES (%s, %s)
+            ON CONFLICT (user_id, friend_id) DO NOTHING
             """,
             (friend_id, user_id)
         )
@@ -72,13 +78,14 @@ def remove_friend(user_id, friend_id):
     conn = connect()
     cur = conn.cursor()
     try:
+        # Delete both directions of the friendship in one query
         cur.execute(
-            "DELETE FROM friends WHERE user_id = %s AND friend_id = %s",
-            (user_id, friend_id)
-        )
-        cur.execute(
-            "DELETE FROM friends WHERE user_id = %s AND friend_id = %s",
-            (friend_id, user_id)
+            """
+            DELETE FROM friends
+            WHERE (user_id = %s AND friend_id = %s)
+               OR (user_id = %s AND friend_id = %s)
+            """,
+            (user_id, friend_id, friend_id, user_id)
         )
         conn.commit()
         return True
