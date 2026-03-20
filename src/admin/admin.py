@@ -11,19 +11,27 @@ class AdminApp(ft.Column):
         self.admin_page = page
         self.r = Responsive(page)
         self.Title = ft.Text("ADMIN PAGE")
+        self.search_bar = ft.TextField(label="SEARCH FOR USERS",
+                                       on_change=self.on_search_change)
         self.user_list = ft.Column()
         self.retrieve_users()
         self.expand = True
         self.scroll = ft.ScrollMode.HIDDEN
         self.controls = [
             self.Title,
+            self.search_bar,
             self.user_list
         ]
 
-    def retrieve_users(self):
+    def retrieve_users(self,search_query=""):
         if conn is not None:
             cur = conn.cursor()
-            cur.execute("SELECT username,email,role,id FROM users WHERE role != %s",("admin",))
+            query = "SELECT username, email, role, id FROM users WHERE role != %s"
+            params = ["admin"]
+            if search_query:
+                query += " AND (username ILIKE %s)"
+                params.extend([f"%{search_query}%",])
+            cur.execute(query, tuple(params))
             rows = cur.fetchall()
             self.user_list.controls.clear()
             for data in rows:
@@ -68,6 +76,11 @@ class AdminApp(ft.Column):
             cur.close()
             self.user_list.controls.clear()
             self.retrieve_users()
+
+    def on_search_change(self,e):
+        self.retrieve_users(search_query=self.search_bar.value)
+
+
 
 def main_admin(page: ft.Page):
     admin_page = AdminApp(page)
