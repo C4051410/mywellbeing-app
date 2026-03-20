@@ -1,6 +1,9 @@
 import flet as ft
+
+from admin.admin import main_admin
 from auth.authpage import authPage
 from activities.activities import main_activities
+from database.connection import connect
 from home.homepage import main_homepage
 from activities.map import main_map
 from nutrition.nutrition import main_nutrition
@@ -52,16 +55,30 @@ def main(page: ft.Page):
         page.user_id = user_id
 
         page.clean()
-        page.add(WorkoutApp(page, user_id))
+        if (check_admin(user_id)):
+            page.add(main_admin(page))
+        else:
+            page.add(WorkoutApp(page, user_id))
         page.update()
 
     def on_register_success(user_id):
         from auth.setup import setupGoalsPage
         page.user_id = user_id
-
         page.clean()
         page.add(setupGoalsPage(user_id, on_setup_complete))
         page.update()
+
+    def check_admin(user_id):
+        conn = connect()
+        if conn is not None:
+            cur = conn.cursor()
+            cur.execute("SELECT role FROM users WHERE id = %s",(user_id,))
+            user = cur.fetchone()
+            if user is None or user[0] != "admin":
+                return False
+            else:
+                return True
+
 
     def on_setup_complete(user_id, age, gender, height, current_weight, goal_weight):
         page.user_id = user_id
