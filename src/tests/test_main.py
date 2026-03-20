@@ -25,6 +25,10 @@ sys.modules['activities.map'] = create_mock_module("main_map", "map")
 sys.modules['settings.settings'] = create_mock_module("main_settings", "settings")
 sys.modules['settings.account_settings'] = create_mock_module("main_account_settings", "account")
 
+mock_conn = MagicMock()
+sys.modules["psycopg2"] = MagicMock()
+import database.connection
+database.connection.connect = MagicMock(return_value=mock_conn)
 # 3. Import main now that mocks are set
 from main import main
 
