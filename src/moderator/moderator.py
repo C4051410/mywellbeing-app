@@ -25,8 +25,10 @@ class ModeratorApp(ft.Column):
             cur.execute("SELECT f.title, u.username,f.id FROM foodlog f JOIN users u on f.user_id = u.id")
             rows = cur.fetchall()
             for data in rows:
+                posts_id = data[2]
                 delete_button = ft.ElevatedButton(
-                    content=ft.Text("DEL", size=10,expand=True))
+                    content=ft.Text("DEL", size=10),
+                    on_click=lambda e, p_id=posts_id: self.delete_posts(p_id))
                 posts_row = (ft.Row(controls=[ft.Text(str(data[0]),size=10,expand=True),
                                               ft.Text(str(data[1]),size=10,expand=True),
                                               ft.Column(controls=[delete_button],
@@ -38,6 +40,15 @@ class ModeratorApp(ft.Column):
                                             border_radius=5,))
                 self.user_posts.controls.append(row_outline)
             cur.close()
+
+    def delete_posts(self,post_id: int):
+        if conn is not None:
+            cur = conn.cursor()
+            cur.execute("DELETE FROM foodlog WHERE id = %s",(post_id,))
+            conn.commit()
+            cur.close()
+            self.user_posts.controls.clear()
+            self.retrieve_posts()
 
 
 
