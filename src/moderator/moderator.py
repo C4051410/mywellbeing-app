@@ -11,18 +11,27 @@ class ModeratorApp(ft.Column):
         self.r = Responsive(page)
         self.Title = ft.Text("MODERATOR PAGE")
         self.user_posts = ft.Column()
+        self.search_bar = ft.TextField(label="SEARCH FOR USERS",
+                                       on_change = self.on_search_change)
         self.expand = True
         self.scroll = ft.ScrollMode.HIDDEN
         self.retrieve_posts()
         self.controls = [
             self.Title,
+            self.search_bar,
             self.user_posts,
         ]
 
-    def retrieve_posts(self):
+    def retrieve_posts(self,search_query=""):
         if conn is not None:
             cur = conn.cursor()
-            cur.execute("SELECT f.title, u.username,f.id FROM foodlog f JOIN users u on f.user_id = u.id")
+            query = "SELECT f.title,u.username,f.id FROM foodlog f JOIN users u on f.user_id = u.id"
+            params = []
+            if search_query:
+                query += " AND (username ILIKE %s)"
+                params.extend([f"%{search_query}%"])
+            cur.execute(query, tuple(params))
+            self.user_posts.controls.clear()
             rows = cur.fetchall()
             for data in rows:
                 posts_id = data[2]
@@ -49,6 +58,9 @@ class ModeratorApp(ft.Column):
             cur.close()
             self.user_posts.controls.clear()
             self.retrieve_posts()
+
+    def on_search_change(self,e):
+        self.retrieve_posts(search_query=self.search_bar.value)
 
 
 
