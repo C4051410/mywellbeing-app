@@ -6,6 +6,7 @@ from activities.activities import main_activities
 from database.connection import connect
 from home.homepage import main_homepage
 from activities.map import main_map
+from moderator.moderator import main_moderator
 from nutrition.nutrition import main_nutrition
 from settings.settings import main_settings
 from settings.account_settings import main_account_settings
@@ -57,6 +58,8 @@ def main(page: ft.Page):
         page.clean()
         if (check_admin(user_id)):
             page.add(main_admin(page))
+        elif (check_mod(user_id)):
+            page.add(main_moderator(page))
         else:
             page.add(WorkoutApp(page, user_id))
         page.update()
@@ -79,6 +82,16 @@ def main(page: ft.Page):
             else:
                 return True
 
+    def check_mod(user_id):
+        conn = connect()
+        if conn is not None:
+            cur = conn.cursor()
+            cur.execute("SELECT role FROM users WHERE id = %s",(user_id,))
+            user = cur.fetchone()
+            if user is None or user[0] != "moderator":
+                return False
+            else:
+                return True
 
     def on_setup_complete(user_id, age, gender, height, current_weight, goal_weight):
         page.user_id = user_id
