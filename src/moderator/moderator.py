@@ -25,8 +25,13 @@ class ModeratorApp(ft.Column):
             cur.execute("SELECT f.title, u.username,f.id FROM foodlog f JOIN users u on f.user_id = u.id")
             rows = cur.fetchall()
             for data in rows:
-                posts_row = (ft.Row(controls=[ft.Text(str(data[0]),size=10),
-                                              ft.Text(str(data[1]),size=10)]))
+                delete_button = ft.ElevatedButton(
+                    content=ft.Text("DEL", size=10,expand=True))
+                posts_row = (ft.Row(controls=[ft.Text(str(data[0]),size=10,expand=True),
+                                              ft.Text(str(data[1]),size=10,expand=True),
+                                              ft.Column(controls=[delete_button],
+                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                tight=True,expand=True)]))
                 row_outline = (ft.Container(content=posts_row,
                                             border= ft.border.all(1,ft.Colors.OUTLINE_VARIANT),
                                             padding=10,
