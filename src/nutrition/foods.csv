@@ -1,11 +1,201 @@
 name,calories,salts,proteins
 Apple,52,0.0,0.3
 Banana,89,0.0,1.1
-Chicken Breast (grilled),165,0.2,31
-Beef Burger,295,1.2,17
-Spaghetti Bolognese,220,0.8,12
-Greek Yogurt,59,0.1,10
-Oatmeal,68,0.0,6
-Salmon Fillet,208,0.1,22
-Cheese Sandwich,310,1.4,14
-Vegetable Stir Fry,150,0.6,5
+Orange,47,0.0,0.9
+Strawberry,32,0.0,0.7
+Blueberry,57,0.0,0.7
+Grape,69,0.0,0.7
+Watermelon,30,0.0,0.6
+Mango,60,0.0,0.8
+Pineapple,50,0.0,0.5
+Peach,39,0.0,0.9
+Pear,57,0.0,0.4
+Kiwi,61,0.0,1.1
+Cherry,50,0.0,1.0
+Lemon,29,0.0,1.1
+Avocado,160,0.0,2.0
+Broccoli,34,0.1,2.8
+Carrot,41,0.1,0.9
+Spinach,23,0.2,2.9
+Kale,49,0.1,4.3
+Potato,77,0.0,2.0
+Sweet Potato,86,0.1,1.6
+Tomato,18,0.0,0.9
+Cucumber,15,0.0,0.7
+Bell Pepper,31,0.0,1.0
+Onion,40,0.0,1.1
+Garlic,149,0.0,6.4
+Mushroom,22,0.0,3.1
+Asparagus,20,0.0,2.2
+Zucchini,17,0.0,1.2
+Eggplant,25,0.0,1.0
+Chicken Breast,165,0.2,31.0
+Chicken Thigh,209,0.2,26.0
+Turkey Breast,135,0.1,30.0
+Ground Beef,176,0.2,20.0
+Beef Steak,244,0.1,27.0
+Pork Chop,231,0.1,24.0
+Bacon,541,1.7,37.0
+Salmon,208,0.1,22.0
+Tuna,116,0.8,26.0
+Cod,82,0.2,18.0
+Shrimp,99,0.3,24.0
+Egg,155,0.3,13.0
+Tofu,83,0.0,8.0
+Tempeh,192,0.0,19.0
+Lentils,116,0.0,9.0
+Chickpeas,164,0.0,8.9
+Black Beans,132,0.0,8.9
+Kidney Beans,127,0.0,8.7
+Quinoa,120,0.0,4.4
+Brown Rice,112,0.0,2.6
+White Rice,130,0.0,2.7
+Oatmeal,68,0.0,2.4
+Whole Wheat Bread,247,1.0,13.0
+White Bread,265,1.2,9.0
+Pasta,131,0.0,5.0
+Greek Yogurt,59,0.1,10.0
+Whole Milk,61,0.1,3.2
+Skim Milk,34,0.1,3.4
+Cheddar Cheese,403,1.6,25.0
+Mozzarella,280,1.4,22.0
+Cottage Cheese,98,0.8,11.0
+Butter,717,0.0,0.9
+Almonds,579,0.0,21.0
+Walnuts,654,0.0,15.0
+Peanuts,567,0.0,26.0
+Cashews,553,0.0,18.0
+Chia Seeds,486,0.0,17.0
+Flax Seeds,534,0.1,18.0
+Pumpkin Seeds,559,0.0,30.0
+Sunflower Seeds,584,0.0,21.0
+Hummus,166,1.0,8.0
+Peanut Butter,588,1.1,25.0
+Olive Oil,884,0.0,0.0
+Coconut Oil,862,0.0,0.0
+Soy Sauce,53,13.0,8.0
+Ketchup,101,2.3,1.0
+Mayonnaise,680,1.6,1.0
+Honey,304,0.0,0.3
+Dark Chocolate,598,0.0,8.0
+Milk Chocolate,535,0.2,8.0
+Potato Chips,536,1.5,7.0
+Pretzels,380,3.2,10.0
+Popcorn,387,0.0,13.0
+Vanilla Ice Cream,207,0.1,3.5
+Cheese Pizza,266,1.5,11.0
+Beef Burger,295,1.2,17.0
+French Fries,312,0.5,3.4
+Hot Dog,290,2.1,10.0
+Sushi Roll,150,1.2,6.0
+Croissant,406,1.2,8.0
+Chocolate Cookie,488,0.8,5.0
+Doughnut,452,1.2,5.0
+Blueberry Muffin,377,0.9,4.0
+Fruit Yogurt,95,0.1,3.5
+Green Peas,81,0.0,5.0
+Sweet Corn,86,0.0,3.2
+Green Beans,31,0.0,1.8
+Cabbage,25,0.0,1.3
+Cauliflower,25,0.1,1.9
+Brussels Sprouts,43,0.1,3.4
+Apricot,48,0.0,1.4
+Raspberry,52,0.0,1.2
+Blackberry,43,0.0,1.4
+Cranberry,46,0.0,0.4
+Pomegranate,83,0.0,1.7
+Cantaloupe,34,0.1,0.8
+Honeydew,36,0.1,0.5
+Papaya,43,0.0,0.5
+Fig,74,0.0,0.8
+Guava,68,0.0,2.6
+Plum,46,0.0,0.7
+Nectarine,44,0.0,1.1
+Lime,30,0.0,0.7
+Grapefruit,42,0.0,0.8
+Radish,16,0.1,0.7
+Celery,16,0.2,0.7
+Artichoke,47,0.2,3.3
+Leek,61,0.0,1.5
+Okra,33,0.0,1.9
+Butternut Squash,45,0.0,1.0
+Pumpkin,26,0.0,1.0
+Swiss Chard,19,0.5,1.8
+Watercress,11,0.1,2.3
+Arugula,25,0.1,2.6
+Bok Choy,13,0.2,1.5
+Duck Breast,140,0.1,19.0
+Lamb Chop,294,0.2,25.0
+Ground Turkey,148,0.2,24.0
+Venison,158,0.1,30.0
+Ham,145,1.2,21.0
+Salami,336,1.9,22.0
+Pepperoni,494,1.6,23.0
+Mackerel,205,0.2,19.0
+Sardines,208,0.8,25.0
+Trout,148,0.1,21.0
+Halibut,110,0.2,23.0
+Lobster,89,0.5,19.0
+Crab,97,0.3,19.0
+Scallops,111,0.7,21.0
+Mussels,172,0.7,24.0
+Clams,148,1.2,25.0
+Lentil Soup,56,0.4,3.0
+Miso Soup,25,2.1,1.5
+Split Peas,118,0.0,8.0
+Edamame,122,0.0,11.0
+Couscous,112,0.0,3.8
+Barley,123,0.0,2.3
+Buckwheat,92,0.0,3.4
+Bulgur,83,0.0,3.0
+Wild Rice,101,0.0,4.0
+Bagel,250,1.1,10.0
+Pita Bread,275,1.3,9.0
+Rye Bread,259,1.5,8.0
+Tortilla Corn,218,0.1,5.0
+Tortilla Flour,297,1.2,8.0
+Naan,310,1.1,9.0
+Soy Milk,54,0.1,3.3
+Almond Milk,13,0.4,0.4
+Oat Milk,48,0.1,1.0
+Ricotta Cheese,174,0.3,11.0
+Parmesan Cheese,431,1.8,38.0
+Swiss Cheese,380,0.5,27.0
+Feta Cheese,264,2.8,14.0
+Brie,334,1.6,21.0
+Sour Cream,193,0.1,2.1
+Cream Cheese,342,0.8,6.0
+Pistachios,562,0.0,20.0
+Pecans,691,0.0,9.0
+Hazelnuts,628,0.0,15.0
+Macadamias,718,0.0,8.0
+Pine Nuts,673,0.0,14.0
+Sesame Seeds,573,0.0,18.0
+Maple Syrup,260,0.0,0.0
+Agave Nectar,310,0.0,0.0
+Jam,278,0.1,0.4
+Pesto,430,1.5,8.0
+Salsa,36,1.1,1.5
+Mustard,66,2.8,4.0
+Balsamic Vinegar,88,0.1,0.5
+Granola,471,0.7,10.0
+Rice Cakes,387,1.0,8.0
+Beef Jerky,410,5.3,33.0
+Tortilla Chips,513,1.3,7.0
+Graham Crackers,424,1.1,7.0
+Fruit Leather,350,0.1,1.0
+Apple Pie,237,0.7,2.0
+Cheesecake,321,0.8,5.5
+Brownie,466,0.8,4.8
+Pancakes,227,1.1,6.0
+Waffles,291,1.3,8.0
+Lasagna,135,0.8,8.0
+Macaroni Cheese,164,0.9,7.0
+Chicken Nuggets,296,1.4,15.0
+Fish Sticks,250,1.2,12.0
+Spring Roll,250,1.3,4.0
+Falafel,333,0.7,13.0
+Tacos,226,1.0,10.0
+Burrito,206,1.1,8.0
+Quesadilla,290,1.6,12.0
+Gnocchi,130,1.2,3.5

@@ -3,7 +3,7 @@ File for nutrition page - accessible by clicking 'nutrition' on nav bar
 '''
 import csv
 import os
-
+import difflib
 from datetime import date, timedelta
 
 import flet as ft
@@ -275,6 +275,7 @@ class NutritionPage(ft.Column):
 
     def find_food_values(self,e):
         search_query = self.food_input.value.strip().lower()
+        self.main_page.overlay.clear()
         if search_query in self.food_db:
             data = self.food_db[search_query]
             self.calories_input.value = str(data['calories'])
@@ -290,8 +291,23 @@ class NutritionPage(ft.Column):
             ))
             self.main_page.update()
             self.update()
+        elif len(search_query)>2:
+            food_names = list(self.food_db.keys())
+            matches = difflib.get_close_matches(search_query,food_names,n=1,cutoff=0.6)
+            if matches:
+                suggestion = matches[0]
+                self.main_page.overlay.append(ft.SnackBar(
+                    content=ft.Text(f"Did you mean {suggestion.title()}?"),action="Yes!",
+                    on_action = lambda _: self.apply_suggestion(suggestion),bgcolor=ft.Colors.BLUE_400,
+                    open=True))
+            self.main_page.update()
+
         else:
             pass
+    def apply_suggestion(self,suggestion):
+        self.food_input.value = suggestion.title()
+        self.find_food_values(None)
+        self.update()
 
 #function called to call upon the page
 def main_nutrition(page: ft.Page,user_id):
