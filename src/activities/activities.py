@@ -3,6 +3,12 @@ import csv
 from datetime import datetime, timedelta
 import flet as ft
 
+from activities.strava_api import (
+    connect_strava,
+    get_saved_activities,
+    format_strava_activities,
+    save_tokens_for_user,
+)
 from components.bottom_nav import NavBar
 from components.responsive import Responsive
 
@@ -20,6 +26,17 @@ class ActivitiesPage(ft.Column):
         header = ft.Container(
             content=ft.Text("Activities", size=32, weight=ft.FontWeight.BOLD),
             padding=ft.padding.only(top=20, left=10)
+        )
+
+        strava_button = ft.OutlinedButton(
+            "Connect Strava",
+            icon=ft.Icons.LINK,
+            on_click=self.connect_strava_clicked,
+            style=ft.ButtonStyle(
+                bgcolor=ft.Colors.BLUE,
+                color=ft.Colors.WHITE,
+                side=ft.BorderSide(color=ft.Colors.BLUE),
+            )
         )
 
         # 2. Weekly Stats Dashboard (Totals Only)
@@ -115,7 +132,12 @@ class ActivitiesPage(ft.Column):
                         padding=5,
                         shadow=ft.BoxShadow(spread_radius=1, blur_radius=5, color=ft.Colors.BLACK12),
                         content=ft.ListTile(
-                            leading=ft.Container(content=ft.Icon(act_icon, color=ft.Colors.WHITE), bgcolor=ft.Colors.BLUE_400, padding=10, border_radius=25),
+                            leading=ft.Container(
+                                content=ft.Icon(act_icon, color=ft.Colors.WHITE),
+                                bgcolor=ft.Colors.BLUE_400,
+                                padding=10,
+                                border_radius=25
+                            ),
                             title=ft.Text(f"{act['type']} • {act['date']}", weight=ft.FontWeight.BOLD, size=14),
                             subtitle=ft.Text(f"{act['dist']} km in {act['time']}", color=ft.Colors.GREY_600, size=12),
                         )
@@ -129,6 +151,7 @@ class ActivitiesPage(ft.Column):
         content_column = ft.Column(
             controls=[
                 header,
+                ft.Container(content=strava_button, padding=ft.padding.symmetric(horizontal=15)),
                 ft.Container(content=stats_card, padding=ft.padding.symmetric(horizontal=15)),
                 ft.Container(content=feed_column, padding=ft.padding.symmetric(horizontal=15), expand=True)
             ],
@@ -148,40 +171,50 @@ class ActivitiesPage(ft.Column):
         activities_list = []
         file_path = "../database/activities_history.csv"
 
-        if not os.path.isfile(file_path):
-            return "0.0", "0s", "0", activities_list
-
         now = datetime.now()
         start_of_week = (now - timedelta(days=now.weekday())).replace(hour=0, minute=0, second=0, microsecond=0)
 
+        # load local app-recorded activities
+        if os.path.isfile(file_path):
+            try:
+                with open(file_path, mode="r") as file:
+                    reader = csv.reader(file)
+                    next(reader)
+                    for row in reader:
+                        if len(row) >= 3:
+                            date_str = row[0]
+                            dist = float(row[1])
+                            secs = int(row[2])
+                            act_type = row[3] if len(row) >= 4 else "Run"
+
+                            run_date = datetime.strptime(date_str, "%Y-%m-%d %H:%M")
+
+                            if run_date >= start_of_week:
+                                total_distance += dist
+                                total_seconds += secs
+                                total_runs += 1
+
+                            activities_list.append({
+                                "date": run_date.strftime("%b %d, %H:%M"),
+                                "dist": f"{dist:.2f}",
+                                "time": self.format_time(secs),
+                                "type": act_type
+                            })
+            except Exception as e:
+                print(f"Error reading stats: {e}")
+
+        # load Strava activities for this logged-in user
         try:
-            with open(file_path, mode="r") as file:
-                reader = csv.reader(file)
-                next(reader)  # Skip the header row
-                for row in reader:
-                    if len(row) >= 3:
-                        date_str = row[0]
-                        dist = float(row[1])
-                        secs = int(row[2])
-                        act_type = row[3] if len(row) >= 4 else "Run"
+            current_user_id = getattr(self.main_page, "user_id", None)
+            print("LOAD ACTIVITY PAGE USER ID:", current_user_id)
 
-                        run_date = datetime.strptime(date_str, "%Y-%m-%d %H:%M")
-
-                        # 1. Add to THIS WEEK'S totals
-                        if run_date >= start_of_week:
-                            total_distance += dist
-                            total_seconds += secs
-                            total_runs += 1
-
-                        # 2. Append to the visual history feed
-                        activities_list.append({
-                            "date": run_date.strftime("%b %d, %H:%M"),
-                            "dist": f"{dist:.2f}",
-                            "time": self.format_time(secs),
-                            "type": act_type
-                        })
+            if current_user_id is not None:
+                strava_activities = get_saved_activities(current_user_id)
+                if strava_activities:
+                    formatted_strava = format_strava_activities(strava_activities)
+                    activities_list.extend(formatted_strava)
         except Exception as e:
-            print(f"Error reading stats: {e}")
+            print(f"Error loading Strava activities: {e}")
 
         tot_time_str = self.format_time(total_seconds)
 
@@ -203,6 +236,36 @@ class ActivitiesPage(ft.Column):
     # --- EVENT HANDLERS ---
     def start_activity(self, e):
         self.main_page.go("/map")
+
+    def connect_strava_clicked(self, e):
+        try:
+            current_user_id = getattr(self.main_page, "user_id", None)
+            print("CONNECT BUTTON CLICKED")
+            print("PAGE USER ID:", current_user_id)
+
+            if current_user_id is None:
+                raise ValueError("No logged-in user found on page.user_id")
+
+            tokens = connect_strava()
+            print("TOKENS RETURNED:", tokens)
+
+            save_tokens_for_user(current_user_id, tokens)
+            print("TOKENS SAVED TO DB")
+
+            self.main_page.snack_bar = ft.SnackBar(
+                content=ft.Text("Strava connected successfully"),
+                open=True
+            )
+            self.main_page.update()
+
+        except Exception as ex:
+            print("STRAVA CONNECTION ERROR:", ex)
+            self.main_page.snack_bar = ft.SnackBar(
+                content=ft.Text(f"Strava connection failed: {ex}"),
+                open=True
+            )
+            self.main_page.update()
+
 
 def main_activities(page: ft.Page):
     return ActivitiesPage(page)

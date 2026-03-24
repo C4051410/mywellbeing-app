@@ -1,7 +1,7 @@
 import os
 import urllib.parse
 import webbrowser
-from datetime import time
+import time
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 import requests
