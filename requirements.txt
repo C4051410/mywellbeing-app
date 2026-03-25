@@ -4,4 +4,5 @@ flet-geolocator
 psycopg2
 dotenv
 bcrypt
+requests
 pytest
