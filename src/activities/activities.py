@@ -3,12 +3,7 @@ import csv
 from datetime import datetime, timedelta
 import flet as ft
 
-from activities.strava_api import (
-    connect_strava,
-    get_saved_activities,
-    format_strava_activities,
-    save_tokens_for_user,
-)
+from activities.strava_api import connect_strava, get_saved_activities, format_strava_activities, save_tokens_for_user, load_tokens_for_user
 from components.bottom_nav import NavBar
 from components.responsive import Responsive
 
@@ -28,8 +23,13 @@ class ActivitiesPage(ft.Column):
             padding=ft.padding.only(top=20, left=10)
         )
 
+        if load_tokens_for_user(self.main_page.user_id):
+            button_text = "Strava Connected"
+        else:
+            button_text = "Connect Strava"
+
         strava_button = ft.OutlinedButton(
-            "Connect Strava",
+            button_text,
             icon=ft.Icons.LINK,
             on_click=self.connect_strava_clicked,
             style=ft.ButtonStyle(
@@ -52,7 +52,7 @@ class ActivitiesPage(ft.Column):
                     alignment=ft.MainAxisAlignment.SPACE_EVENLY,
                     controls=[
                         ft.Column([
-                            ft.Text(tot_dist, size=28, weight=ft.FontWeight.BOLD, color=ft.Colors.DEEP_ORANGE),
+                            ft.Text(tot_dist, size=28, weight=ft.FontWeight.BOLD, color=ft.Colors.BLUE),
                             ft.Text("KM", size=12, weight=ft.FontWeight.BOLD, color=ft.Colors.GREY_400)
                         ], horizontal_alignment=ft.CrossAxisAlignment.CENTER, spacing=0),
 
@@ -82,7 +82,7 @@ class ActivitiesPage(ft.Column):
                 ft.Icon(ft.Icons.FIBER_MANUAL_RECORD, color=ft.Colors.WHITE),
                 ft.Text("RECORD NEW ACTIVITY", size=14, weight=ft.FontWeight.BOLD, color=ft.Colors.WHITE)
             ], alignment=ft.MainAxisAlignment.CENTER),
-            bgcolor=ft.Colors.DEEP_ORANGE,
+            bgcolor=ft.Colors.BLUE,
             height=50,
             style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=25)),
             on_click=self.start_activity
@@ -92,26 +92,22 @@ class ActivitiesPage(ft.Column):
             # Empty State
             feed_column.controls.append(
                 ft.Container(
-                    expand=True,
-                    alignment=ft.Alignment.CENTER,
                     content=ft.Column(
                         horizontal_alignment=ft.CrossAxisAlignment.CENTER,
                         alignment=ft.MainAxisAlignment.CENTER,
                         controls=[
+                            ft.Container(height=25),
                             ft.Icon(ft.Icons.MAP_OUTLINED, size=80, color=ft.Colors.GREY_300),
                             ft.Text("Ready to crush it?", size=24, weight=ft.FontWeight.BOLD),
                             ft.Text("Track your runs, walks, and rides.", color=ft.Colors.GREY_500, size=14),
                             ft.Container(height=20),
-                            record_btn
                         ]
-                    )
+                    ),
+                    expand=True, alignment=ft.Alignment(0, 0)
                 )
             )
         else:
             # Populated History Feed
-            feed_column.controls.append(
-                ft.Container(content=record_btn, padding=ft.padding.only(bottom=10))
-            )
             feed_column.controls.append(
                 ft.Text("ALL RECENT ACTIVITIES", size=12, weight=ft.FontWeight.BOLD, color=ft.Colors.GREY_500)
             )
@@ -151,8 +147,9 @@ class ActivitiesPage(ft.Column):
         content_column = ft.Column(
             controls=[
                 header,
-                ft.Container(content=strava_button, padding=ft.padding.symmetric(horizontal=15)),
-                ft.Container(content=stats_card, padding=ft.padding.symmetric(horizontal=15)),
+                ft.Container(content=strava_button, padding=ft.padding.symmetric(horizontal=15), margin=ft.margin.only(bottom=16)),
+                ft.Container(content=stats_card, padding=ft.padding.symmetric(horizontal=15), margin=ft.margin.only(bottom=16)),
+                ft.Container(content=record_btn, padding=ft.padding.symmetric(horizontal=15), margin=ft.margin.only(bottom=16)),
                 ft.Container(content=feed_column, padding=ft.padding.symmetric(horizontal=15), expand=True)
             ],
             expand=True
@@ -198,7 +195,8 @@ class ActivitiesPage(ft.Column):
                                 "date": run_date.strftime("%b %d, %H:%M"),
                                 "dist": f"{dist:.2f}",
                                 "time": self.format_time(secs),
-                                "type": act_type
+                                "type": act_type,
+                                "source": "app"
                             })
             except Exception as e:
                 print(f"Error reading stats: {e}")
@@ -212,6 +210,8 @@ class ActivitiesPage(ft.Column):
                 strava_activities = get_saved_activities(current_user_id)
                 if strava_activities:
                     formatted_strava = format_strava_activities(strava_activities)
+                    for act in formatted_strava:
+                        act["source"] = "Strava"
                     activities_list.extend(formatted_strava)
         except Exception as e:
             print(f"Error loading Strava activities: {e}")
