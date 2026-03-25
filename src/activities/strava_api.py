@@ -1,3 +1,6 @@
+'''
+IMPORTANT - This Strava integration is currently limited to one user/athlete
+'''
 import os
 import urllib.parse
 import webbrowser

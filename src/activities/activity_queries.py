@@ -1,4 +1,26 @@
 from database.connection import connect
+from database.connection import connect
+
+def save_activity(user_id, activity_type, distance_km, duration_seconds, start_date, source="manual"):
+    conn = connect()
+    cur = conn.cursor()
+    cur.execute("INSERT INTO workouts (user_id, source, activity_type, distance_km, start_date, "
+                "duration_seconds, title, duration) VALUES (%s, %s, %s, %s, %s, %s, %s, (%s || ' seconds')::interval)",
+                (user_id, source, activity_type, distance_km, start_date, duration_seconds, activity_type, duration_seconds))
+    conn.commit()
+    cur.close()
+    conn.close()
+
+def get_activities(user_id):
+    conn = connect()
+    cur = conn.cursor()
+    cur.execute("SELECT activity_type, distance_km, start_date, duration_seconds, source FROM workouts "
+                "WHERE user_id = %s ORDER BY start_date DESC NULLS LAST, id DESC", (user_id,))
+    rows = cur.fetchall()
+    cur.close()
+    conn.close()
+    return rows
+
 
 def save_tokens_for_user(user_id, token_data):
     conn = connect()

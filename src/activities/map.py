@@ -1,5 +1,3 @@
-import os
-import csv
 import math
 import time
 import asyncio
@@ -7,6 +5,7 @@ from datetime import datetime
 import flet as ft
 import flet_map as ftm
 from flet_geolocator import Geolocator
+from activities.activity_queries import save_activity
 
 
 def calculate_distance(lat1, lon1, lat2, lon2):
@@ -29,7 +28,7 @@ def main_map(page: ft.Page):
     current_gps_loc = ftm.MapLatitudeLongitude(54.9783, -1.6178)  # Default fallback
 
     # --- UI Elements ---
-    distance_value = ft.Text(value="0.00", size=48, weight=ft.FontWeight.BOLD, color=ft.Colors.DEEP_ORANGE)
+    distance_value = ft.Text(value="0.00", size=48, weight=ft.FontWeight.BOLD, color=ft.Colors.BLUE)
     distance_label = ft.Text(value="KILOMETERS", size=12, color=ft.Colors.GREY_700, weight=ft.FontWeight.BOLD)
 
     # Live Stopwatch & Speed Elements
@@ -53,7 +52,7 @@ def main_map(page: ft.Page):
 
     marker_layer = ftm.MarkerLayer(markers=[])
     polyline_layer = ftm.PolylineLayer(
-        polylines=[ftm.PolylineMarker(coordinates=[], color=ft.Colors.DEEP_ORANGE, stroke_width=4)]
+        polylines=[ftm.PolylineMarker(coordinates=[], color=ft.Colors.BLUE, stroke_width=4)]
     )
 
     map_ctrl = ftm.Map(
@@ -189,23 +188,21 @@ def main_map(page: ft.Page):
         final_seconds = int(total_time_seconds)
         selected_activity = activity_dropdown.value
 
-        file_path = "../database/activities_history.csv"
-        file_exists = os.path.isfile(file_path)
-
-        with open(file_path, mode='a', newline='') as file:
-            writer = csv.writer(file)
-            if not file_exists:
-                writer.writerow(["Date", "Distance_KM", "Duration_Seconds", "Activity_Type"])
-
-            current_date = datetime.now().strftime("%Y-%m-%d %H:%M")
-            writer.writerow([current_date, round(final_distance, 2), final_seconds, selected_activity])
+        save_activity(
+            user_id=page.user_id,
+            activity_type=selected_activity,
+            distance_km=round(final_distance, 2),
+            duration_seconds=final_seconds,
+            start_date=datetime.now()
+        )
 
         page.overlay.append(ft.SnackBar(
             content=ft.Text(f"{selected_activity} Saved! Dist: {final_distance:.2f}km | Time: {final_seconds}s",
                             weight=ft.FontWeight.BOLD),
-            bgcolor=ft.Colors.GREEN, open=True))
+            bgcolor=ft.Colors.GREEN,
+            open=True
+        ))
 
-        # Reset everything for next time
         path_points.clear()
         total_dist = 0.0
         total_time_seconds = 0.0
@@ -248,16 +245,16 @@ def main_map(page: ft.Page):
     )
 
     start_btn = ft.FloatingActionButton(content=ft.Text("START", weight=ft.FontWeight.BOLD, color=ft.Colors.WHITE),
-                                        icon=ft.Icons.FIBER_MANUAL_RECORD, bgcolor=ft.Colors.DEEP_ORANGE, width=150,
+                                        icon=ft.Icons.FIBER_MANUAL_RECORD, bgcolor=ft.Colors.BLUE, width=150,
                                         on_click=start_tracking)
     pause_btn = ft.FloatingActionButton(content=ft.Text("PAUSE", weight=ft.FontWeight.BOLD, color=ft.Colors.WHITE),
                                         icon=ft.Icons.PAUSE, bgcolor=ft.Colors.GREY_800, width=150,
                                         on_click=pause_tracking)
     tracking_row = ft.Row(controls=[pause_btn], alignment=ft.MainAxisAlignment.CENTER, visible=False)
     resume_btn = ft.FloatingActionButton(content=ft.Text("RESUME", weight=ft.FontWeight.BOLD, color=ft.Colors.WHITE),
-                                         bgcolor=ft.Colors.DEEP_ORANGE, width=140, on_click=resume_tracking)
+                                         bgcolor=ft.Colors.GREEN, width=140, on_click=resume_tracking)
     finish_btn = ft.FloatingActionButton(content=ft.Text("FINISH", weight=ft.FontWeight.BOLD, color=ft.Colors.WHITE),
-                                         bgcolor=ft.Colors.GREEN, width=140, on_click=finish_and_save)
+                                         bgcolor=ft.Colors.RED, width=140, on_click=finish_and_save)
     paused_row = ft.Row(controls=[resume_btn, finish_btn], alignment=ft.MainAxisAlignment.CENTER, visible=False,
                         spacing=15)
 

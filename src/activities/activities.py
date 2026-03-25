@@ -1,8 +1,7 @@
-import os
-import csv
 from datetime import datetime, timedelta
 import flet as ft
 
+from activities.activity_queries import get_activities
 from activities.strava_api import connect_strava, get_saved_activities, format_strava_activities, save_tokens_for_user, load_tokens_for_user
 from components.bottom_nav import NavBar
 from components.responsive import Responsive
@@ -166,40 +165,35 @@ class ActivitiesPage(ft.Column):
         total_runs = 0
         total_seconds = 0
         activities_list = []
-        file_path = "../database/activities_history.csv"
 
         now = datetime.now()
         start_of_week = (now - timedelta(days=now.weekday())).replace(hour=0, minute=0, second=0, microsecond=0)
 
-        # load local app-recorded activities
-        if os.path.isfile(file_path):
-            try:
-                with open(file_path, mode="r") as file:
-                    reader = csv.reader(file)
-                    next(reader)
-                    for row in reader:
-                        if len(row) >= 3:
-                            date_str = row[0]
-                            dist = float(row[1])
-                            secs = int(row[2])
-                            act_type = row[3] if len(row) >= 4 else "Run"
+        # load locally recorded activities
+        try:
+            current_user_id = getattr(self.main_page, "user_id", None)
+            print("LOAD ACTIVITY PAGE USER ID:", current_user_id)
 
-                            run_date = datetime.strptime(date_str, "%Y-%m-%d %H:%M")
+            if current_user_id is not None:
+                rows = get_activities(current_user_id)
+                for activity_type, distance_km, start_date, duration_seconds, source in rows:
+                    dist = float(distance_km or 0)
+                    secs = int(duration_seconds or 0)
 
-                            if run_date >= start_of_week:
-                                total_distance += dist
-                                total_seconds += secs
-                                total_runs += 1
+                    if start_date and start_date >= start_of_week:
+                        total_distance += dist
+                        total_seconds += secs
+                        total_runs += 1
 
-                            activities_list.append({
-                                "date": run_date.strftime("%b %d, %H:%M"),
-                                "dist": f"{dist:.2f}",
-                                "time": self.format_time(secs),
-                                "type": act_type,
-                                "source": "app"
-                            })
-            except Exception as e:
-                print(f"Error reading stats: {e}")
+                    activities_list.append({
+                        "date": start_date.strftime("%b %d, %H:%M") if start_date else "No date",
+                        "dist": f"{dist:.2f}",
+                        "time": self.format_time(secs),
+                        "type": activity_type or "Run",
+                        "source": source or "app"
+                    })
+        except Exception as e:
+            print(f"Error reading DB activities: {e}")
 
         # load Strava activities for this logged-in user
         try:
@@ -217,7 +211,6 @@ class ActivitiesPage(ft.Column):
             print(f"Error loading Strava activities: {e}")
 
         tot_time_str = self.format_time(total_seconds)
-
         return f"{total_distance:.1f}", tot_time_str, str(total_runs), activities_list
 
     def format_time(self, seconds):
