@@ -1,7 +1,9 @@
 '''
 File for nutrition page - accessible by clicking 'nutrition' on nav bar
 '''
-
+import csv
+import os
+import difflib
 from datetime import date, timedelta
 
 import flet as ft
@@ -19,7 +21,17 @@ class NutritionPage(ft.Column):
         super().__init__()
         self.main_page = page
         self.r = Responsive(page) # lets page access size and layout
-        self.food_input = ft.TextField(hint_text="Food",height=40)
+        self.food_db = {}
+        current_dir = os.path.dirname(__file__)
+        csv_path = os.path.join(current_dir, 'foods.csv')
+        try:
+            with open(csv_path,mode='r') as file:
+                reader = csv.DictReader(file)
+                for row in reader:
+                    self.food_db[row['name'].lower()] = row
+        except FileNotFoundError:
+            print('foods.csv not found')
+        self.food_input = ft.TextField(hint_text="Food",height=40,on_blur=self.find_food_values)
         self.calories_input = ft.TextField(hint_text="Calories",input_filter=ft.InputFilter(allow=True,regex_string=r"^[0-9]*$",replacement_string=""),height=40) # only allow numerical values
         self.salts_input = ft.TextField(hint_text="Salts",input_filter=ft.InputFilter(allow=True,regex_string=r"^\d*\.?\d*$",replacement_string=""),height=40) # only allow numerical values + "."
         self.proteins_input = ft.TextField(hint_text="Proteins",input_filter=ft.InputFilter(allow=True,regex_string=r"^\d*\.?\d*$",replacement_string=""),height=40)
@@ -260,6 +272,42 @@ class NutritionPage(ft.Column):
         ]
         self.expand = True #expandeds pages when possible
         self.alignment = ft.MainAxisAlignment.SPACE_BETWEEN #sets alignment for page
+
+    def find_food_values(self,e):
+        search_query = self.food_input.value.strip().lower()
+        self.main_page.overlay.clear()
+        if search_query in self.food_db:
+            data = self.food_db[search_query]
+            self.calories_input.value = str(data['calories'])
+            self.salts_input.value = str(data['salts'])
+            self.proteins_input.value = str(data['proteins'])
+            self.calories_input.update()
+            self.salts_input.update()
+            self.proteins_input.update()
+            self.main_page.overlay.append(ft.SnackBar(
+                content=ft.Text(f"Found values for '{data['name']}'"),
+                bgcolor=ft.Colors.BLUE_400,
+                open=True
+            ))
+            self.main_page.update()
+            self.update()
+        elif len(search_query)>2:
+            food_names = list(self.food_db.keys())
+            matches = difflib.get_close_matches(search_query,food_names,n=1,cutoff=0.6)
+            if matches:
+                suggestion = matches[0]
+                self.main_page.overlay.append(ft.SnackBar(
+                    content=ft.Text(f"Did you mean {suggestion.title()}?"),action="Yes!",
+                    on_action = lambda _: self.apply_suggestion(suggestion),bgcolor=ft.Colors.BLUE_400,
+                    open=True))
+            self.main_page.update()
+
+        else:
+            pass
+    def apply_suggestion(self,suggestion):
+        self.food_input.value = suggestion.title()
+        self.find_food_values(None)
+        self.update()
 
 #function called to call upon the page
 def main_nutrition(page: ft.Page,user_id):
