@@ -7,6 +7,7 @@ import flet as ft
 from components.userpfp import Userpfp
 from components.bottom_nav import NavBar
 from components.responsive import Responsive
+from social.social_service import add_friend_by_username, list_friends
 
 #Sizes of all elements on homepage (as a percent of screen)
 page_title_size = 0.1
@@ -16,10 +17,12 @@ standings_v_size = 0.08
 activity_v_size=0.18
 
 class SocialPage(ft.Column):
-    def __init__(self, page: ft.Page):
+    def __init__(self, page: ft.Page, user_id):
         super().__init__()
 
         self.this_page = page
+        # Store the current user id
+        self.user_id = user_id
         self.r = Responsive(page)
 
             # placeholder data
@@ -196,7 +199,7 @@ class SocialPage(ft.Column):
 
         self.update()
 
-def main_social(page: ft.Page):
-    social_page = SocialPage(page)
+def main_social(page: ft.Page, user_id):
+    social_page = SocialPage(page, user_id)
 
     return social_page
