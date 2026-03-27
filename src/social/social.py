@@ -109,7 +109,7 @@ class SocialPage(ft.Column):
 
         # Button for adding a friend.
         self.add_friend_button = ft.ElevatedButton(
-            text="Add Friend",
+            content = ft.Text("Add Friend"),
             on_click = self.handle_add_friend
         )
 
