@@ -109,7 +109,8 @@ class SocialPage(ft.Column):
 
         # Button for adding a friend.
         self.add_friend_button = ft.ElevatedButton(
-            text="Add Friend"
+            text="Add Friend",
+            on_click = self.handle_add_friend
         )
 
         self.friends_title = ft.Text(
@@ -223,6 +224,25 @@ class SocialPage(ft.Column):
             spacing=5,
             scroll=ft.ScrollMode.AUTO
         )
+
+    # Add a friend using the entered username, then refresh the list
+    def handle_add_friend(self, e):
+        entered_username = self.friend_username_input.value
+
+        # Call the service layer in UI.
+        result_message = add_friend_by_username(self.user_id, entered_username)
+        # Show feedback to the user.
+        self.this_page.snack_bar = ft.SnackBar(
+            content=ft.Text(result_message)
+        )
+        self.this_page.snack_bar.open = True
+        # Clear the input after submission for a cleaner user experience.
+        self.friend_username_input.value = ""
+        # Reload the list so newly added friends appear immediately.
+        self.load_friends()
+
+        self.this_page.update()
+        self.update()
 
     #Set size of all text on screen
     def set_text_size(self):
