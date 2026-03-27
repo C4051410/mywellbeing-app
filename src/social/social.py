@@ -161,9 +161,10 @@ class SocialPage(ft.Column):
         self.set_widget_size()
         self.load_leaderboard()
         self.load_activity()
+        self.load_friends()
         page.on_resize = self.resize
 
-        # Load leaderboard data into the 3 containers
+    # Load leaderboard data into the 3 containers
     def load_leaderboard(self):
             sorted_users = sorted(
                 self.leaderboard_data,
@@ -183,7 +184,7 @@ class SocialPage(ft.Column):
                 f"3. {sorted_users[2]['name']} - {sorted_users[2]['points']} pts"
             )
 
-        # Load activity feed into activity container
+    # Load activity feed into activity container
     def load_activity(self):
             activity_controls = []
 
@@ -197,6 +198,31 @@ class SocialPage(ft.Column):
                 )
 
             self.activity_container.content = ft.Column(activity_controls)
+
+    # Load the current user's friends and render them into the friends container
+    def load_friends(self):
+        friends = list_friends(self.user_id)
+        friend_controls = []
+
+        # Show an empty state when the user has no friends.
+        if not friends:
+            self.friends_container.content = ft.Text("No friends added yet.")
+            return
+
+        # Build one list tile per friend so the UI is easy to read.
+        for friend in friends:
+            friend_controls.append(
+                ft.ListTile(
+                    title=ft.Text(friend["username"]),
+                    subtitle=ft.Text(friend["email"])
+                )
+            )
+
+        self.friends_container.content = ft.Column(
+            controls=friend_controls,
+            spacing=5,
+            scroll=ft.ScrollMode.AUTO
+        )
 
     #Set size of all text on screen
     def set_text_size(self):
