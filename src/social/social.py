@@ -98,8 +98,34 @@ class SocialPage(ft.Column):
              border=ft.Border.all(width=2, color=ft.Colors.GREY_400),
              border_radius=8,
              padding=10
-
             )
+
+        # Input used to add a friend by username.
+        self.friend_username_input = ft.TextField(
+            label="Friend username",
+            hint_text="Enter a username",
+            border_radius=8
+        )
+
+        # Button for adding a friend.
+        self.add_friend_button = ft.ElevatedButton(
+            text="Add Friend"
+        )
+
+        self.friends_title = ft.Text(
+            value="Friends",
+            size=self.r.w(page_desc_size),
+            weight=ft.FontWeight.BOLD,
+            color=ft.Colors.BLACK
+        )
+
+        # Container that will display the friend list.
+        self.friends_container = ft.Container(
+            border=ft.Border.all(width=2, color=ft.Colors.GREY_400),
+            border_radius=8,
+            padding=10,
+            content=ft.Text("No friends loaded yet.")
+        )
 
         self.nav_bar = NavBar(page)
         self.controls = [
@@ -123,6 +149,10 @@ class SocialPage(ft.Column):
             self.third_container,
             self.activity_title,
             self.activity_container,
+            self.friends_title,
+            self.friend_username_input,
+            self.add_friend_button,
+            self.friends_container,
             self.nav_bar
         ]
 
@@ -186,6 +216,8 @@ class SocialPage(ft.Column):
         self.third_container.height = self.r.h(standings_v_size)
         #Friends activity widget - rectangle
         self.activity_container.height = self.r.h(activity_v_size)
+        # Friends list widget
+        self.friends_container.height = self.r.h(activity_v_size)
 
     def resize(self, e):
         self.r = Responsive(self.this_page)
