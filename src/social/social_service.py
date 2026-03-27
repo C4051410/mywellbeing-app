@@ -77,7 +77,7 @@ def list_friends(user_id):
         friends.append({
             "id": row[0],
             "username": row[1],
-            "full_name": row[2]
+            "email": row[2]
         })
     return friends
 
