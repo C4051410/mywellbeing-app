@@ -29,7 +29,7 @@ def main(page: ft.Page):
             if page.route == "/nutrition":
                 page.add(main_nutrition(page,uid))
             if page.route == "/social":
-                page.add(main_social(page))
+                page.add(main_social(page,uid))
             if page.route == "/settings":
                 page.add(main_settings(page))
             if page.route == "/map":
