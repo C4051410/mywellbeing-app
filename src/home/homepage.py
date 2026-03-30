@@ -87,6 +87,19 @@ class WorkoutApp(ft.Column):
             border=ft.Border.all(width=2, color=ft.Colors.GREY_400)
         )
 
+        async def open_url(): # used to create link to UN website, using async to perform the launch in the background
+            await self.this_page.launch_url("https://globalgoals.org/goals/3-good-health-and-well-being/")
+
+        self.un_link = ft.GestureDetector( #used to allow users to click on the img and take them to UN website
+            mouse_cursor = ft.MouseCursor.CLICK,
+            on_tap = open_url,
+            content = ft.Image(
+                src = "unGoal.png",
+                height = 100,
+                width = 350,
+            )
+        )
+
         #Create user profile picture image
         self.userpfp = Userpfp(page)
 
@@ -120,6 +133,7 @@ class WorkoutApp(ft.Column):
             ),
             self.friends_container,
             self.streak_container,
+            self.un_link,
             self.nav_bar
         ]
         #Expand, take all available space
