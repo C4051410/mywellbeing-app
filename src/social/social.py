@@ -205,7 +205,12 @@ class SocialPage(ft.Column):
                     )
                 )
 
-            self.activity_container.content = ft.Column(activity_controls)
+            # Keep the activity list scrollable inside its container.
+            self.activity_container.content = ft.Column(
+                controls=activity_controls,
+                spacing=5,
+                scroll=ft.ScrollMode.AUTO
+            )
 
     # Load the current user's friends and render them into the friends container
     def load_friends(self):
@@ -214,7 +219,10 @@ class SocialPage(ft.Column):
 
         # Show an empty state when the user has no friends.
         if not friends:
-            self.friends_container.content = ft.Text("No friends added yet.")
+            self.friends_container.content = ft.Container(
+                alignment=ft.alignment.center,
+                content=ft.Text("No friends added yet.")
+            )
             return
 
         # Build one list tile per friend so the UI is easy to read.
@@ -236,7 +244,7 @@ class SocialPage(ft.Column):
     def handle_add_friend(self, e):
         entered_username = self.friend_username_input.value
 
-        # Call the service layer in UI.
+        # Call the service layer in the UI.
         result_message = add_friend_by_username(self.user_id, entered_username)
         # Show feedback to the user.
         self.this_page.snack_bar = ft.SnackBar(
