@@ -7,6 +7,7 @@ import flet as ft
 from components.userpfp import Userpfp
 from components.bottom_nav import NavBar
 from components.responsive import Responsive
+from social.social_service import add_friend_by_username, list_friends
 
 #Sizes of all elements on homepage (as a percent of screen)
 page_title_size = 0.1
@@ -16,10 +17,12 @@ standings_v_size = 0.08
 activity_v_size=0.18
 
 class SocialPage(ft.Column):
-    def __init__(self, page: ft.Page):
+    def __init__(self, page: ft.Page, user_id):
         super().__init__()
 
         self.this_page = page
+        # Store the current user id
+        self.user_id = user_id
         self.r = Responsive(page)
 
             # placeholder data
@@ -95,8 +98,35 @@ class SocialPage(ft.Column):
              border=ft.Border.all(width=2, color=ft.Colors.GREY_400),
              border_radius=8,
              padding=10
-
             )
+
+        # Input used to add a friend by username.
+        self.friend_username_input = ft.TextField(
+            label="Friend username",
+            hint_text="Enter a username",
+            border_radius=8
+        )
+
+        # Button for adding a friend.
+        self.add_friend_button = ft.ElevatedButton(
+            content = ft.Text("Add Friend"),
+            on_click = self.handle_add_friend
+        )
+
+        self.friends_title = ft.Text(
+            value="Friends",
+            size=self.r.w(page_desc_size),
+            weight=ft.FontWeight.BOLD,
+            color=ft.Colors.BLACK
+        )
+
+        # Container that will display the friend list.
+        self.friends_container = ft.Container(
+            border=ft.Border.all(width=2, color=ft.Colors.GREY_400),
+            border_radius=8,
+            padding=10,
+            content=ft.Text("No friends loaded yet.")
+        )
 
         self.nav_bar = NavBar(page)
         self.controls = [
@@ -120,17 +150,29 @@ class SocialPage(ft.Column):
             self.third_container,
             self.activity_title,
             self.activity_container,
+            self.friends_title,
+            self.friend_username_input,
+            self.add_friend_button,
+            self.friends_container,
             self.nav_bar
         ]
 
         self.expand = True
-        self.alignment = ft.MainAxisAlignment.SPACE_BETWEEN
+        # Keep the page content stacked from top to bottom.
+        self.alignment = ft.MainAxisAlignment.START
+        # Stretch controls horizontally so containers line up more naturally.
+        self.horizontal_alignment = ft.CrossAxisAlignment.STRETCH
+        # Add consistent spacing between sections.
+        self.spacing = 12
+        # Allow the whole page to scroll.
+        self.scroll = ft.ScrollMode.AUTO
         self.set_widget_size()
         self.load_leaderboard()
         self.load_activity()
+        self.load_friends()
         page.on_resize = self.resize
 
-        # Load leaderboard data into the 3 containers
+    # Load leaderboard data into the 3 containers
     def load_leaderboard(self):
             sorted_users = sorted(
                 self.leaderboard_data,
@@ -150,7 +192,7 @@ class SocialPage(ft.Column):
                 f"3. {sorted_users[2]['name']} - {sorted_users[2]['points']} pts"
             )
 
-        # Load activity feed into activity container
+    # Load activity feed into activity container
     def load_activity(self):
             activity_controls = []
 
@@ -163,7 +205,59 @@ class SocialPage(ft.Column):
                     )
                 )
 
-            self.activity_container.content = ft.Column(activity_controls)
+            # Keep the activity list scrollable inside its container.
+            self.activity_container.content = ft.Column(
+                controls=activity_controls,
+                spacing=5,
+                scroll=ft.ScrollMode.AUTO
+            )
+
+    # Load the current user's friends and render them into the friends container
+    def load_friends(self):
+        friends = list_friends(self.user_id)
+        friend_controls = []
+
+        # Show an empty state when the user has no friends.
+        if not friends:
+            self.friends_container.content = ft.Container(
+                alignment=ft.alignment.center,
+                content=ft.Text("No friends added yet.")
+            )
+            return
+
+        # Build one list tile per friend so the UI is easy to read.
+        for friend in friends:
+            friend_controls.append(
+                ft.ListTile(
+                    title=ft.Text(friend["username"]),
+                    subtitle=ft.Text(friend["email"])
+                )
+            )
+
+        self.friends_container.content = ft.Column(
+            controls=friend_controls,
+            spacing=5,
+            scroll=ft.ScrollMode.AUTO
+        )
+
+    # Add a friend using the entered username, then refresh the list
+    def handle_add_friend(self, e):
+        entered_username = self.friend_username_input.value
+
+        # Call the service layer in the UI.
+        result_message = add_friend_by_username(self.user_id, entered_username)
+        # Show feedback to the user.
+        self.this_page.snack_bar = ft.SnackBar(
+            content=ft.Text(result_message)
+        )
+        self.this_page.snack_bar.open = True
+        # Clear the input after submission for a cleaner user experience.
+        self.friend_username_input.value = ""
+        # Reload the list so newly added friends appear immediately.
+        self.load_friends()
+
+        self.this_page.update()
+        self.update()
 
     #Set size of all text on screen
     def set_text_size(self):
@@ -183,6 +277,8 @@ class SocialPage(ft.Column):
         self.third_container.height = self.r.h(standings_v_size)
         #Friends activity widget - rectangle
         self.activity_container.height = self.r.h(activity_v_size)
+        # Friends list widget
+        self.friends_container.height = self.r.h(activity_v_size)
 
     def resize(self, e):
         self.r = Responsive(self.this_page)
@@ -196,7 +292,7 @@ class SocialPage(ft.Column):
 
         self.update()
 
-def main_social(page: ft.Page):
-    social_page = SocialPage(page)
+def main_social(page: ft.Page, user_id):
+    social_page = SocialPage(page, user_id)
 
     return social_page
