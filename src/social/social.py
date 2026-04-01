@@ -158,7 +158,14 @@ class SocialPage(ft.Column):
         ]
 
         self.expand = True
-        self.alignment = ft.MainAxisAlignment.SPACE_BETWEEN
+        # Keep the page content stacked from top to bottom.
+        self.alignment = ft.MainAxisAlignment.START
+        # Stretch controls horizontally so containers line up more naturally.
+        self.horizontal_alignment = ft.CrossAxisAlignment.STRETCH
+        # Add consistent spacing between sections.
+        self.spacing = 12
+        # Allow the whole page to scroll.
+        self.scroll = ft.ScrollMode.AUTO
         self.set_widget_size()
         self.load_leaderboard()
         self.load_activity()
