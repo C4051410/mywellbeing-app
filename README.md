@@ -2,13 +2,13 @@
 
 | **Criteria** | **Where to Find It (File Paths, Links, or Explanations)** |
 |--------------|-----------------------------------------------------------|
-| **Team Standards: Cohesion**                 | (your text here)          |
-| **Team Standards: Documentation**            | (your text here)          |
-| **Team Standards: Version Control Workflow** | (your text here)          |
-| **Design & Structure**                       | (your text here)          |
-| **GUI: Clever and Interesting Design**       | (your text here)          |
-| **Testing Documentation**                    | (your text here)          |
-| **Functionality and Features**               | (your text here)          |
+| **Team Standards: Cohesion**                 | STYLE_GUIDE.md                                            |
+| **Team Standards: Documentation**            | Below                                                     |
+| **Team Standards: Version Control Workflow** | GIT_CONVENTION.md                                         |
+| **Design & Structure**                       | DESIGN.md                                                 |
+| **GUI: Clever and Interesting Design**       | screenshots/                                              |
+| **Testing Documentation**                    | TESTING.md                                                |
+| **Functionality and Features**               | FEATURES.md                                               |
 
 ***
 **Installation Tutorial**
