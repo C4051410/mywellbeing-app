@@ -1,0 +1,17 @@
+[tool.ruff]
+#makes sure its running at atleast python 3.11
+target-version = "py311"
+#sets the length of a line before ruff flags it
+line-length = 88
+
+[tool.ruff.lint]
+#tests python code style, logic errors, imports and naming conventions
+select = ["E", "W", "F", "I", "N"]
+[tool.ruff.lint.mccabe]
+#sets the most amount of loops
+max-complexity = 10
+
+[tool.ruff.format]
+# Automated formatting settings
+quote-style = "double"
+indent-style = "space"
