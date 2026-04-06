@@ -1,5 +1,8 @@
 import bcrypt
 from database.connection import connect
+from plyer import notification
+from pygments.filter import apply_filters
+
 
 def login(email,password):
     conn = connect()
@@ -21,6 +24,11 @@ def login(email,password):
 
         # if password matches login is succesful
         # TODO: (UI) change it to redirect user to home page once logged in
+        notification.notify(
+            title="Login Successful",
+            message=f"Welcome Back {user[1]}",
+            app_name="MyWellBeing",
+        )
         return user
 
     finally:
