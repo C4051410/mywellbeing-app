@@ -116,6 +116,7 @@ def format_strava_activities(strava_activities):
             "date": formatted_date,
             "datetime" : parsed_date,
             "dist": f"{distance_km:.2f}",
+            "seconds": moving_time,
             "time": format_time(moving_time),
             "type": activity_type
         })

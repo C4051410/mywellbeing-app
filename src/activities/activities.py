@@ -207,6 +207,13 @@ class ActivitiesPage(ft.Column):
                     formatted_strava = format_strava_activities(strava_activities)
                     for act in formatted_strava:
                         act["source"] = "Strava"
+
+                        # adds strava activities to weekly totals
+                        if act.get("datetime") and act["datetime"] >= start_of_week:
+                            total_distance += float(act.get("dist") or 0)
+                            total_seconds += int(act.get("seconds") or 0)
+                            total_runs += 1
+
                     activities_list.extend(formatted_strava)
         except Exception as e:
             print(f"Error loading Strava activities: {e}")
