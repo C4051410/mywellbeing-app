@@ -118,7 +118,7 @@ class ActivitiesPage(ft.Column):
                 "Cycle": ft.Icons.DIRECTIONS_BIKE
             }
 
-            for act in reversed(activities_list):  # Read newest first
+            for act in activities_list:
                 act_icon = icon_map.get(act["type"], ft.Icons.FITNESS_CENTER)
                 feed_column.controls.append(
                     ft.Container(
@@ -187,6 +187,7 @@ class ActivitiesPage(ft.Column):
 
                     activities_list.append({
                         "date": start_date.strftime("%b %d, %H:%M") if start_date else "No date",
+                        "datetime": start_date,
                         "dist": f"{dist:.2f}",
                         "time": self.format_time(secs),
                         "type": activity_type or "Run",
@@ -211,6 +212,9 @@ class ActivitiesPage(ft.Column):
             print(f"Error loading Strava activities: {e}")
 
         tot_time_str = self.format_time(total_seconds)
+
+        # sort activities by time new to old
+        activities_list.sort(key=lambda x: x["datetime"] or datetime.min, reverse=True)
         return f"{total_distance:.1f}", tot_time_str, str(total_runs), activities_list
 
     def format_time(self, seconds):
