@@ -27,14 +27,14 @@ class ActivitiesPage(ft.Column):
         else:
             button_text = "Connect Strava"
 
-        strava_button = ft.OutlinedButton(
+        self.strava_button = ft.OutlinedButton(
             button_text,
             icon=ft.Icons.LINK,
             on_click=self.connect_strava_clicked,
             style=ft.ButtonStyle(
-                bgcolor=ft.Colors.BLUE,
+                bgcolor=ft.Colors.DEEP_ORANGE,
                 color=ft.Colors.WHITE,
-                side=ft.BorderSide(color=ft.Colors.BLUE),
+                side=ft.BorderSide(color=ft.Colors.DEEP_ORANGE),
             )
         )
 
@@ -146,7 +146,7 @@ class ActivitiesPage(ft.Column):
         content_column = ft.Column(
             controls=[
                 header,
-                ft.Container(content=strava_button, padding=ft.padding.symmetric(horizontal=15), margin=ft.margin.only(bottom=16)),
+                ft.Container(content=self.strava_button, padding=ft.padding.symmetric(horizontal=15), margin=ft.margin.only(bottom=16)),
                 ft.Container(content=stats_card, padding=ft.padding.symmetric(horizontal=15), margin=ft.margin.only(bottom=16)),
                 ft.Container(content=record_btn, padding=ft.padding.symmetric(horizontal=15), margin=ft.margin.only(bottom=16)),
                 ft.Container(content=feed_column, padding=ft.padding.symmetric(horizontal=15), expand=True)
@@ -243,6 +243,16 @@ class ActivitiesPage(ft.Column):
             print("TOKENS RETURNED:", tokens)
 
             save_tokens_for_user(current_user_id, tokens)
+            # update strava button text
+            self.strava_button.text = "Strava Connected"
+            self.strava_button.disabled = True
+
+            self.main_page.snack_bar = ft.SnackBar(
+                content=ft.Text("Strava connected successfully"),
+                open=True
+            )
+
+            self.main_page.update()
             print("TOKENS SAVED TO DB")
 
             self.main_page.snack_bar = ft.SnackBar(
