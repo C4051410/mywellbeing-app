@@ -82,7 +82,7 @@ class ActivitiesPage(ft.Column):
         )
 
         # 3. Individual Activities Feed OR Empty State
-        feed_column = ft.Column(scroll=ft.ScrollMode.HIDDEN, expand=True, spacing=15)
+        feed_column = ft.Column(spacing=15)
 
         record_btn = ft.ElevatedButton(
             content=ft.Row([
@@ -178,6 +178,7 @@ class ActivitiesPage(ft.Column):
                 ft.Container(content=record_btn, padding=ft.padding.symmetric(horizontal=15), margin=ft.margin.only(bottom=16)),
                 ft.Container(content=feed_column, padding=ft.padding.symmetric(horizontal=15), expand=True)
             ],
+            scroll=ft.ScrollMode.AUTO,
             expand=True
         )
 
