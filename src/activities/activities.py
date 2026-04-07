@@ -155,10 +155,46 @@ class ActivitiesPage(ft.Column):
                         shadow=ft.BoxShadow(spread_radius=1, blur_radius=5, color=ft.Colors.BLACK12),
                         content=ft.ListTile(
                             leading=ft.Container(
-                                content=ft.Icon(act_icon, color=ft.Colors.WHITE),
-                                bgcolor=ft.Colors.BLUE_400,
-                                padding=10,
-                                border_radius=25
+                                width=40,
+                                height=40,
+                                content=ft.Stack(
+                                    controls=[
+                                        # activity icon background
+                                        ft.Container(
+                                            width=40,
+                                            height=40,
+                                            bgcolor=ft.Colors.BLUE_400,
+                                            border_radius=20,
+                                            alignment=ft.alignment.Alignment(0, 0),
+                                            content=ft.Icon(
+                                                act_icon,
+                                                color=ft.Colors.WHITE,
+                                                size=20
+                                            ),
+                                        ),
+
+                                        # only show strava badge for imported activities
+                                        ft.Container(
+                                            visible=(act.get("source") == "Strava"),
+                                            alignment=ft.alignment.Alignment(1, 1),
+                                            content=ft.Container(
+                                                width=16,
+                                                height=16,
+                                                border_radius=7,
+                                                bgcolor=ft.Colors.WHITE,
+                                                padding=2,
+                                                content=ft.Image(
+                                                    width=22,
+                                                    height=22,
+                                                    src="strava.png",
+                                                    fit="cover",
+                                                    margin=ft.margin.all(-3),
+                                                ),
+                                            ),
+                                        ),
+
+                                    ]
+                                )
                             ),
                             title=ft.Text(f"{act['type']} • {act['date']}", weight=ft.FontWeight.BOLD, size=13, max_lines=1),
                             subtitle=ft.Text(subtitle_text, color=ft.Colors.GREY_600, size=12),
