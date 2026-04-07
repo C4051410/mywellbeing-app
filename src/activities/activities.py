@@ -6,6 +6,14 @@ from activities.strava_api import connect_strava, get_saved_activities, format_s
 from components.bottom_nav import NavBar
 from components.responsive import Responsive
 
+ACTIVITY_DISPLAY = {
+    "Run":          {"primary": "dist",     "primary_unit": "km",    "label": lambda act: f"{act['dist']} km in {act['time']}"},
+    "Walk":         {"primary": "steps",    "primary_unit": "steps", "label": lambda act: f"{act.get('steps', '—')} steps in {act['time']}"},
+    "Cycle":        {"primary": "dist",     "primary_unit": "km",    "label": lambda act: f"{act['dist']} km in {act['time']}"},
+    "WeightLifting":{"primary": "calories", "primary_unit": "kcal",  "label": lambda act: f"{act.get('calories', '—')} kcal in {act['time']}"},
+    "Workout":      {"primary": "calories", "primary_unit": "kcal",  "label": lambda act: f"{act.get('calories', '—')} kcal in {act['time']}"},
+}
+DEFAULT_DISPLAY = {"label": lambda act: f"{act['dist']} km in {act['time']}"}
 
 class ActivitiesPage(ft.Column):
     def __init__(self, page: ft.Page):
@@ -27,14 +35,14 @@ class ActivitiesPage(ft.Column):
         else:
             button_text = "Connect Strava"
 
-        strava_button = ft.OutlinedButton(
+        self.strava_button = ft.OutlinedButton(
             button_text,
             icon=ft.Icons.LINK,
             on_click=self.connect_strava_clicked,
             style=ft.ButtonStyle(
-                bgcolor=ft.Colors.BLUE,
+                bgcolor=ft.Colors.DEEP_ORANGE,
                 color=ft.Colors.WHITE,
-                side=ft.BorderSide(color=ft.Colors.BLUE),
+                side=ft.BorderSide(color=ft.Colors.DEEP_ORANGE),
             )
         )
 
@@ -74,7 +82,7 @@ class ActivitiesPage(ft.Column):
         )
 
         # 3. Individual Activities Feed OR Empty State
-        feed_column = ft.Column(scroll=ft.ScrollMode.HIDDEN, expand=True, spacing=15)
+        feed_column = ft.Column(spacing=15)
 
         record_btn = ft.ElevatedButton(
             content=ft.Row([
@@ -115,11 +123,30 @@ class ActivitiesPage(ft.Column):
             icon_map = {
                 "Run": ft.Icons.DIRECTIONS_RUN,
                 "Walk": ft.Icons.DIRECTIONS_WALK,
-                "Cycle": ft.Icons.DIRECTIONS_BIKE
+                "Cycle": ft.Icons.DIRECTIONS_BIKE,
+                "WeightLifting": ft.Icons.FITNESS_CENTER,
             }
 
-            for act in reversed(activities_list):  # Read newest first
+            for act in activities_list:
                 act_icon = icon_map.get(act["type"], ft.Icons.FITNESS_CENTER)
+                act_type = act["type"]
+                if act_type == "WeightLifting":
+                    parts = []
+                    if act.get("calories"):
+                        parts.append(f"{act['calories']} kcal")
+                    if act.get("heart_rate"):
+                        parts.append(f"{act['heart_rate']} bpm avg")
+                    parts.append(f" {act['time']}")
+                    subtitle_text = " • ".join(parts)
+                elif act_type in ("Run", "Cycle"):
+                    subtitle_text = f"{act['dist']} km • {act['time'].replace('m', ' mins')}"
+                elif act_type == "Walk":
+                    subtitle_text = f"{act.get('steps', act['dist'] + ' km')} in {act['time']}"
+                elif act_type == "Workout":
+                    subtitle_text = f"{act.get('calories', '—')} kcal • {act['time']}"
+                else:
+                    subtitle_text = act['time']
+
                 feed_column.controls.append(
                     ft.Container(
                         bgcolor=ft.Colors.WHITE,
@@ -128,13 +155,49 @@ class ActivitiesPage(ft.Column):
                         shadow=ft.BoxShadow(spread_radius=1, blur_radius=5, color=ft.Colors.BLACK12),
                         content=ft.ListTile(
                             leading=ft.Container(
-                                content=ft.Icon(act_icon, color=ft.Colors.WHITE),
-                                bgcolor=ft.Colors.BLUE_400,
-                                padding=10,
-                                border_radius=25
+                                width=40,
+                                height=40,
+                                content=ft.Stack(
+                                    controls=[
+                                        # activity icon background
+                                        ft.Container(
+                                            width=40,
+                                            height=40,
+                                            bgcolor=ft.Colors.BLUE_400,
+                                            border_radius=20,
+                                            alignment=ft.alignment.Alignment(0, 0),
+                                            content=ft.Icon(
+                                                act_icon,
+                                                color=ft.Colors.WHITE,
+                                                size=20
+                                            ),
+                                        ),
+
+                                        # only show strava badge for imported activities
+                                        ft.Container(
+                                            visible=(act.get("source") == "Strava"),
+                                            alignment=ft.alignment.Alignment(1, 1),
+                                            content=ft.Container(
+                                                width=16,
+                                                height=16,
+                                                border_radius=7,
+                                                bgcolor=ft.Colors.WHITE,
+                                                padding=2,
+                                                content=ft.Image(
+                                                    width=22,
+                                                    height=22,
+                                                    src="strava.png",
+                                                    fit="cover",
+                                                    margin=ft.margin.all(-3),
+                                                ),
+                                            ),
+                                        ),
+
+                                    ]
+                                )
                             ),
-                            title=ft.Text(f"{act['type']} • {act['date']}", weight=ft.FontWeight.BOLD, size=14),
-                            subtitle=ft.Text(f"{act['dist']} km in {act['time']}", color=ft.Colors.GREY_600, size=12),
+                            title=ft.Text(f"{act['type']} • {act['date']}", weight=ft.FontWeight.BOLD, size=13, max_lines=1),
+                            subtitle=ft.Text(subtitle_text, color=ft.Colors.GREY_600, size=12),
                         )
                     )
                 )
@@ -146,11 +209,12 @@ class ActivitiesPage(ft.Column):
         content_column = ft.Column(
             controls=[
                 header,
-                ft.Container(content=strava_button, padding=ft.padding.symmetric(horizontal=15), margin=ft.margin.only(bottom=16)),
+                ft.Container(content=self.strava_button, padding=ft.padding.symmetric(horizontal=15), margin=ft.margin.only(bottom=16)),
                 ft.Container(content=stats_card, padding=ft.padding.symmetric(horizontal=15), margin=ft.margin.only(bottom=16)),
                 ft.Container(content=record_btn, padding=ft.padding.symmetric(horizontal=15), margin=ft.margin.only(bottom=16)),
                 ft.Container(content=feed_column, padding=ft.padding.symmetric(horizontal=15), expand=True)
             ],
+            scroll=ft.ScrollMode.AUTO,
             expand=True
         )
 
@@ -187,6 +251,7 @@ class ActivitiesPage(ft.Column):
 
                     activities_list.append({
                         "date": start_date.strftime("%b %d, %H:%M") if start_date else "No date",
+                        "datetime": start_date,
                         "dist": f"{dist:.2f}",
                         "time": self.format_time(secs),
                         "type": activity_type or "Run",
@@ -206,11 +271,21 @@ class ActivitiesPage(ft.Column):
                     formatted_strava = format_strava_activities(strava_activities)
                     for act in formatted_strava:
                         act["source"] = "Strava"
+
+                        # adds strava activities to weekly totals
+                        if act.get("datetime") and act["datetime"] >= start_of_week:
+                            total_distance += float(act.get("dist") or 0)
+                            total_seconds += int(act.get("seconds") or 0)
+                            total_runs += 1
+
                     activities_list.extend(formatted_strava)
         except Exception as e:
             print(f"Error loading Strava activities: {e}")
 
         tot_time_str = self.format_time(total_seconds)
+
+        # sort activities by time new to old
+        activities_list.sort(key=lambda x: x["datetime"] or datetime.min, reverse=True)
         return f"{total_distance:.1f}", tot_time_str, str(total_runs), activities_list
 
     def format_time(self, seconds):
@@ -243,6 +318,16 @@ class ActivitiesPage(ft.Column):
             print("TOKENS RETURNED:", tokens)
 
             save_tokens_for_user(current_user_id, tokens)
+            # update strava button text
+            self.strava_button.text = "Strava Connected"
+            self.strava_button.disabled = True
+
+            self.main_page.snack_bar = ft.SnackBar(
+                content=ft.Text("Strava connected successfully"),
+                open=True
+            )
+
+            self.main_page.update()
             print("TOKENS SAVED TO DB")
 
             self.main_page.snack_bar = ft.SnackBar(
