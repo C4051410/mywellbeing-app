@@ -6,6 +6,7 @@ import urllib.parse
 import webbrowser
 import time
 from http.server import BaseHTTPRequestHandler, HTTPServer
+from datetime import datetime
 
 import requests
 from dotenv import load_dotenv
@@ -45,6 +46,7 @@ def get_activities(access_token):
     response = requests.get(
         "https://www.strava.com/api/v3/athlete/activities",
         headers={"Authorization": f"Bearer {access_token}"},
+        params={"per_page": 10},
         timeout=30,
     )
 
@@ -68,7 +70,6 @@ def get_saved_activities(user_id):
 
     # check if the token has expired
     if time.time() > expires_at:
-        #print("Token expired, refreshing...")
         access_token = refresh_access_token(user_id, refresh_token)
 
     # get activities using the valid token
@@ -92,17 +93,21 @@ def format_time(seconds):
 def format_strava_activities(strava_activities):
     formatted = []
 
+    for act in strava_activities:
+        if act.get("type") == "WeightTraining":
+            print(act)
     # loop through each activity
     for act in strava_activities:
         activity_type = act.get("type", "Activity")
         distance_km = act.get("distance", 0) / 1000
         moving_time = act.get("moving_time", 0)
 
+        parsed_date = None
         start_date = act.get("start_date_local")
         if start_date:
             try:
                 dt = start_date.replace("Z", "")
-                parsed_date = __import__("datetime").datetime.fromisoformat(dt)
+                parsed_date = datetime.fromisoformat(dt)
                 formatted_date = parsed_date.strftime("%b %d, %H:%M")
             except Exception:
                 formatted_date = "Unknown date"
@@ -111,14 +116,19 @@ def format_strava_activities(strava_activities):
 
         if activity_type == "Ride":
             activity_type = "Cycle"
+        elif activity_type == "WeightTraining":
+            activity_type = "WeightLifting"
 
         formatted.append({
             "date": formatted_date,
-            "datetime" : parsed_date,
+            "datetime": parsed_date,
             "dist": f"{distance_km:.2f}",
             "seconds": moving_time,
             "time": format_time(moving_time),
-            "type": activity_type
+            "type": activity_type,
+            "calories": str(int(act.get("calories", 0))) if act.get("calories") else None,
+            "heart_rate": str(round(act["average_heartrate"])) if act.get("average_heartrate") else None,
+            "steps": f"{act['map'].get('polyline', 0):,}" if False else None,
         })
 
     return formatted

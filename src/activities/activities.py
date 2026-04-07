@@ -6,6 +6,14 @@ from activities.strava_api import connect_strava, get_saved_activities, format_s
 from components.bottom_nav import NavBar
 from components.responsive import Responsive
 
+ACTIVITY_DISPLAY = {
+    "Run":          {"primary": "dist",     "primary_unit": "km",    "label": lambda act: f"{act['dist']} km in {act['time']}"},
+    "Walk":         {"primary": "steps",    "primary_unit": "steps", "label": lambda act: f"{act.get('steps', '—')} steps in {act['time']}"},
+    "Cycle":        {"primary": "dist",     "primary_unit": "km",    "label": lambda act: f"{act['dist']} km in {act['time']}"},
+    "WeightLifting":{"primary": "calories", "primary_unit": "kcal",  "label": lambda act: f"{act.get('calories', '—')} kcal in {act['time']}"},
+    "Workout":      {"primary": "calories", "primary_unit": "kcal",  "label": lambda act: f"{act.get('calories', '—')} kcal in {act['time']}"},
+}
+DEFAULT_DISPLAY = {"label": lambda act: f"{act['dist']} km in {act['time']}"}
 
 class ActivitiesPage(ft.Column):
     def __init__(self, page: ft.Page):
@@ -115,11 +123,30 @@ class ActivitiesPage(ft.Column):
             icon_map = {
                 "Run": ft.Icons.DIRECTIONS_RUN,
                 "Walk": ft.Icons.DIRECTIONS_WALK,
-                "Cycle": ft.Icons.DIRECTIONS_BIKE
+                "Cycle": ft.Icons.DIRECTIONS_BIKE,
+                "WeightLifting": ft.Icons.FITNESS_CENTER,
             }
 
             for act in activities_list:
                 act_icon = icon_map.get(act["type"], ft.Icons.FITNESS_CENTER)
+                act_type = act["type"]
+                if act_type == "WeightLifting":
+                    parts = []
+                    if act.get("calories"):
+                        parts.append(f"{act['calories']} kcal")
+                    if act.get("heart_rate"):
+                        parts.append(f"{act['heart_rate']} bpm avg")
+                    parts.append(f" {act['time']}")
+                    subtitle_text = " • ".join(parts)
+                elif act_type in ("Run", "Cycle"):
+                    subtitle_text = f"{act['dist']} km • {act['time'].replace('m', ' mins')}"
+                elif act_type == "Walk":
+                    subtitle_text = f"{act.get('steps', act['dist'] + ' km')} in {act['time']}"
+                elif act_type == "Workout":
+                    subtitle_text = f"{act.get('calories', '—')} kcal • {act['time']}"
+                else:
+                    subtitle_text = act['time']
+
                 feed_column.controls.append(
                     ft.Container(
                         bgcolor=ft.Colors.WHITE,
@@ -133,8 +160,8 @@ class ActivitiesPage(ft.Column):
                                 padding=10,
                                 border_radius=25
                             ),
-                            title=ft.Text(f"{act['type']} • {act['date']}", weight=ft.FontWeight.BOLD, size=14),
-                            subtitle=ft.Text(f"{act['dist']} km in {act['time']}", color=ft.Colors.GREY_600, size=12),
+                            title=ft.Text(f"{act['type']} • {act['date']}", weight=ft.FontWeight.BOLD, size=13, max_lines=1),
+                            subtitle=ft.Text(subtitle_text, color=ft.Colors.GREY_600, size=12),
                         )
                     )
                 )
