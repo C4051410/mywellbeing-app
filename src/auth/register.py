@@ -1,6 +1,8 @@
 import re
 import bcrypt
 from database.connection import connect
+from plyer import notification
+
 
 def register(username, password, email):
     # TODO: (UI) add field level error messages next to each input
@@ -37,6 +39,11 @@ def register(username, password, email):
         cur.execute("INSERT INTO users (username, password, email, role) VALUES (%s, %s, %s, %s) RETURNING id",(username, hashed_password, email, "user"))
         user_id = cur.fetchone()[0]
         conn.commit()
+        notification.notify(
+            title="Registration Successful",
+            message="Account Created Successfully",
+            app_name="MyWellBeing",
+        )
         return (user_id,)
     except Exception as e:
         conn.rollback()
