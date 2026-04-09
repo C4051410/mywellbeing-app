@@ -150,10 +150,10 @@ class NutritionPage(ft.Column):
                 return total_c, total_s, total_p,total_w # returns all variables
         #used to retrieve the users set goals
         def retrieve_user_goals():
-            goal_c = 0
-            goal_s = 0.0
-            goal_p = 0.0
-            goal_w = 0
+            goal_c = 1
+            goal_s = 1.0
+            goal_p = 1.0
+            goal_w = 1
             if conn is not None:
                 cur = conn.cursor()
                 cur.execute("SELECT calories_goal, salts_goal, proteins_goal,water_goal FROM foodgoals WHERE user_id = %s",(user_id,))
