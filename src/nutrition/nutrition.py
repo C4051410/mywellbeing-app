@@ -7,6 +7,8 @@ import difflib
 from datetime import date, timedelta
 
 import flet as ft
+import flet_permission_handler as fph
+from plyer import notification
 
 from components.userpfp import Userpfp
 from components.bottom_nav import NavBar
@@ -19,6 +21,7 @@ class NutritionPage(ft.Column):
     #constructor method used to create page
     def __init__(self, page: ft.Page,user_id):
         super().__init__()
+        self.ph = fph.PermissionHandler()
         self.main_page = page
         self.r = Responsive(page) # lets page access size and layout
         self.food_db = {}
@@ -44,8 +47,11 @@ class NutritionPage(ft.Column):
         self.foodlog_list = ft.Column()
         self.waterlog_list = ft.Column()
         self.userpfp = Userpfp(page)
+        async def check_notification():
+            status = await self.ph.request(fph.Permission.NOTIFICATION)
+            return status
         #used to handle when Enter Food button is pressed
-        def handle_food_submit(e):
+        async def handle_food_submit(e):
             food = self.food_input.value
             calories = self.calories_input.value
             salts = self.salts_input.value
@@ -66,6 +72,13 @@ class NutritionPage(ft.Column):
                 print("Executed")
                 conn.commit()
                 cur.close()
+            notif_status = await check_notification()
+            if notif_status == fph.PermissionStatus.GRANTED:
+                notification.notify(
+                    title = "Food Logged",
+                    message = f"Meal Added - {food}",
+                    app_name = "MyWellBeing",
+                )
             self.food_input.value = "" #used to empty textfield
             self.calories_input.value = ""
             self.salts_input.value = ""
