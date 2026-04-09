@@ -106,7 +106,7 @@ class WorkoutApp(ft.Column):
         #Create NavBar element
         self.nav_bar = NavBar(page)
 
-        self.controls=[
+        main_contnet = ft.Column(controls=[
             #Row with text and pfp
             ft.Row(
                 #Adds white space in-between text and profile pic
@@ -133,9 +133,9 @@ class WorkoutApp(ft.Column):
             ),
             self.friends_container,
             self.streak_container,
-            self.un_link,
-            self.nav_bar
-        ]
+            self.un_link],expand=True,scroll=ft.ScrollMode.HIDDEN)
+        self.controls = [main_contnet,self.nav_bar]
+
         #Expand, take all available space
         self.expand = True
         #Spread the elements apart

@@ -276,7 +276,7 @@ class NutritionPage(ft.Column):
             self.enter_waterlog,
             self.display_foodlog,
             self.display_waterlog,
-        ],height=600,scroll=ft.ScrollMode.HIDDEN)
+        ],expand=True,scroll=ft.ScrollMode.HIDDEN)
         self.nav_bar = NavBar(page)
         self.controls = [
             scrollable,

@@ -46,7 +46,7 @@ def main(page: ft.Page):
     page.window.width = 360
     page.window.height = 800
     page.padding = 10
-    page.window.resizable = False
+    page.window.resizable = True
     page.horizontal_alignment = ft.CrossAxisAlignment.CENTER
     page.vertical_alignment = ft.MainAxisAlignment.CENTER
     page.update()
