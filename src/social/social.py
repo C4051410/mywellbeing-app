@@ -220,7 +220,7 @@ class SocialPage(ft.Column):
         # Show an empty state when the user has no friends.
         if not friends:
             self.friends_container.content = ft.Container(
-                alignment=ft.alignment.center,
+                alignment=ft.Alignment.CENTER,
                 content=ft.Text("No friends added yet.")
             )
             return
