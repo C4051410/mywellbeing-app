@@ -7,3 +7,5 @@ bcrypt
 requests
 pytest
 ruff
+plyer
+flet_permission_handler
