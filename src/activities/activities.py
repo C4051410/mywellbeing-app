@@ -367,10 +367,12 @@ class ActivityDetailPage(ft.Column):
 
         # page title
         header = ft.Container(
-            content=ft.Text("Activity Detail", size=32, weight=ft.FontWeight.BOLD),
-            padding=ft.padding.only(top=20, left=10)
+            padding=ft.padding.only(top=20, left=5, right=10),
+            content=ft.Row(controls=[ft.IconButton(icon=ft.Icons.ARROW_BACK, on_click=self.go_back,icon_color=ft.Colors.BLACK,),
+                    ft.Text("Activity Detail", size=24, weight=ft.FontWeight.BOLD),
+                ]
+            )
         )
-
         # activity statistics
         def stat_row(label, value):
             return ft.Container(
@@ -426,6 +428,8 @@ class ActivityDetailPage(ft.Column):
         self.expand = True
         self.alignment = ft.MainAxisAlignment.SPACE_BETWEEN
 
+    def go_back(self, e):
+        self.main_page.go("/activities")
 
 def main_activity_detail(page: ft.Page):
     return ActivityDetailPage(page)
