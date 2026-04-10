@@ -153,6 +153,8 @@ class ActivitiesPage(ft.Column):
                         border_radius=10,
                         padding=5,
                         shadow=ft.BoxShadow(spread_radius=1, blur_radius=5, color=ft.Colors.BLACK12),
+                        ink=True,
+                        on_click=self.make_activity_click(act),
                         content=ft.ListTile(
                             leading=ft.Container(
                                 width=40,
@@ -302,6 +304,12 @@ class ActivitiesPage(ft.Column):
             return f"{secs}s"
 
     # --- EVENT HANDLERS ---
+    def make_activity_click(self, activity):
+        def on_click(e):
+            self.main_page.activity_detail = activity
+            self.main_page.go("/redirect")
+        return on_click
+
     def start_activity(self, e):
         self.main_page.go("/map")
 
