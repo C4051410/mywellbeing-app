@@ -307,7 +307,7 @@ class ActivitiesPage(ft.Column):
     def make_activity_click(self, activity):
         def on_click(e):
             self.main_page.activity_detail = activity
-            self.main_page.go("/redirect")
+            self.main_page.go("/activity-detail")
         return on_click
 
     def start_activity(self, e):
@@ -352,6 +352,83 @@ class ActivitiesPage(ft.Column):
             )
             self.main_page.update()
 
+class ActivityDetailPage(ft.Column):
+    def __init__(self, page: ft.Page):
+        super().__init__()
+        self.main_page = page
+
+        # get activity that was clicked on
+        act = getattr(page, "activity_detail", None)
+
+        # if no activity is passed return an error
+        if act is None:
+            self.controls = [ft.Text("No activity data found.")]
+            return
+
+        # page title
+        header = ft.Container(
+            content=ft.Text("Activity Detail", size=32, weight=ft.FontWeight.BOLD),
+            padding=ft.padding.only(top=20, left=10)
+        )
+
+        # activity statistics
+        def stat_row(label, value):
+            return ft.Container(
+                bgcolor=ft.Colors.WHITE,
+                border_radius=10,
+                padding=15,
+                shadow=ft.BoxShadow(spread_radius=1, blur_radius=5, color=ft.Colors.BLACK12),
+                content=ft.Row(
+                    alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                    controls=[
+                        ft.Text(label, size=13, color=ft.Colors.GREY_600, weight=ft.FontWeight.BOLD),
+                        ft.Text(value, size=13, weight=ft.FontWeight.BOLD),
+                    ]
+                )
+            )
+
+        stats = ft.Column(spacing=10)
+
+        # fields that will always be present
+        stats.controls.append(stat_row("Type", act.get("type", "—")))
+        stats.controls.append(stat_row("Date", act.get("date", "—")))
+        stats.controls.append(stat_row("Duration", act.get("time", "—")))
+
+        # optional fields
+        dist = act.get("dist")
+        if dist and float(dist) > 0:
+            stats.controls.append(stat_row("Distance", f"{dist} km"))
+        if act.get("calories"):
+            stats.controls.append(stat_row("Calories", f"{act['calories']} kcal"))
+        if act.get("heart_rate"):
+            stats.controls.append(stat_row("Avg Heart Rate", f"{act['heart_rate']} bpm"))
+        if act.get("steps"):
+            stats.controls.append(stat_row("Steps", str(act["steps"])))
+
+        # show where actviity came from
+        stats.controls.append(stat_row("Source", act.get("source", "App")))
+        nav_bar = NavBar(page)
+
+        content_column = ft.Column(
+            controls=[
+                header,
+                ft.Container(
+                    content=stats,
+                    padding=ft.padding.symmetric(horizontal=15),
+                    margin=ft.margin.only(top=15)
+                ),
+            ],
+            scroll=ft.ScrollMode.AUTO,
+            expand=True,
+        )
+
+        self.controls = [content_column, nav_bar]
+        self.expand = True
+        self.alignment = ft.MainAxisAlignment.SPACE_BETWEEN
+
+
+def main_activity_detail(page: ft.Page):
+    return ActivityDetailPage(page)
 
 def main_activities(page: ft.Page):
     return ActivitiesPage(page)
