@@ -368,13 +368,13 @@ class ActivityDetailPage(ft.Column):
         # page title
         header = ft.Container(
             padding=ft.padding.only(top=20, left=5, right=10),
-            content=ft.Row(controls=[ft.IconButton(icon=ft.Icons.ARROW_BACK, on_click=self.go_back,icon_color=ft.Colors.BLACK,),
-                    ft.Text("Activity Detail", size=24, weight=ft.FontWeight.BOLD),
-                ]
-            )
+            content=ft.Row(controls=[ft.IconButton(icon=ft.Icons.ARROW_BACK, on_click=self.go_back, icon_color=ft.Colors.BLACK),
+                ft.Text("Activity Detail", size=24, weight=ft.FontWeight.BOLD),
+            ]
         )
+    )
         # activity statistics
-        def stat_row(label, value):
+        def stat_row(label, value, icon, icon_color=ft.Colors.BLUE):
             return ft.Container(
                 bgcolor=ft.Colors.WHITE,
                 border_radius=10,
@@ -383,7 +383,10 @@ class ActivityDetailPage(ft.Column):
                 content=ft.Row(
                     alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
                     controls=[
-                        ft.Text(label, size=13, color=ft.Colors.GREY_600, weight=ft.FontWeight.BOLD),
+                        ft.Row(spacing=8, controls=[
+                            ft.Icon(icon, size=18, color=icon_color),
+                            ft.Text(label, size=13, color=ft.Colors.GREY_600, weight=ft.FontWeight.BOLD),
+                        ]),
                         ft.Text(value, size=13, weight=ft.FontWeight.BOLD),
                     ]
                 )
@@ -392,23 +395,22 @@ class ActivityDetailPage(ft.Column):
         stats = ft.Column(spacing=10)
 
         # fields that will always be present
-        stats.controls.append(stat_row("Type", act.get("type", "—")))
-        stats.controls.append(stat_row("Date", act.get("date", "—")))
-        stats.controls.append(stat_row("Duration", act.get("time", "—")))
+        stats.controls.append(stat_row("Type", act.get("type", "—"),  ft.Icons.DIRECTIONS_RUN,  ft.Colors.BLUE))
+        stats.controls.append(stat_row("Date", act.get("date", "—"),  ft.Icons.CALENDAR_TODAY,  ft.Colors.GREY_600))
+        stats.controls.append(stat_row("Duration", act.get("time", "—"),  ft.Icons.TIMER,           ft.Colors.PURPLE))
 
-        # optional fields
         dist = act.get("dist")
         if dist and float(dist) > 0:
-            stats.controls.append(stat_row("Distance", f"{dist} km"))
+            stats.controls.append(stat_row("Distance", f"{dist} km", ft.Icons.STRAIGHTEN,            ft.Colors.TEAL))
         if act.get("calories"):
-            stats.controls.append(stat_row("Calories", f"{act['calories']} kcal"))
+            stats.controls.append(stat_row("Calories", f"{act['calories']} kcal", ft.Icons.LOCAL_FIRE_DEPARTMENT,  ft.Colors.ORANGE))
         if act.get("heart_rate"):
-            stats.controls.append(stat_row("Avg Heart Rate", f"{act['heart_rate']} bpm"))
+            stats.controls.append(stat_row("Avg Heart Rate", f"{act['heart_rate']} bpm",ft.Icons.FAVORITE,              ft.Colors.RED))
         if act.get("steps"):
-            stats.controls.append(stat_row("Steps", str(act["steps"])))
+            stats.controls.append(stat_row("Steps", str(act["steps"]), ft.Icons.DIRECTIONS_WALK,       ft.Colors.GREEN))
 
         # show where actviity came from
-        stats.controls.append(stat_row("Source", act.get("source", "App")))
+        stats.controls.append(stat_row("Source", act.get("source", "App"), ft.Icons.INFO_OUTLINE, ft.Colors.GREY_600))
         nav_bar = NavBar(page)
 
         content_column = ft.Column(
