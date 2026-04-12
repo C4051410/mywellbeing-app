@@ -10,7 +10,7 @@ def setupGoalsPage(user_id, on_setup_complete):
 
     # user data fields
     age = ft.TextField(label="Age")
-    gender = ft.Dropdown(label="Gender", options=[ft.dropdown.Option("Male"), ft.dropdown.Option("Female")])
+    gender = ft.Dropdown(label="Gender", options=[ft.dropdown.Option("Male"), ft.dropdown.Option("Female"),ft.Dropdown("Non-Binary"), ft.Dropdown("Other")])
     height = ft.TextField(label="Height (cm)")
     current_weight = ft.TextField(label="Current Weight (kg)")
     goal_weight = ft.TextField(label="Goal Weight (kg)")
