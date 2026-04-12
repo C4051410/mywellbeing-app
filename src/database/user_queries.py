@@ -23,15 +23,15 @@ def get_user(user_id):
         cur.close()
         conn.close()
 
-def save_setup(user_id, age, gender, height_cm, current_weight_kg, weight_goal_kg, calorie_goal):
+def save_setup(user_id, age, gender, height_cm, current_weight_kg, weight_goal_kg, calorie_goal,salts_goal,protein_goal,water_goal):
     '''Saves the user's profile setup information to user_stats table '''
     conn = connect()
     cur = conn.cursor()
     try:
         cur.execute(
                 "INSERT INTO user_stats (user_id, age, gender, height_cm, current_weight_kg, weight_goal_kg, "
-                "calorie_goal) VALUES (%s, %s, %s, %s, %s, %s, %s)",
-                (user_id, age, gender, height_cm, current_weight_kg, weight_goal_kg, calorie_goal))
+                "calorie_goal,salts_goal,proteins_goal,water_goal) VALUES (%s, %s, %s, %s, %s, %s, %s,%s, %s,%s)",
+                (user_id, age, gender, height_cm, current_weight_kg, weight_goal_kg, calorie_goal,salts_goal,protein_goal,water_goal))
         conn.commit()
         return "Setup saved"
 

@@ -57,7 +57,7 @@ class SocialPage(ft.Column):
         self.userpfp = Userpfp(page)
 
         self.rank_container = ft.Container(bgcolor=ft.Colors.ORANGE_200, border_radius=10, padding=20,
-                                                   content=ft.Row(alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                                                   content=ft.Row(
                                                                   controls=[
                                                                       ft.Text(f"Rank #{self.user_rank}", size=20,
                                                                               weight=ft.FontWeight.BOLD),
@@ -129,12 +129,10 @@ class SocialPage(ft.Column):
         )
 
         self.nav_bar = NavBar(page)
-        self.controls = [
+        main_content = ft.Column(controls = [
             ft.Row(
-                alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
                 controls=[
                     ft.Column(
-                        expand=True,
                         controls=[
                             self.page_title,
                             self.page_desc
@@ -153,19 +151,15 @@ class SocialPage(ft.Column):
             self.friends_title,
             self.friend_username_input,
             self.add_friend_button,
-            self.friends_container,
-            self.nav_bar
-        ]
+            self.friends_container],expand=True, scroll=ft.ScrollMode.HIDDEN)
+        self.controls =[main_content,self.nav_bar]
 
         self.expand = True
-        # Keep the page content stacked from top to bottom.
-        self.alignment = ft.MainAxisAlignment.START
         # Stretch controls horizontally so containers line up more naturally.
         self.horizontal_alignment = ft.CrossAxisAlignment.STRETCH
         # Add consistent spacing between sections.
         self.spacing = 12
         # Allow the whole page to scroll.
-        self.scroll = ft.ScrollMode.AUTO
         self.set_widget_size()
         self.load_leaderboard()
         self.load_activity()
@@ -209,7 +203,6 @@ class SocialPage(ft.Column):
             self.activity_container.content = ft.Column(
                 controls=activity_controls,
                 spacing=5,
-                scroll=ft.ScrollMode.AUTO
             )
 
     # Load the current user's friends and render them into the friends container
@@ -220,7 +213,7 @@ class SocialPage(ft.Column):
         # Show an empty state when the user has no friends.
         if not friends:
             self.friends_container.content = ft.Container(
-                alignment=ft.alignment.center,
+                alignment=ft.Alignment.CENTER,
                 content=ft.Text("No friends added yet.")
             )
             return
@@ -237,7 +230,6 @@ class SocialPage(ft.Column):
         self.friends_container.content = ft.Column(
             controls=friend_controls,
             spacing=5,
-            scroll=ft.ScrollMode.AUTO
         )
 
     # Add a friend using the entered username, then refresh the list

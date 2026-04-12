@@ -150,19 +150,19 @@ class NutritionPage(ft.Column):
                 return total_c, total_s, total_p,total_w # returns all variables
         #used to retrieve the users set goals
         def retrieve_user_goals():
-            goal_c = 0
-            goal_s = 0.0
-            goal_p = 0.0
-            goal_w = 0
+            goal_c = 1
+            goal_s = 1.0
+            goal_p = 1.0
+            goal_w = 1
             if conn is not None:
                 cur = conn.cursor()
-                cur.execute("SELECT calories_goal, salts_goal, proteins_goal,water_goal FROM foodgoals WHERE user_id = %s",(user_id,))
+                cur.execute("SELECT calories_goal, salts_goal, proteins_goal,water_goal FROM user_stats WHERE user_id = %s",(user_id,))
                 rows = cur.fetchall()
                 for data in rows:
-                    goal_c = goal_c + data[0]
-                    goal_s = goal_s + data[1]
-                    goal_p = goal_p + data[2]
-                    goal_w = goal_w + data[3]
+                    goal_c = data[0]
+                    goal_s = data[1]
+                    goal_p = data[2]
+                    goal_w = data[3]
                 return goal_c, goal_s, goal_p, goal_w
 
         total_calories, total_salts, total_proteins, total_water = retrieve_daily_stats() #retrieves users totals from today
@@ -276,7 +276,7 @@ class NutritionPage(ft.Column):
             self.enter_waterlog,
             self.display_foodlog,
             self.display_waterlog,
-        ],height=600,scroll=ft.ScrollMode.HIDDEN)
+        ],expand=True,scroll=ft.ScrollMode.HIDDEN)
         self.nav_bar = NavBar(page)
         self.controls = [
             scrollable,
