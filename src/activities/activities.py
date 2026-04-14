@@ -95,6 +95,17 @@ class ActivitiesPage(ft.Column):
             on_click=self.start_activity
         )
 
+
+
+        past_exercises = ft.ElevatedButton(content=ft.Row([
+                ft.Icon(ft.Icons.FIBER_MANUAL_RECORD, color=ft.Colors.WHITE),
+                ft.Text("RECORD PAST ACTIVITY", size=14, weight=ft.FontWeight.BOLD, color=ft.Colors.WHITE)
+            ], alignment=ft.MainAxisAlignment.CENTER),
+            bgcolor=ft.Colors.BLUE,
+            height=50,
+            style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=25)),
+            on_click=self.past_activity
+        )
         if not activities_list:
             # Empty State
             feed_column.controls.append(
@@ -212,6 +223,7 @@ class ActivitiesPage(ft.Column):
                 ft.Container(content=self.strava_button, padding=ft.padding.symmetric(horizontal=15), margin=ft.margin.only(bottom=16)),
                 ft.Container(content=stats_card, padding=ft.padding.symmetric(horizontal=15), margin=ft.margin.only(bottom=16)),
                 ft.Container(content=record_btn, padding=ft.padding.symmetric(horizontal=15), margin=ft.margin.only(bottom=16)),
+                ft.Container(content=past_exercises,padding=ft.padding.symmetric(horizontal=15), margin=ft.margin.only(bottom=16)),
                 ft.Container(content=feed_column, padding=ft.padding.symmetric(horizontal=15), expand=True)
             ],
             scroll=ft.ScrollMode.AUTO,
@@ -304,6 +316,9 @@ class ActivitiesPage(ft.Column):
     # --- EVENT HANDLERS ---
     def start_activity(self, e):
         self.main_page.go("/map")
+
+    def past_activity(self, e):
+        self.main_page.go("/past_activities")
 
     def connect_strava_clicked(self, e):
         try:
