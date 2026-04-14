@@ -71,7 +71,7 @@ def main_past_activities(page: ft.Page):
 
     hours = ft.Dropdown(
         label="Hrs",
-        width=100,
+        width=60,
         height=40,
         text_size= 8,
         label_style=ft.TextStyle(size=8),
@@ -80,7 +80,7 @@ def main_past_activities(page: ft.Page):
 
     minutes = ft.Dropdown(
         label="Mins",
-        width=100,
+        width=60,
         height=40,
         text_size= 8,
         label_style=ft.TextStyle(size=8),
@@ -89,15 +89,27 @@ def main_past_activities(page: ft.Page):
 
     seconds = ft.Dropdown(
         label="Secs",
-        width=100,
+        width=60,
         height=40,
         text_size= 8,
         label_style=ft.TextStyle(size=8),
         options=[ft.dropdown.Option(str(i)) for i in range(0, 60)]
     )
-    duration = ft.Row([hours, minutes, seconds],)
+    reps_input = ft.TextField(hint_text="Reps",
+                                input_filter=ft.InputFilter(allow=True, regex_string=r"^[0-9]*$",
+                                replacement_string=""), height=40,width=120)
+    distance_input = ft.TextField(
+                                hint_text="Distance",input_filter=ft.InputFilter(allow=True,regex_string=r"^\d*\.?\d*$",
+                                replacement_string=""),height=40,width=120) # only allow numerical values + "."
+
+    duration = ft.Row([ft.Text("Time (Optional)"),hours, minutes, seconds],expand=True)
+    reps = ft.Row([ft.Text("Reps (Optional)" ),reps_input],expand=True)
+    distance = ft.Row([ft.Text("Distance (Optional)"),distance_input],expand=True)
+
+    save_activity = ft.FloatingActionButton(content=ft.Text("FINISH", weight=ft.FontWeight.BOLD, color=ft.Colors.WHITE),
+                                         bgcolor=ft.Colors.RED, width=140)
 
 
-    enter_past_exercises = ft.Column(controls=[ft.Text("Enter Past Exercises"),exercise_search,
-                                                calories_input,duration])
-    return ft.Stack(controls=[enter_past_exercises])
+    enter_past_exercises = ft.Column(controls=[exercise_search,
+                                                calories_input,duration,reps,distance,save_activity])
+    return ft.Column(controls=[enter_past_exercises],width=300)
