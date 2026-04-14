@@ -11,6 +11,15 @@ def save_activity(user_id, activity_type, distance_km, duration_seconds, start_d
     cur.close()
     conn.close()
 
+def save_past_activities(user_id, title,calories,duration,reps,distance,start_date, source="manual"):
+    conn = connect()
+    cur = conn.cursor()
+    cur.execute("INSERT INTO workouts (user_id,source,title,calories,duration,reps,distance_km,start_date) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
+                (user_id, source, title, calories, duration, reps, distance, start_date))
+    conn.commit()
+    cur.close()
+    conn.close()
+
 def get_activities(user_id):
     conn = connect()
     cur = conn.cursor()

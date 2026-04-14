@@ -1,6 +1,8 @@
 from datetime import datetime
 import flet as ft
-from activities.activity_queries import save_activity
+from datetime import timedelta
+from src.activities.activity_queries import  save_past_activities
+
 exercises = [
     "Push-ups",
     "Squats",
@@ -63,6 +65,28 @@ def main_past_activities(page: ft.Page):
         # waits for list to appear before
         await exercise_search.open_view()
 
+    def go_back(e):
+        page.go("/activities")
+
+    def get_duration():
+        return timedelta(
+            hours=int(hours.value or 0),
+            minutes=int(minutes.value or 0),
+            seconds=int(seconds.value or 0)
+        )
+    def save_and_finish():
+        duration = get_duration()
+        if exercise_search.value != "" and calories_input.value != "":
+            exercise = exercise_search.value
+            calories = calories_input.value
+            distance = distance_input.value or None
+            reps = reps_input.value or None
+            if duration.total_seconds() == 0:
+                duration = None
+            start_date = datetime.now()
+            save_past_activities(page.user_id,exercise,calories,duration,reps,distance,start_date)
+            page.go("/activities")
+
     # used to enter the exercises
     exercise_search = ft.SearchBar(bar_hint_text="Enter your exercise", controls=search_exercises, expand=True,
                                         on_tap=open_search, on_change=handle_search_change,
@@ -71,27 +95,27 @@ def main_past_activities(page: ft.Page):
 
     hours = ft.Dropdown(
         label="Hrs",
-        width=60,
+        width=80,
         height=40,
-        text_size= 8,
+        text_size= 12,
         label_style=ft.TextStyle(size=8),
         options=[ft.dropdown.Option(str(i)) for i in range(0, 25)]
     )
 
     minutes = ft.Dropdown(
         label="Mins",
-        width=60,
+        width=80,
         height=40,
-        text_size= 8,
+        text_size= 12,
         label_style=ft.TextStyle(size=8),
         options=[ft.dropdown.Option(str(i)) for i in range(0, 60)]
     )
 
     seconds = ft.Dropdown(
         label="Secs",
-        width=60,
+        width=80,
         height=40,
-        text_size= 8,
+        text_size= 12,
         label_style=ft.TextStyle(size=8),
         options=[ft.dropdown.Option(str(i)) for i in range(0, 60)]
     )
@@ -99,17 +123,24 @@ def main_past_activities(page: ft.Page):
                                 input_filter=ft.InputFilter(allow=True, regex_string=r"^[0-9]*$",
                                 replacement_string=""), height=40,width=120)
     distance_input = ft.TextField(
-                                hint_text="Distance",input_filter=ft.InputFilter(allow=True,regex_string=r"^\d*\.?\d*$",
+                                hint_text="Distance (km)",input_filter=ft.InputFilter(allow=True,regex_string=r"^\d*\.?\d*$",
                                 replacement_string=""),height=40,width=120) # only allow numerical values + "."
 
-    duration = ft.Row([ft.Text("Time (Optional)"),hours, minutes, seconds],expand=True)
+    duration = ft.Row([hours, minutes, seconds],expand=True)
     reps = ft.Row([ft.Text("Reps (Optional)" ),reps_input],expand=True)
     distance = ft.Row([ft.Text("Distance (Optional)"),distance_input],expand=True)
 
-    save_activity = ft.FloatingActionButton(content=ft.Text("FINISH", weight=ft.FontWeight.BOLD, color=ft.Colors.WHITE),
-                                         bgcolor=ft.Colors.RED, width=140)
+    save_button = ft.FloatingActionButton(content=ft.Text("FINISH", weight=ft.FontWeight.BOLD, color=ft.Colors.WHITE),
+                                         bgcolor=ft.Colors.RED, width=140,on_click=save_and_finish)
+    top_back_button = ft.Container(
+        content=ft.FloatingActionButton(
+            content=ft.Icon(ft.Icons.ARROW_BACK, color=ft.Colors.BLACK),
+            bgcolor=ft.Colors.WHITE,
+            on_click=go_back,
+            mini=True
+        ),
+    )
 
-
-    enter_past_exercises = ft.Column(controls=[exercise_search,
-                                                calories_input,duration,reps,distance,save_activity])
+    enter_past_exercises = ft.Column(controls=[top_back_button,exercise_search,
+                                                calories_input,duration,reps,distance,save_button])
     return ft.Column(controls=[enter_past_exercises],width=300)
