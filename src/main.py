@@ -2,7 +2,7 @@ import flet as ft
 
 from admin.admin import main_admin
 from auth.authpage import authPage
-from activities.activities import main_activities
+from activities.activities import main_activities, main_activity_detail
 from database.connection import connect
 from home.homepage import main_homepage
 from activities.map import main_map
@@ -26,6 +26,8 @@ def main(page: ft.Page):
                 page.add(main_homepage(page,uid))
             if page.route == "/activities":
                 page.add(main_activities(page))
+            if page.route == "/activity-detail":
+                page.add(main_activity_detail(page))
             if page.route == "/nutrition":
                 page.add(main_nutrition(page,uid))
             if page.route == "/social":

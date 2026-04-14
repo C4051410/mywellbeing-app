@@ -153,6 +153,8 @@ class ActivitiesPage(ft.Column):
                         border_radius=10,
                         padding=5,
                         shadow=ft.BoxShadow(spread_radius=1, blur_radius=5, color=ft.Colors.BLACK12),
+                        ink=True,
+                        on_click=self.make_activity_click(act),
                         content=ft.ListTile(
                             leading=ft.Container(
                                 width=40,
@@ -302,6 +304,12 @@ class ActivitiesPage(ft.Column):
             return f"{secs}s"
 
     # --- EVENT HANDLERS ---
+    def make_activity_click(self, activity):
+        def on_click(e):
+            self.main_page.activity_detail = activity
+            self.main_page.go("/activity-detail")
+        return on_click
+
     def start_activity(self, e):
         self.main_page.go("/map")
 
@@ -344,6 +352,89 @@ class ActivitiesPage(ft.Column):
             )
             self.main_page.update()
 
+class ActivityDetailPage(ft.Column):
+    def __init__(self, page: ft.Page):
+        super().__init__()
+        self.main_page = page
+
+        # get activity that was clicked on
+        act = getattr(page, "activity_detail", None)
+
+        # if no activity is passed return an error
+        if act is None:
+            self.controls = [ft.Text("No activity data found.")]
+            return
+
+        # page title
+        header = ft.Container(
+            padding=ft.padding.only(top=20, left=5, right=10),
+            content=ft.Row(controls=[ft.IconButton(icon=ft.Icons.ARROW_BACK, on_click=self.go_back, icon_color=ft.Colors.BLACK),
+                ft.Text("Activity Detail", size=24, weight=ft.FontWeight.BOLD),
+            ]
+        )
+    )
+        # activity statistics
+        def stat_row(label, value, icon, icon_color=ft.Colors.BLUE):
+            return ft.Container(
+                bgcolor=ft.Colors.WHITE,
+                border_radius=10,
+                padding=15,
+                shadow=ft.BoxShadow(spread_radius=1, blur_radius=5, color=ft.Colors.BLACK12),
+                content=ft.Row(
+                    alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                    controls=[
+                        ft.Row(spacing=8, controls=[
+                            ft.Icon(icon, size=18, color=icon_color),
+                            ft.Text(label, size=13, color=ft.Colors.GREY_600, weight=ft.FontWeight.BOLD),
+                        ]),
+                        ft.Text(value, size=13, weight=ft.FontWeight.BOLD),
+                    ]
+                )
+            )
+
+        stats = ft.Column(spacing=10)
+
+        # fields that will always be present
+        stats.controls.append(stat_row("Type", act.get("type", "—"),  ft.Icons.DIRECTIONS_RUN,  ft.Colors.BLUE))
+        stats.controls.append(stat_row("Date", act.get("date", "—"),  ft.Icons.CALENDAR_TODAY,  ft.Colors.GREY_600))
+        stats.controls.append(stat_row("Duration", act.get("time", "—"),  ft.Icons.TIMER,           ft.Colors.PURPLE))
+
+        dist = act.get("dist")
+        if dist and float(dist) > 0:
+            stats.controls.append(stat_row("Distance", f"{dist} km", ft.Icons.STRAIGHTEN,            ft.Colors.TEAL))
+        if act.get("calories"):
+            stats.controls.append(stat_row("Calories", f"{act['calories']} kcal", ft.Icons.LOCAL_FIRE_DEPARTMENT,  ft.Colors.ORANGE))
+        if act.get("heart_rate"):
+            stats.controls.append(stat_row("Avg Heart Rate", f"{act['heart_rate']} bpm",ft.Icons.FAVORITE,              ft.Colors.RED))
+        if act.get("steps"):
+            stats.controls.append(stat_row("Steps", str(act["steps"]), ft.Icons.DIRECTIONS_WALK,       ft.Colors.GREEN))
+
+        # show where actviity came from
+        stats.controls.append(stat_row("Source", act.get("source", "App"), ft.Icons.INFO_OUTLINE, ft.Colors.GREY_600))
+        nav_bar = NavBar(page)
+
+        content_column = ft.Column(
+            controls=[
+                header,
+                ft.Container(
+                    content=stats,
+                    padding=ft.padding.symmetric(horizontal=15),
+                    margin=ft.margin.only(top=15)
+                ),
+            ],
+            scroll=ft.ScrollMode.AUTO,
+            expand=True,
+        )
+
+        self.controls = [content_column, nav_bar]
+        self.expand = True
+        self.alignment = ft.MainAxisAlignment.SPACE_BETWEEN
+
+    def go_back(self, e):
+        self.main_page.go("/activities")
+
+def main_activity_detail(page: ft.Page):
+    return ActivityDetailPage(page)
 
 def main_activities(page: ft.Page):
     return ActivitiesPage(page)
