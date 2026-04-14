@@ -63,13 +63,41 @@ def main_past_activities(page: ft.Page):
         # waits for list to appear before
         await exercise_search.open_view()
 
-    # display the stored exercises
-    exercise_list = ft.Column()
     # used to enter the exercises
     exercise_search = ft.SearchBar(bar_hint_text="Enter your exercise", controls=search_exercises, expand=True,
                                         on_tap=open_search, on_change=handle_search_change,
                                         view_size_constraints=ft.BoxConstraints(max_height=200, max_width=400))
+    calories_input = ft.TextField(hint_text="Calories",input_filter=ft.InputFilter(allow=True,regex_string=r"^[0-9]*$",replacement_string=""),height=40) # only allow numerical values
+
+    hours = ft.Dropdown(
+        label="Hrs",
+        width=100,
+        height=40,
+        text_size= 8,
+        label_style=ft.TextStyle(size=8),
+        options=[ft.dropdown.Option(str(i)) for i in range(0, 25)]
+    )
+
+    minutes = ft.Dropdown(
+        label="Mins",
+        width=100,
+        height=40,
+        text_size= 8,
+        label_style=ft.TextStyle(size=8),
+        options=[ft.dropdown.Option(str(i)) for i in range(0, 60)]
+    )
+
+    seconds = ft.Dropdown(
+        label="Secs",
+        width=100,
+        height=40,
+        text_size= 8,
+        label_style=ft.TextStyle(size=8),
+        options=[ft.dropdown.Option(str(i)) for i in range(0, 60)]
+    )
+    duration = ft.Row([hours, minutes, seconds],)
+
 
     enter_past_exercises = ft.Column(controls=[ft.Text("Enter Past Exercises"),exercise_search,
-                                                    ])
+                                                calories_input,duration])
     return ft.Stack(controls=[enter_past_exercises])
