@@ -69,22 +69,24 @@ def main_past_activities(page: ft.Page):
         page.go("/activities")
 
     def get_duration():
-        return timedelta(
-            hours=int(hours.value or 0),
-            minutes=int(minutes.value or 0),
-            seconds=int(seconds.value or 0)
-        )
+        h = int(hours.value) or 0
+        m = int(minutes.value) or 0
+        s = int(seconds.value) or 0
+        total = h*3600 + m*60 + s
+        return total
+
+
     def save_and_finish():
-        duration = get_duration()
+        duration_seconds = get_duration()
         if exercise_search.value != "" and calories_input.value != "":
             exercise = exercise_search.value
             calories = calories_input.value
             distance = distance_input.value or None
             reps = reps_input.value or None
-            if duration.total_seconds() == 0:
-                duration = None
+            if duration_seconds == None:
+                duration_seconds = 0
             start_date = datetime.now()
-            save_past_activities(page.user_id,exercise,calories,duration,reps,distance,start_date)
+            save_past_activities(page.user_id,exercise,calories,duration_seconds,reps,distance,start_date)
             page.go("/activities")
 
     # used to enter the exercises

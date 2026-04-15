@@ -154,7 +154,18 @@ class ActivitiesPage(ft.Column):
                 elif act_type == "Walk":
                     subtitle_text = f"{act.get('steps', act['dist'] + ' km')} in {act['time']}"
                 elif act_type == "Workout":
-                    subtitle_text = f"{act.get('calories', '—')} kcal • {act['time']}"
+                    parts = []
+                    if act.get("calories") and int(act["calories"]) > 0:
+                        parts.append(f"{act['calories']} kcal")
+                        # Only show distance for workouts if it exists and is > 0
+                    if act.get("dist") and float(act["dist"]) > 0:
+                        parts.append(f"{act['dist']} km")
+                        # Only show reps for workouts if it exists and is > 0
+                    if act.get("reps") and int(act["reps"]) > 0:
+                        parts.append(f"{act['reps']} reps")
+
+                    parts.append(act["time"])
+                    subtitle_text = " • ".join(parts)
                 else:
                     subtitle_text = act['time']
 
@@ -252,9 +263,11 @@ class ActivitiesPage(ft.Column):
 
             if current_user_id is not None:
                 rows = get_activities(current_user_id)
-                for activity_type, distance_km, start_date, duration_seconds, source in rows:
+                for activity_type, distance_km, start_date, duration_seconds,calories,reps, source in rows:
                     dist = float(distance_km or 0)
                     secs = int(duration_seconds or 0)
+                    cal = int(calories or 0)
+                    reps = int(reps or 0)
 
                     if start_date and start_date >= start_of_week:
                         total_distance += dist
@@ -267,7 +280,9 @@ class ActivitiesPage(ft.Column):
                         "dist": f"{dist:.2f}",
                         "time": self.format_time(secs),
                         "type": activity_type or "Run",
-                        "source": source or "app"
+                        "source": source or "app",
+                        "calories": f"{cal:}",
+                        "reps": f"{reps:}"
                     })
         except Exception as e:
             print(f"Error reading DB activities: {e}")
