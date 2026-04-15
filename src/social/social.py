@@ -7,7 +7,7 @@ import flet as ft
 from components.userpfp import Userpfp
 from components.bottom_nav import NavBar
 from components.responsive import Responsive
-from social.social_service import add_friend_by_username, list_friends
+from social.social_service import add_friend_by_username, list_friends, get_social_overview
 
 #Sizes of all elements on homepage (as a percent of screen)
 page_title_size = 0.1
@@ -25,22 +25,11 @@ class SocialPage(ft.Column):
         self.user_id = user_id
         self.r = Responsive(page)
 
-            # placeholder data
-        self.user_name = "User"
-        self.user_rank = 4
-        self.user_points = 320
-
-        self.leaderboard_data = [
-           {"name": "User A", "points": 520},
-           {"name": "User B", "points": 470},
-           {"name": "User C", "points": 410},
-           {"name": "User", "points": 320},
-                ]
-        self.activity_data = [
-            {"name": "User 1", "activity": "completed a workout", "time": "Today"},
-            {"name": "User 2", "activity": "logged nutrition", "time": "Today"},
-            {"name": "User 3", "activity": "recorded a run", "time": "Yesterday"},
-                ]
+        # Load real social data from the service layer.
+        self.user_rank = "-"
+        self.user_points = 0
+        self.leaderboard_data = []
+        self.activity_data = []
 
         self.page_title = ft.Text(
             value="Social",
@@ -161,49 +150,99 @@ class SocialPage(ft.Column):
         self.spacing = 12
         # Allow the whole page to scroll.
         self.set_widget_size()
-        self.load_leaderboard()
-        self.load_activity()
+        self.load_social_overview()
         self.load_friends()
         page.on_resize = self.resize
 
+
+    def load_social_overview(self):
+        """
+        Load rank, leaderboard, and recent activity from the service layer.
+        """
+        overview = get_social_overview(self.user_id)
+        rank_data = overview["rank"]
+        self.user_rank = rank_data["position"] if rank_data["position"] is not None else "-"
+        self.user_points = rank_data["points"] if rank_data["points"] is not None else 0
+
+        self.leaderboard_data = [
+            {"name": item["username"], "points": item["points"]}
+            for item in overview["leaderboard"]
+        ]
+
+        self.activity_data = [
+            {
+                "name": item["username"],
+                "activity": f"{item['activity_type']}: {item['title']} ({item['calories']} cal)",
+                "time": "Recent"
+            }
+            for item in overview["activity"]
+        ]
+
+        # Refresh the rank card after real data is loaded.
+        self.rank_container.content = ft.Row(
+            alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+            controls=[
+                ft.Text(
+                    f"Rank #{self.user_rank}",
+                    size=20,
+                    weight=ft.FontWeight.BOLD
+                ),
+                ft.Text(f"{self.user_points} pts", size=18)
+            ]
+        )
+
+        self.load_leaderboard()
+        self.load_activity()
+
     # Load leaderboard data into the 3 containers
     def load_leaderboard(self):
-            sorted_users = sorted(
-                self.leaderboard_data,
-                key=lambda x: x["points"],
-                reverse=True
-            )
+        if not self.leaderboard_data:
+            self.first_container.content = ft.Text("No leaderboard data yet.")
+            self.second_container.content = ft.Text("No leaderboard data yet.")
+            self.third_container.content = ft.Text("No leaderboard data yet.")
+            return
 
-            self.first_container.content = ft.Text(
-                f"1. {sorted_users[0]['name']} - {sorted_users[0]['points']} pts"
-            )
+        sorted_users = sorted(
+            self.leaderboard_data,
+            key=lambda x: x["points"],
+            reverse=True
+        )
+        containers = [self.first_container, self.second_container, self.third_container]
+        for i in range(3):
+            if i < len(sorted_users):
+                containers[i].content = ft.Text(
+                    f"{i + 1}. {sorted_users[i]['name']} - {sorted_users[i]['points']} pts"
+                )
+            else:
+                containers[i].content = ft.Text(f"{i + 1}. ---")
 
-            self.second_container.content = ft.Text(
-                f"2. {sorted_users[1]['name']} - {sorted_users[1]['points']} pts"
-            )
 
-            self.third_container.content = ft.Text(
-                f"3. {sorted_users[2]['name']} - {sorted_users[2]['points']} pts"
-            )
 
     # Load activity feed into activity container
     def load_activity(self):
-            activity_controls = []
+        activity_controls = []
 
-            for item in self.activity_data:
-                activity_controls.append(
-                    ft.ListTile(
-                        title=ft.Text(item["name"]),
-                        subtitle=ft.Text(item["activity"]),
-                        trailing=ft.Text(item["time"])
-                    )
-                )
-
-            # Keep the activity list scrollable inside its container.
-            self.activity_container.content = ft.Column(
-                controls=activity_controls,
-                spacing=5,
+        if not self.activity_data:
+            self.activity_container.content = ft.Container(
+                alignment=ft.alignment.center,
+                content=ft.Text("No recent friend activity data yet.")
             )
+            return
+
+        for item in self.activity_data:
+            activity_controls.append(
+                ft.ListTile(
+                    title=ft.Text(item["name"]),
+                    subtitle=ft.Text(item["activity"]),
+                    trailing=ft.Text(item["time"])
+                )
+            )
+
+        # Keep the activity list scrollable inside its container.
+        self.activity_container.content = ft.Column(
+            controls=activity_controls,
+            spacing=5,
+        )
 
     # Load the current user's friends and render them into the friends container
     def load_friends(self):
