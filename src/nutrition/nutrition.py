@@ -13,9 +13,8 @@ from plyer import notification
 from components.userpfp import Userpfp
 from components.bottom_nav import NavBar
 from components.responsive import Responsive
-from src.database.connection import connect
+from nutrition.nutrition_queries import save_foodlog, retrieve_waterlog, save_waterlog,retrieve_foodlog, retrieve_daily_stats, retrieve_user_goals
 
-conn = connect()
 #used to generate the nutrition page
 class NutritionPage(ft.Column):
     #constructor method used to create page
@@ -66,12 +65,7 @@ class NutritionPage(ft.Column):
                                                                    ft.ListTile(title="Salts",subtitle=salts),
                                                                    ft.ListTile(title="Proteins",subtitle=proteins),
                                                                ])) # adds all elements entered to foodlog_list
-            if conn is not None: #checks that database connection is valid
-                cur = conn.cursor()
-                cur.execute("INSERT INTO foodlog (title,calories,salts,proteins,date,mealtype,user_id) VALUES (%s,%s,%s,%s,%s,%s,%s)  ",(food,calories,salts,proteins,str(date.today()),mealtype,user_id,))
-                print("Executed")
-                conn.commit()
-                cur.close()
+            save_foodlog(food,calories,salts,proteins,str(date.today()),mealtype,user_id,)
             notif_status = await check_notification()
             if notif_status == fph.PermissionStatus.GRANTED:
                 notification.notify(
@@ -95,11 +89,7 @@ class NutritionPage(ft.Column):
                 print("Nope")
                 return
             self.waterlog_list.controls.append(ft.ListTile(title=str(date.today()),subtitle=water)) #adds date and amount to tile
-            if conn is not None: #checks database connection is valid
-                cur = conn.cursor()
-                cur.execute("INSERT INTO waterlog (water,date,user_id) VALUES (%s,%s,%s)",(water,str(date.today()),user_id,))
-                conn.commit()
-                cur.close()
+            save_waterlog(water,str(date.today()),user_id,)
             refresh_stats()
             page.overlay.append(ft.SnackBar(
                 content=ft.Text("Water Entered", weight=ft.FontWeight.BOLD), bgcolor=ft.Colors.GREEN, open=True))
@@ -108,65 +98,23 @@ class NutritionPage(ft.Column):
         # used to retrieve posts from database
         def retrieve_posts():
             two_days = date.today() - timedelta(days=2) # used to find two days ago
-            if conn is not None: # makes sure database connection is valid
-                cur = conn.cursor()
-                cur.execute("SELECT title,calories,salts,proteins,mealtype,date FROM foodlog WHERE user_id = %s AND date > (%s) ORDER BY date DESC",(user_id,str(two_days),))
-                rows = cur.fetchall() # retrieves all results from query
-                for data in rows:
-                    self.foodlog_list.controls.append(ft.ExpansionTile(title=data[0],subtitle=str(data[5]) + " " + str(data[4]),
-                                                               controls=[
-                                                                   ft.ListTile(title="Calories",subtitle=str(data[1])),
-                                                                   ft.ListTile(title="Salts",subtitle=str(data[2])),
-                                                                   ft.ListTile(title="Proteins",subtitle=str(data[3])),
-                                                               ])) #takes values from db and display them
-                cur.execute("SELECT water,date FROM waterlog WHERE user_id = %s AND date > (%s) ORDER BY date DESC",(user_id,str(two_days),))
-                rows = cur.fetchall()
-                for data in rows:
-                    self.waterlog_list.controls.append(ft.ListTile(title=str(data[0]) + " ml",subtitle=str(data[1]))) #used to display water values from db
-                cur.close()
-                page.update()
+            f_rows = retrieve_foodlog(user_id,str(two_days))
+            for data in f_rows:
+                self.foodlog_list.controls.append(ft.ExpansionTile(title=data[0],subtitle=str(data[5]) + " " + str(data[4]),
+                                                           controls=[
+                                                               ft.ListTile(title="Calories",subtitle=str(data[1])),
+                                                               ft.ListTile(title="Salts",subtitle=str(data[2])),
+                                                               ft.ListTile(title="Proteins",subtitle=str(data[3])),
+                                                           ])) #takes values from db and display them
+            w_rows = retrieve_waterlog(user_id,str(two_days))
+            for data in w_rows:
+                self.waterlog_list.controls.append(ft.ListTile(title=str(data[0]) + " ml",subtitle=str(data[1]))) #used to display water values from db
 
         retrieve_posts() #used to retrieve posts before creating display
         self.header = ft.Container(content=ft.Row(controls=[ft.Text("Nutrition",size=32,weight=ft.FontWeight.BOLD),self.userpfp],alignment=ft.MainAxisAlignment.SPACE_BETWEEN))
         #used to retrieve daily stats
-        def retrieve_daily_stats():
-            total_c = 0
-            total_s = 0.0
-            total_p = 0.0
-            total_w = 0
-            if conn is not None:
-                cur = conn.cursor()
-                cur.execute("SELECT calories,salts,proteins FROM foodlog WHERE user_id = %s AND date = %s",(user_id,str(date.today()),))
-                rows = cur.fetchall()
-                for data in rows: #retrieves stats from today and totals them
-                    total_c = total_c + data[0]
-                    total_s = total_s + data[1]
-                    total_p = total_p + data[2]
-                cur.execute("SELECT water FROM waterlog WHERE user_id = %s AND date = %s",(user_id,str(date.today()),))
-                rows = cur.fetchall()
-                for data in rows: # find total water from today
-                    total_w = total_w + data[0]
-
-                return total_c, total_s, total_p,total_w # returns all variables
-        #used to retrieve the users set goals
-        def retrieve_user_goals():
-            goal_c = 1
-            goal_s = 1.0
-            goal_p = 1.0
-            goal_w = 1
-            if conn is not None:
-                cur = conn.cursor()
-                cur.execute("SELECT calorie_goal, salts_goal, proteins_goal,water_goal FROM user_stats WHERE user_id = %s",(user_id,))
-                rows = cur.fetchall()
-                for data in rows:
-                    goal_c = data[0]
-                    goal_s = data[1]
-                    goal_p = data[2]
-                    goal_w = data[3]
-                return goal_c, goal_s, goal_p, goal_w
-
-        total_calories, total_salts, total_proteins, total_water = retrieve_daily_stats() #retrieves users totals from today
-        goal_calories, goal_salts, goal_proteins, goal_water = retrieve_user_goals() # retrieves users goals
+        total_calories, total_salts, total_proteins, total_water = retrieve_daily_stats(user_id, date.today()) #retrieves users totals from today
+        goal_calories, goal_salts, goal_proteins, goal_water = retrieve_user_goals(user_id) # retrieves users goals
         self.calories_text = ft.Text(f"{total_calories:.0f} / {goal_calories:.0f}",size=12,weight=ft.FontWeight.BOLD,color=ft.Colors.GREY_400)
         self.calories_bar = ft.ProgressBar(width=100, height=20,color=ft.Colors.ORANGE_400,value=total_calories / goal_calories)
         self.protein_text = ft.Text(f"{total_proteins:.2f} / {goal_proteins:.2f}",size=12, weight=ft.FontWeight.BOLD,color=ft.Colors.GREY_400)
@@ -211,8 +159,8 @@ class NutritionPage(ft.Column):
                                        ])
         )
         def refresh_stats():
-            total_calories, total_salts, total_proteins, total_water = retrieve_daily_stats()
-            goal_calories, goal_salts, goal_proteins, goal_water = retrieve_user_goals()
+            total_calories, total_salts, total_proteins, total_water = retrieve_daily_stats(user_id,date.today())
+            goal_calories, goal_salts, goal_proteins, goal_water = retrieve_user_goals(user_id)
             self.calories_text.value = f"{total_calories:.0f} / {goal_calories:.0f}"
             self.protein_text.value = f"{total_proteins:.2f} / {goal_proteins:.2f}"
             self.salts_text.value = f"{total_salts:.2f} / {goal_salts:.2f}"

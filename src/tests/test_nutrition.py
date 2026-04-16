@@ -1,6 +1,7 @@
 import sys
 import types
-from unittest.mock import MagicMock
+from datetime import date
+from unittest.mock import MagicMock, patch
 
 
 sys.modules['src.database'] = MagicMock()
@@ -54,6 +55,11 @@ sys.modules['UI.components.responsive'] = MagicMock()
 import nutrition.nutrition as nutrition_module
 from nutrition.nutrition import main_nutrition
 
+MOCK_FOOD_LOG = [("Chicken Burger", 800, 3.2, 25.0, "Dinner", date.today())]
+MOCK_WATER_LOG = [(500, date.today())]
+MOCK_DAILY_STATS = (500, 2.5, 10.0, 1000) # total_c, total_s, total_p, total_w
+MOCK_GOALS = (2000, 6.0, 15.0, 2000)      # goal_c, goal_s, goal_p, goal_w
+
 # Inject mock connection into the module
 nutrition_module.conn = mock_conn
 
@@ -67,9 +73,13 @@ class MockPage:
 
 @pytest.fixture
 def nutrition_page():
-    nutrition_module.conn = mock_conn
-    page = MockPage()
-    return main_nutrition(page, user_id=1)
+    with patch("nutrition.nutrition.retrieve_foodlog", return_value=MOCK_FOOD_LOG), \
+            patch("nutrition.nutrition.retrieve_waterlog", return_value=MOCK_WATER_LOG), \
+            patch("nutrition.nutrition.retrieve_daily_stats", return_value=MOCK_DAILY_STATS), \
+            patch("nutrition.nutrition.retrieve_user_goals", return_value=MOCK_GOALS):
+            nutrition_module.conn = mock_conn
+            page = MockPage()
+            return main_nutrition(page, user_id=1)
 
 def test_nutrition_initial_load(nutrition_page):
     assert not isinstance(nutrition_page, str)
@@ -84,4 +94,4 @@ def test_logs_display_correctly(nutrition_page):
     food_list = scrollable.controls[4].controls[0]
     burger_tile = food_list.controls[0]
     assert burger_tile.title == "Chicken Burger"
-    assert "2026-03-18" in burger_tile.subtitle
+    assert str(date.today()) in burger_tile.subtitle
