@@ -1,0 +1,23 @@
+exercise_name,category_id,fields,labels
+Push-ups,3,"reps,sets","Reps,Sets"
+Squats,3,"reps,sets","Reps,Sets"
+Lunges,3,"reps,sets","Reps,Sets"
+Plank,4,duration,Duration (sec)
+Burpees,3,"reps,sets","Reps,Sets"
+Mountain Climbers,3,"reps,sets","Reps,Sets"
+Jumping Jacks,3,"reps,sets","Reps,Sets"
+Sit-ups,3,"reps,sets","Reps,Sets"
+Crunches,3,"reps,sets","Reps,Sets"
+Glute Bridges,3,"reps,sets","Reps,Sets"
+Tricep Dips,3,"reps,sets","Reps,Sets"
+High Knees,4,duration,Duration (sec)
+Russian Twists,3,"reps,sets","Reps,Sets"
+Leg Raises,3,"reps,sets","Reps,Sets"
+Bicycle Crunches,3,"reps,sets","Reps,Sets"
+Calf Raises,3,"reps,sets","Reps,Sets"
+Supermans,3,"reps,sets","Reps,Sets"
+Wall Sit,4,duration,Duration (sec)
+Hip Thrusts,2,"reps,sets,weight","Reps,Sets,Weight (kg)"
+Side Plank,4,duration,Duration (sec)
+Running,1,"distance,duration","Distance (km),Duration (min)"
+Walking,1,"distance,duration","Distance (km),Duration (min)"

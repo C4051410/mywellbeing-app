@@ -6,6 +6,7 @@ from activities.activities import main_activities, main_activity_detail
 from database.connection import connect
 from home.homepage import main_homepage
 from activities.map import main_map
+from activities.past_activities import main_past_activities
 from moderator.moderator import main_moderator
 from nutrition.nutrition import main_nutrition
 from settings.settings import main_settings
@@ -36,6 +37,8 @@ def main(page: ft.Page):
                 page.add(main_settings(page))
             if page.route == "/map":
                     page.add(main_map(page))
+            if page.route == "/past_activities":
+                page.add(main_past_activities(page))
             if page.route == "/account-settings":
                 page.add(main_account_settings(page, getattr(page, "user_id", None)))
 

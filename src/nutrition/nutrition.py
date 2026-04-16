@@ -156,7 +156,7 @@ class NutritionPage(ft.Column):
             goal_w = 1
             if conn is not None:
                 cur = conn.cursor()
-                cur.execute("SELECT calories_goal, salts_goal, proteins_goal,water_goal FROM user_stats WHERE user_id = %s",(user_id,))
+                cur.execute("SELECT calorie_goal, salts_goal, proteins_goal,water_goal FROM user_stats WHERE user_id = %s",(user_id,))
                 rows = cur.fetchall()
                 for data in rows:
                     goal_c = data[0]
