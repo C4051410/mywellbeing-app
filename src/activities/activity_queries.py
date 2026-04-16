@@ -23,7 +23,7 @@ def save_past_activities(user_id, title,calories,duration_seconds,reps,distance,
 def get_activities(user_id):
     conn = connect()
     cur = conn.cursor()
-    cur.execute("SELECT activity_type, distance_km, start_date, duration_seconds,calories,reps, source FROM workouts "
+    cur.execute("SELECT title,activity_type, distance_km, start_date, duration_seconds,calories,reps, source FROM workouts "
                 "WHERE user_id = %s ORDER BY start_date DESC NULLS LAST, id DESC", (user_id,))
     rows = cur.fetchall()
     cur.close()

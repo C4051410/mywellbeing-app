@@ -218,7 +218,7 @@ class ActivitiesPage(ft.Column):
                                     ]
                                 )
                             ),
-                            title=ft.Text(f"{act['type']} • {act['date']}", weight=ft.FontWeight.BOLD, size=13, max_lines=1),
+                            title=ft.Text(f"{act['title']} • {act['date']}", weight=ft.FontWeight.BOLD, size=13, max_lines=1),
                             subtitle=ft.Text(subtitle_text, color=ft.Colors.GREY_600, size=12),
                         )
                     )
@@ -263,7 +263,7 @@ class ActivitiesPage(ft.Column):
 
             if current_user_id is not None:
                 rows = get_activities(current_user_id)
-                for activity_type, distance_km, start_date, duration_seconds,calories,reps, source in rows:
+                for title,activity_type, distance_km, start_date, duration_seconds,calories,reps, source in rows:
                     dist = float(distance_km or 0)
                     secs = int(duration_seconds or 0)
                     cal = int(calories or 0)
@@ -275,6 +275,7 @@ class ActivitiesPage(ft.Column):
                         total_runs += 1
 
                     activities_list.append({
+                        "title": title,
                         "date": start_date.strftime("%b %d, %H:%M") if start_date else "No date",
                         "datetime": start_date,
                         "dist": f"{dist:.2f}",
