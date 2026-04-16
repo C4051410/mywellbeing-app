@@ -1,7 +1,7 @@
 from datetime import datetime
 import flet as ft
 from plyer import notification
-from src.activities.activity_queries import  save_past_activities
+from activities.activity_queries import  save_past_activities
 
 exercises = [
     "Push-ups",
