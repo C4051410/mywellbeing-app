@@ -1,6 +1,6 @@
 from datetime import datetime
 import flet as ft
-from datetime import timedelta
+from plyer import notification
 from src.activities.activity_queries import  save_past_activities
 
 exercises = [
@@ -87,6 +87,12 @@ def main_past_activities(page: ft.Page):
                 duration_seconds = 0
             start_date = datetime.now()
             save_past_activities(page.user_id,exercise,calories,duration_seconds,reps,distance,start_date)
+            notification.notify(
+                title = "Activity Logged",
+                message = f"{exercise} Recorded",
+                app_name = "MyWellBeing"
+
+            )
             page.go("/activities")
 
     # used to enter the exercises
