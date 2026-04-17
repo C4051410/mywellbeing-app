@@ -437,6 +437,8 @@ class ActivityDetailPage(ft.Column):
             stats.controls.append(stat_row("Calories", f"{act['calories']} kcal", ft.Icons.LOCAL_FIRE_DEPARTMENT,  ft.Colors.ORANGE))
         if act.get("heart_rate"):
             stats.controls.append(stat_row("Avg Heart Rate", f"{act['heart_rate']} bpm",ft.Icons.FAVORITE,              ft.Colors.RED))
+        if act.get("reps") and float(act.get("reps")) > 0:
+            stats.controls.append(stat_row("Reps",f"{act['reps']} reps",ft.Icons.REPEAT,ft.Colors.YELLOW))
         if act.get("steps"):
             stats.controls.append(stat_row("Steps", str(act["steps"]), ft.Icons.DIRECTIONS_WALK,       ft.Colors.GREEN))
 
