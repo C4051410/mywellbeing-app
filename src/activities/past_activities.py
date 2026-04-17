@@ -69,8 +69,16 @@ def main_past_activities(page: ft.Page):
         page.go("/activities")
 
     def get_duration():
-        h = int(hours.value) or 0
-        m = int(minutes.value) or 0
+        h = hours.value
+        if h is not None:
+            h = int(hours.value)
+        else:
+            h = 0
+        m = hours.value
+        if m is not None:
+            m = int(minutes.value)
+        else:
+            m = 0
         s = int(seconds.value) or 0
         total = h*3600 + m*60 + s
         return total
