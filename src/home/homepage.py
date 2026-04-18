@@ -9,7 +9,8 @@ from components.userpfp import Userpfp
 from components.bottom_nav import NavBar
 from components.responsive import Responsive
 from database.user_queries import get_user
-from home.home_queries import retrieve_daily_stats
+from flet import ScrollMode
+from home.home_queries import retrieve_daily_stats, retrieve_friends_activities
 
 #Sizes of all elements on homepage (as percent of screen)
 welcome_text_size = 0.1
@@ -63,6 +64,16 @@ class WorkoutApp(ft.Column):
         self.protein_text = ft.Text(f"Protein: {daily_proteins} / {protein_goal} g",size=self.r.w(widget_text_size))
         self.water_text = ft.Text(f"Water: {daily_water} / {water_goal} ml",size=self.r.w(widget_text_size))
 
+        friends_data = retrieve_friends_activities(user_id,date.today())
+        friends_list = []
+        for name, activity in friends_data:
+            print(name + " " + activity)
+            friends_list.append(
+                ft.ListTile(title=ft.Text(name),
+                            subtitle=ft.Text(activity),
+                            dense=True,
+                            visual_density=ft.VisualDensity.COMPACT)
+            )
 
         #Steps widget
         self.steps_container = ft.Container(
@@ -89,9 +100,21 @@ class WorkoutApp(ft.Column):
 
         #Friends widget
         self.friends_container = ft.Container(
-            bgcolor = ft.Colors.BLUE_300
+            bgcolor = ft.Colors.BLUE_300,
+            clip_behavior=ft.ClipBehavior.HARD_EDGE,
+            content= ft.Column(
+                controls=friends_list,
+                scroll = ft.ScrollMode.ALWAYS,
+                spacing = 0
+            )
         )
-
+        if friends_list == []:
+            self.friends_container = ft.Container(
+                bgcolor = ft.Colors.BLUE_300,
+                clip_behavior=ft.ClipBehavior.HARD_EDGE,
+                content= ft.Column(
+                    controls = [ft.Text("No Friends Have Posted An Activity")])
+            )
         #Streak widget
         self.streak_container = ft.Container(
             border=ft.Border.all(width=2, color=ft.Colors.GREY_400)

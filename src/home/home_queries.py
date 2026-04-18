@@ -19,5 +19,23 @@ def retrieve_daily_stats(user_id,date):
         total_w = total_w + data[0]
     cur.close()
     conn.close()
+    return total_c, total_s, total_p, total_w
 
-    return total_c,total_s,total_p,total_w
+def retrieve_friends_activities(user_id,date):
+    conn = connect()
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT DISTINCT ON (u.username)
+        u.username,w.title
+        FROM friends f
+        JOIN users u ON f.friend_id = u.id
+        JOIN workouts w on u.id = w.user_id
+        WHERE f.user_id = %s AND w.start_date::date = %s
+        ORDER BY u.username, w.id DESC
+    """,(user_id,date,))
+    rows = cur.fetchall()
+    return rows
+
+
+
+
