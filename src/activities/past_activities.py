@@ -74,7 +74,7 @@ def main_past_activities(page: ft.Page):
             h = int(hours.value)
         else:
             h = 0
-        m = hours.value
+        m = minutes.value
         if m is not None:
             m = int(minutes.value)
         else:
