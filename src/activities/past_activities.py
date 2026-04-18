@@ -79,7 +79,11 @@ def main_past_activities(page: ft.Page):
             m = int(minutes.value)
         else:
             m = 0
-        s = int(seconds.value) or 0
+        s = seconds.value
+        if s is not None:
+            s = int(seconds.value)
+        else:
+            s = 0
         total = h*3600 + m*60 + s
         return total
 
