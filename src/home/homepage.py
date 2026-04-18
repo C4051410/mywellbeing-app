@@ -9,7 +9,7 @@ from components.userpfp import Userpfp
 from components.bottom_nav import NavBar
 from components.responsive import Responsive
 from database.user_queries import get_user
-from nutrition.nutrition_queries import retrieve_daily_stats
+from home.home_queries import retrieve_daily_stats
 
 #Sizes of all elements on homepage (as percent of screen)
 welcome_text_size = 0.1
