@@ -36,6 +36,18 @@ def retrieve_friends_activities(user_id,date):
     rows = cur.fetchall()
     return rows
 
+def retrieve_current_streak(user_id):
+    conn = connect()
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT current_streak, longest_streak
+        FROM user_stats 
+        WHERE user_id = %s
+    """,(user_id,))
+    streaks = cur.fetchone()
+    return streaks
+
+
 
 
 
