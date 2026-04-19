@@ -257,7 +257,7 @@ class TestResize:
     ("0", "salts_text"),
     ("0","protein_text"),
      ("0","water_text")]),
-    ((9999, 50, 999, 500),
+    ((9999, 50, 999, 9999),
     [("9999", "calories_text"),
     ("50",   "salts_text"),
     ("999",  "protein_text"),
