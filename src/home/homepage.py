@@ -70,13 +70,14 @@ class WorkoutApp(ft.Column):
         self.water_text = ft.Text(f"Water: {daily_water} / {water_goal} ml",size=self.r.w(widget_text_size))
 
 
-        for name, activity in friends_data:
+        for name, activity, f_streak in friends_data:
             print(name + " " + activity)
             friends_list.append(
                 ft.ListTile(title=ft.Text(name),
                             subtitle=ft.Text(activity),
                             dense=True,
-                            visual_density=ft.VisualDensity.COMPACT)
+                            visual_density=ft.VisualDensity.COMPACT,
+                            trailing = ft.Text(f"Streak : {f_streak}🔥"))
             )
 
         self.current_streak_text = ft.Text(f"Current Streak: {streak[0]}")
