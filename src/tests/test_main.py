@@ -122,18 +122,21 @@ def make_app(
 
 #used to test the text appears
 class TestTextContent:
+    #makes sure the users name appears
     def test_welcome_text_contains_username(self):
         app, _ = make_app()
         assert "TestUser" in app.welcome_text.value
 
+    #makes sure steps appear correctly
+    def test_steps_text_shows_step_count(self):
+        app, _ = make_app()
+        assert "8000" in app.steps_text.value
+
+    # make sure the values appear in the app
     def test_calories_text_shows_consumed_and_goal(self):
         app, _ = make_app()
         assert "1500" in app.calories_text.value
         assert "2500" in app.calories_text.value
-
-    def test_steps_text_shows_step_count(self):
-        app, _ = make_app()
-        assert "8000" in app.steps_text.value
 
     def test_salts_text_shows_values(self):
         app, _ = make_app()
@@ -149,7 +152,7 @@ class TestTextContent:
         app, _ = make_app()
         assert "1800" in app.water_text.value
         assert "2000" in app.water_text.value
-
+    #makes sure the correct streak appears
     def test_streak_texts_show_correct_numbers(self):
         app, _ = make_app()
         assert "5"  in app.current_streak_text.value
@@ -159,7 +162,7 @@ class TestTextContent:
 
 #tests with results are null to show how it can deal with nulltype
 class TestNullSafety:
-
+    #sets all goals to none for testing
     def _user_with_none_goals(self):
         user = list(base_user)
         user[9]  = None   # calories_goal
@@ -169,10 +172,11 @@ class TestNullSafety:
         user[13] = None   # steps
         return tuple(user)
 
+    #makes sure they don't crash the page
     def test_none_goals_do_not_raise(self):
         app, _ = make_app(user_data=self._user_with_none_goals())
         assert app is not None
-
+    #makes sure the goals default
     def test_none_calories_goal_shows_zero(self):
         app, _ = make_app(user_data=self._user_with_none_goals())
         assert "/ 0" in app.calories_text.value
@@ -184,22 +188,23 @@ class TestNullSafety:
 
 #tests friends widget
 class TestFriendsWidget:
+    #makes sure the right number of tiles appear
     def test_friends_container_has_list_tiles_when_friends_present(self):
         app, _ = make_app(friends=user_friends_data)
         tiles = app.friends_container.content.controls
         assert len(tiles) == 2
-
+    #makes sure the name and exercise appears correctly
     def test_friend_tile_shows_name_and_activity(self):
         app, _ = make_app(friends=user_friends_data)
         tile = app.friends_container.content.controls[0]
         assert tile.title.value    == "Alice"
         assert tile.subtitle.value == "Running"
-
+    #makes sure the streak is visible
     def test_friend_tile_shows_streak(self):
         app, _ = make_app(friends=user_friends_data)
         tile = app.friends_container.content.controls[0]
         assert "5" in tile.trailing.value
-
+    #makes sure if no friends it appears corretcly
     def test_empty_friends_shows_fallback_message(self):
         app, _ = make_app(friends=user_friends_empty)
         controls = app.friends_container.content.controls

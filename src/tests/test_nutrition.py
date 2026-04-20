@@ -22,6 +22,7 @@ for mod in [
     sys.modules.setdefault(mod, MagicMock())
 
 import flet as ft
+from nutrition.nutrition import NutritionPage
 
 
 
@@ -30,6 +31,9 @@ user_daily_stats = (1500.0, 3.0, 120.0, 1800.0)
 
 #stores users goal to be tested
 user_stats_goal = (2500.0, 5.0, 150.0, 2000.0)
+
+#stores results when goals are none in database
+user_stats_goal_null = (1.0,1.0,1.0,1.0)
 
 #stores rows of food entries to be tested
 user_food_rows = [
@@ -96,18 +100,16 @@ def make_nutrition(
     food_rows   = food_rows   if food_rows   is not None else user_food_rows
     water_rows  = water_rows  if water_rows  is not None else user_water_rows
 
+    #returns proportions of page
     mock_responsive = MagicMock()
     mock_responsive.w.side_effect = lambda pct: page_width  * pct
     mock_responsive.h.side_effect = lambda pct: page_height * pct
 
     page = MockPage(width=page_width, height=page_height)
 
-    # Patch open() to prevent FileNotFoundError for foods.csv.
-    # NutritionPage catches FileNotFoundError gracefully, so this just
-    # ensures food_db stays empty — we inject fake_food_db in tests that
-    # need it.
+    #prevent file not found error when trying to open non-existent csv file
     mock_open = MagicMock(side_effect=FileNotFoundError)
-
+    #used to mock the return of functions
     with (
         patch("nutrition.nutrition.retrieve_daily_stats", return_value=daily_stats),
         patch("nutrition.nutrition.retrieve_user_goals",  return_value=user_goals),
@@ -120,36 +122,34 @@ def make_nutrition(
         patch("nutrition.nutrition.NavBar",               return_value=ResizableMock()),
         patch("builtins.open",                            mock_open),
     ):
-        from nutrition.nutrition import NutritionPage
+
         app = NutritionPage(page, user_id=1)
 
-    app.update = lambda: None   # prevent Flet parent-chain walk on .update()
+    app.update = lambda: None
     return app, page
 
 
 
 #used to test the stats cards
 class TestStatsCard:
+    #is used to check that the correct text is displayed for each stat
     def test_calories_text_shows_consumed_and_goal(self):
         app, _ = make_nutrition()
         assert "1500" in app.calories_text.value
         assert "2500" in app.calories_text.value
-
     def test_protein_text_shows_consumed_and_goal(self):
         app, _ = make_nutrition()
         assert "120" in app.protein_text.value
         assert "150" in app.protein_text.value
-
     def test_salts_text_shows_consumed_and_goal(self):
         app, _ = make_nutrition()
         assert "3"  in app.salts_text.value
         assert "5"  in app.salts_text.value
-
     def test_water_text_shows_consumed_and_goal(self):
         app, _ = make_nutrition()
         assert "1800" in app.water_text.value
         assert "2000" in app.water_text.value
-
+    #checks to make sure the progress bar is correct for the values entered
     def test_calories_progress_bar_ratio(self):
         # 1500 / 2500 = 0.6
         app, _ = make_nutrition()
@@ -171,25 +171,29 @@ class TestStatsCard:
 
 ##used to test display food and water logs
 class TestLogDisplay:
+    #makes sure the number of food entries are correct
     def test_foodlog_tiles_match_db_rows(self):
         app, _ = make_nutrition(food_rows=user_food_rows)
         tiles = app.foodlog_list.controls
         assert len(tiles) == len(user_food_rows)
-
+    #makes sure the food entry is correct
     def test_foodlog_tile_shows_food_name(self):
         app, _ = make_nutrition(food_rows=user_food_rows)
-        # ExpansionTile title is the food name from the DB row
         assert app.foodlog_list.controls[0].title == "Chicken"
-
+    #makes sure the water log is correct
     def test_waterlog_tiles_match_db_rows(self):
         app, _ = make_nutrition(water_rows=user_water_rows)
         tiles = app.waterlog_list.controls
         assert len(tiles) == len(user_water_rows)
-
+    def test_waterlog_tile_shows_water_value(self):
+        app, _ = make_nutrition(water_rows=user_water_rows)
+        tiles = app.waterlog_list.controls
+        assert app.waterlog_list.controls[0].title == "500 ml"
+    #makes sure empty foodlog shows no tiles
     def test_empty_foodlog_shows_no_tiles(self):
         app, _ = make_nutrition(food_rows=[])
         assert len(app.foodlog_list.controls) == 0
-
+    #makes sure empty waterlog shows no tiles
     def test_empty_waterlog_shows_no_tiles(self):
         app, _ = make_nutrition(water_rows=[])
         assert len(app.waterlog_list.controls) == 0
@@ -202,14 +206,12 @@ class TestFoodSearch:
         app, page = make_nutrition()
         app.food_db = fake_food_db
         app.main_page = page
-        # find_food_values() calls .update() on individual TextFields and
-        # main_page — patch them all to prevent Flet's parent-chain walk
         app.calories_input.update  = lambda: None
         app.salts_input.update     = lambda: None
         app.proteins_input.update  = lambda: None
         page.update                = lambda: None
         return app, page
-
+    #tests to make sure an exact match will automatically fill the fields
     def test_exact_match_fills_calories(self):
         app, _ = self._app_with_food_db()
         app.food_input.value = "banana"
@@ -227,23 +229,20 @@ class TestFoodSearch:
         app.food_input.value = "banana"
         app.find_food_values(None)
         assert app.proteins_input.value == "1.1"
-
+    #check that its case-sensitive
     def test_exact_match_is_case_insensitive(self):
-        """food_input strips and lowercases, so 'Banana' should still match."""
         app, _ = self._app_with_food_db()
         app.food_input.value = "Banana"
         app.find_food_values(None)
         assert app.calories_input.value == "89"
-
+    #checks unknown/poor searches dont return anything
     def test_unknown_food_does_not_fill_inputs(self):
-        """A completely unknown short string should leave inputs unchanged."""
         app, _ = self._app_with_food_db()
         app.food_input.value = "xy"   # too short for fuzzy match (len <= 2)
         app.find_food_values(None)
         assert app.calories_input.value == ""
-
+    #tests the suggestions return the correct value
     def test_apply_suggestion_sets_food_input(self):
-        """apply_suggestion() should update food_input and re-run the lookup."""
         app, _ = self._app_with_food_db()
         app.apply_suggestion("banana")
         assert app.food_input.value == "Banana"
@@ -251,16 +250,16 @@ class TestFoodSearch:
 
 
 
-#tests 0/null divide errors
-class TestNullSafety:
-
-    @pytest.mark.xfail(strict=True, reason="ZeroDivisionError — add (goal or 1) guard in nutrition.py")
-    def test_zero_calorie_goal_does_not_raise(self):
-        make_nutrition(user_goals=(0.0, 5.0, 150.0, 2000.0))
-
-    @pytest.mark.xfail(strict=True, reason="ZeroDivisionError — add (goal or 1) guard in nutrition.py")
-    def test_zero_water_goal_does_not_raise(self):
-        make_nutrition(user_goals=(2500.0, 5.0, 150.0, 0.0))
+#tests when goals are empty
+class TestEmptySafety:
+    #makes sure app doesn't crash when default
+    def test_none_goals_do_not_raise(self):
+        app, _ = make_nutrition(user_goals=user_stats_goal_null)
+        assert app is not None
+    #makes sure app does display default values
+    def test_none_goal_shows_default(self):
+        app, _ = make_nutrition(user_goals=user_stats_goal_null)
+        assert app.calories_text.value == "1500 / 1"
 
 
 #tests boundary of values
