@@ -163,7 +163,7 @@ class TestTextContent:
 #tests with results are null to show how it can deal with nulltype
 class TestNullSafety:
     #sets all goals to none for testing
-    def _user_with_none_goals(self):
+    def user_with_none_goals(self):
         user = list(base_user)
         user[9]  = None   # calories_goal
         user[14] = None   # salts_goal
@@ -174,15 +174,15 @@ class TestNullSafety:
 
     #makes sure they don't crash the page
     def test_none_goals_do_not_raise(self):
-        app, _ = make_app(user_data=self._user_with_none_goals())
+        app, _ = make_app(user_data=self.user_with_none_goals())
         assert app is not None
     #makes sure the goals default
     def test_none_calories_goal_shows_zero(self):
-        app, _ = make_app(user_data=self._user_with_none_goals())
+        app, _ = make_app(user_data=self.user_with_none_goals())
         assert "/ 0" in app.calories_text.value
 
     def test_none_steps_shows_zero(self):
-        app, _ = make_app(user_data=self._user_with_none_goals())
+        app, _ = make_app(user_data=self.user_with_none_goals())
         assert "0" in app.steps_text.value
 
 
@@ -232,7 +232,7 @@ class TestWidgetSizing:
 #tests that window can be resized properly
 
 class TestResize:
-    def _make_responsive_mock(self, page):
+    def make_responsive_mock(self, page):
         mock_r = MagicMock()
         mock_r.w.side_effect = lambda p: page.width  * p
         mock_r.h.side_effect = lambda p: page.height * p
@@ -241,7 +241,7 @@ class TestResize:
     def test_resize_does_not_raise(self):
         app, page = make_app()
         app.update = lambda: None  # prevent Flet walking parent chain
-        with patch("home.homepage.Responsive", return_value=self._make_responsive_mock(page)):
+        with patch("home.homepage.Responsive", return_value=self.make_responsive_mock(page)):
             app.resize(MagicMock())
 
     def test_resize_updates_welcome_text_size(self):
@@ -250,7 +250,7 @@ class TestResize:
         original_size = app.welcome_text.size
 
         page.width = 720
-        with patch("home.homepage.Responsive", return_value=self._make_responsive_mock(page)):
+        with patch("home.homepage.Responsive", return_value=self.make_responsive_mock(page)):
             app.resize(MagicMock())
 
         assert app.welcome_text.size > original_size

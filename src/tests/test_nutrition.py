@@ -92,8 +92,7 @@ def make_nutrition(
     food_rows=None,
     water_rows=None,
     page_width=360,
-    page_height=800,
-):
+    page_height=800,):
     #adds custom data or default if non entered
     daily_stats = daily_stats if daily_stats is not None else user_daily_stats
     user_goals  = user_goals  if user_goals  is not None else user_stats_goal
@@ -202,7 +201,7 @@ class TestLogDisplay:
 
 #tests food search function
 class TestFoodSearch:
-    def _app_with_food_db(self):
+    def app_with_food_db(self):
         app, page = make_nutrition()
         app.food_db = fake_food_db
         app.main_page = page
@@ -213,37 +212,37 @@ class TestFoodSearch:
         return app, page
     #tests to make sure an exact match will automatically fill the fields
     def test_exact_match_fills_calories(self):
-        app, _ = self._app_with_food_db()
+        app, _ = self.app_with_food_db()
         app.food_input.value = "banana"
         app.find_food_values(None)
         assert app.calories_input.value == "89"
 
     def test_exact_match_fills_salts(self):
-        app, _ = self._app_with_food_db()
+        app, _ = self.app_with_food_db()
         app.food_input.value = "banana"
         app.find_food_values(None)
         assert app.salts_input.value == "0.0"
 
     def test_exact_match_fills_proteins(self):
-        app, _ = self._app_with_food_db()
+        app, _ = self.app_with_food_db()
         app.food_input.value = "banana"
         app.find_food_values(None)
         assert app.proteins_input.value == "1.1"
     #check that its case-sensitive
     def test_exact_match_is_case_insensitive(self):
-        app, _ = self._app_with_food_db()
+        app, _ = self.app_with_food_db()
         app.food_input.value = "Banana"
         app.find_food_values(None)
         assert app.calories_input.value == "89"
     #checks unknown/poor searches dont return anything
     def test_unknown_food_does_not_fill_inputs(self):
-        app, _ = self._app_with_food_db()
+        app, _ = self.app_with_food_db()
         app.food_input.value = "xy"   # too short for fuzzy match (len <= 2)
         app.find_food_values(None)
         assert app.calories_input.value == ""
     #tests the suggestions return the correct value
     def test_apply_suggestion_sets_food_input(self):
-        app, _ = self._app_with_food_db()
+        app, _ = self.app_with_food_db()
         app.apply_suggestion("banana")
         assert app.food_input.value == "Banana"
         assert app.calories_input.value == "89"
