@@ -86,25 +86,35 @@ class ActivitiesPage(ft.Column):
 
         record_btn = ft.ElevatedButton(
             content=ft.Row([
-                ft.Icon(ft.Icons.FIBER_MANUAL_RECORD, color=ft.Colors.WHITE),
-                ft.Text("RECORD NEW ACTIVITY", size=14, weight=ft.FontWeight.BOLD, color=ft.Colors.WHITE)
-            ], alignment=ft.MainAxisAlignment.CENTER),
+                ft.Icon(ft.Icons.ADD_CIRCLE_OUTLINE, color=ft.Colors.WHITE, size=14),
+                ft.Text("New Activity", size=12, weight=ft.FontWeight.W_600, color=ft.Colors.WHITE)
+            ], alignment=ft.MainAxisAlignment.CENTER, spacing=6),
             bgcolor=ft.Colors.BLUE,
-            height=50,
-            style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=25)),
+            height=38,
+            expand=True,
+            style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=10)),
             on_click=self.start_activity
         )
 
-
-
-        past_exercises = ft.ElevatedButton(content=ft.Row([
-                ft.Icon(ft.Icons.FIBER_MANUAL_RECORD, color=ft.Colors.WHITE),
-                ft.Text("RECORD PAST ACTIVITY", size=14, weight=ft.FontWeight.BOLD, color=ft.Colors.WHITE)
-            ], alignment=ft.MainAxisAlignment.CENTER),
-            bgcolor=ft.Colors.BLUE,
-            height=50,
-            style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=25)),
+        past_exercises = ft.ElevatedButton(
+            content=ft.Row([
+                ft.Icon(ft.Icons.ADD_CIRCLE_OUTLINE, color=ft.Colors.BLUE, size=14),
+                ft.Text("Manual Activity", size=12, weight=ft.FontWeight.W_600, color=ft.Colors.BLUE)
+            ], alignment=ft.MainAxisAlignment.CENTER, spacing=6),
+            bgcolor=ft.Colors.WHITE,
+            height=38,
+            expand=True,
+            style=ft.ButtonStyle(
+                shape=ft.RoundedRectangleBorder(radius=10),
+                side=ft.BorderSide(color=ft.Colors.BLUE, width=1.5)
+            ),
             on_click=self.past_activity
+        )
+
+        activity_buttons = ft.Row(
+            controls=[record_btn, past_exercises],
+            alignment=ft.MainAxisAlignment.CENTER,
+            spacing=10
         )
         if not activities_list:
             # Empty State
@@ -235,8 +245,7 @@ class ActivitiesPage(ft.Column):
                 header,
                 ft.Container(content=self.strava_button, padding=ft.padding.symmetric(horizontal=15), margin=ft.margin.only(bottom=16)),
                 ft.Container(content=stats_card, padding=ft.padding.symmetric(horizontal=15), margin=ft.margin.only(bottom=16)),
-                ft.Container(content=record_btn, padding=ft.padding.symmetric(horizontal=15), margin=ft.margin.only(bottom=16)),
-                ft.Container(content=past_exercises,padding=ft.padding.symmetric(horizontal=15), margin=ft.margin.only(bottom=16)),
+                ft.Container(content=activity_buttons, padding=ft.padding.symmetric(horizontal=15), margin=ft.margin.only(bottom=16)),
                 ft.Container(content=feed_column, padding=ft.padding.symmetric(horizontal=15), expand=True)
             ],
             scroll=ft.ScrollMode.AUTO,
