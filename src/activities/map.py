@@ -128,7 +128,7 @@ def main_map(page: ft.Page):
 
     # --- BUTTON HANDLERS ---
     def go_back(e):
-        page.go("/home")
+        page.go("/activities")
 
     def recenter_map(e):
         map_ctrl.center = current_gps_loc
