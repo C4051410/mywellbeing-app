@@ -1,97 +1,272 @@
+
+
 import sys
-import types
-from datetime import date
-from unittest.mock import MagicMock, patch
-
-
-sys.modules['src.database'] = MagicMock()
-sys.modules['src.database.connection'] = MagicMock()
-
-# 2. Clear out the mocks from test_main so we use the REAL nutrition code
-for mod in ['nutrition.nutrition', 'nutrition']:
-    if mod in sys.modules:
-        del sys.modules[mod]
-
+from unittest.mock import MagicMock, patch, call
 import pytest
+
+
+#used to stop functions and components which would stop test from working
+sys.modules.setdefault("psycopg2", MagicMock())
+sys.modules.setdefault("flet_permission_handler", MagicMock())
+sys.modules.setdefault("plyer", MagicMock())
+sys.modules.setdefault("plyer.notification", MagicMock())
+
+for mod in [
+    "components.userpfp",
+    "components.bottom_nav",
+    "components.responsive",
+    "database.connection",
+    "database.user_queries",
+    "nutrition.nutrition_queries",
+]:
+    sys.modules.setdefault(mod, MagicMock())
+
 import flet as ft
+from nutrition.nutrition import NutritionPage
 
-# 3. Standard Mocks for DB and UI components
-ft.run = lambda *args, **kwargs: None
-mock_db = MagicMock()
-mock_conn = MagicMock()
-mock_cur = MagicMock()
-mock_db.connect.return_value = mock_conn
-mock_conn.cursor.return_value = mock_cur
 
-# Mock data rows
-mock_food_row = [("Chicken Burger", 800, 3.2, 25.0, "Dinner", "2026-03-18")]
-mock_water_rows = [(500, "2026-03-16")]
 
-def get_mock_responses():
-    yield mock_food_row             # food logs
-    yield mock_water_rows           # water logs
-    yield [(500, 2.5, 10)]          # daily stats (food)
-    yield [(1000,)]                 # daily stats (water)
-    yield [(2000, 6.0, 15.0, 2000)] # user goals
+#stores users stats to be tested
+user_daily_stats = (1500.0, 3.0, 120.0, 1800.0)
 
-def fresh_side_effect(*args, **kwargs):
-    if not hasattr(fresh_side_effect, "gen"):
-        fresh_side_effect.gen = get_mock_responses()
-    try:
-        return next(fresh_side_effect.gen)
-    except StopIteration:
-        fresh_side_effect.gen = get_mock_responses()
-        return next(fresh_side_effect.gen)
+#stores users goal to be tested
+user_stats_goal = (2500.0, 5.0, 150.0, 2000.0)
 
-mock_cur.fetchall.side_effect = fresh_side_effect
+#stores results when goals are none in database
+user_stats_goal_null = (1.0,1.0,1.0,1.0)
 
-# Mock dependencies
-sys.modules['psycopg2'] = mock_db
-sys.modules['UI.components.userpfp'] = MagicMock()
-sys.modules['UI.components.bottom_nav'] = MagicMock()
-sys.modules['UI.components.responsive'] = MagicMock()
+#stores rows of food entries to be tested
+user_food_rows = [
+    ("Chicken", 300, 1.2, 30.0, "Lunch", "2026-01-01"),
+    ("Rice",    200, 0.5, 5.0,  "Dinner", "2026-01-01"),
+]
 
-# 4. Now import the real logic
-import nutrition.nutrition as nutrition_module
-from nutrition.nutrition import main_nutrition
+#stores rows of water entries to be tested
+user_water_rows = [
+    (500, "2026-01-01"),
+    (300, "2026-01-01"),
+]
 
-MOCK_FOOD_LOG = [("Chicken Burger", 800, 3.2, 25.0, "Dinner", date.today())]
-MOCK_WATER_LOG = [(500, date.today())]
-MOCK_DAILY_STATS = (500, 2.5, 10.0, 1000) # total_c, total_s, total_p, total_w
-MOCK_GOALS = (2000, 6.0, 15.0, 2000)      # goal_c, goal_s, goal_p, goal_w
+#used to store a fake db to test stored foods
+fake_food_db = {
+    "banana": {"name": "Banana", "calories": "89",  "salts": "0.0", "proteins": "1.1"},
+    "chicken": {"name": "Chicken", "calories": "239", "salts": "0.8", "proteins": "27.0"},
+}
 
-# Inject mock connection into the module
-nutrition_module.conn = mock_conn
+#used to prevent errors with controls and resize
+class ResizableMock(ft.Container):
+    def resize(self):
+        pass
 
+#create mock page for testing
 class MockPage:
-    def __init__(self):
-        self.controls = []
-        self.height = 800
-        self.width = 360
+    def __init__(self, width=360, height=800):
+        self.width   = width
+        self.height  = height
+        self.platform = ft.PagePlatform.WINDOWS
+        self.web     = False
+        self.on_resize = None
+        self.controls  = []
+        self.overlay   = []
+        self.title     = ""
+        self.window    = MagicMock()
+
+    def add(self, *controls):
+        self.controls.extend(controls)
+
+    def clean(self):
+        self.controls.clear()
+
     def update(self):
         pass
 
-@pytest.fixture
-def nutrition_page():
-    with patch("nutrition.nutrition.retrieve_foodlog", return_value=MOCK_FOOD_LOG), \
-            patch("nutrition.nutrition.retrieve_waterlog", return_value=MOCK_WATER_LOG), \
-            patch("nutrition.nutrition.retrieve_daily_stats", return_value=MOCK_DAILY_STATS), \
-            patch("nutrition.nutrition.retrieve_user_goals", return_value=MOCK_GOALS):
-            nutrition_module.conn = mock_conn
-            page = MockPage()
-            return main_nutrition(page, user_id=1)
+    def run_task(self, coro):
+        pass
 
-def test_nutrition_initial_load(nutrition_page):
-    assert not isinstance(nutrition_page, str)
-    scrollable = nutrition_page.controls[0]
-    stats_card = scrollable.controls[1]
-    row_cal_pro = stats_card.content.controls[2]
-    cal_text = row_cal_pro.controls[0].controls[1].value
-    assert "500 / 2000" in cal_text
 
-def test_logs_display_correctly(nutrition_page):
-    scrollable = nutrition_page.controls[0]
-    food_list = scrollable.controls[4].controls[0]
-    burger_tile = food_list.controls[0]
-    assert burger_tile.title == "Chicken Burger"
-    assert str(date.today()) in burger_tile.subtitle
+
+#used to add data to page
+def make_nutrition(
+    daily_stats=None,
+    user_goals=None,
+    food_rows=None,
+    water_rows=None,
+    page_width=360,
+    page_height=800,):
+    #adds custom data or default if non entered
+    daily_stats = daily_stats if daily_stats is not None else user_daily_stats
+    user_goals  = user_goals  if user_goals  is not None else user_stats_goal
+    food_rows   = food_rows   if food_rows   is not None else user_food_rows
+    water_rows  = water_rows  if water_rows  is not None else user_water_rows
+
+    #returns proportions of page
+    mock_responsive = MagicMock()
+    mock_responsive.w.side_effect = lambda pct: page_width  * pct
+    mock_responsive.h.side_effect = lambda pct: page_height * pct
+
+    page = MockPage(width=page_width, height=page_height)
+
+    #prevent file not found error when trying to open non-existent csv file
+    mock_open = MagicMock(side_effect=FileNotFoundError)
+    #used to mock the return of functions
+    with (
+        patch("nutrition.nutrition.retrieve_daily_stats", return_value=daily_stats),
+        patch("nutrition.nutrition.retrieve_user_goals",  return_value=user_goals),
+        patch("nutrition.nutrition.retrieve_foodlog",     return_value=food_rows),
+        patch("nutrition.nutrition.retrieve_waterlog",    return_value=water_rows),
+        patch("nutrition.nutrition.save_foodlog",         return_value=None),
+        patch("nutrition.nutrition.save_waterlog",        return_value=None),
+        patch("nutrition.nutrition.Responsive",           return_value=mock_responsive),
+        patch("nutrition.nutrition.Userpfp",              return_value=ResizableMock()),
+        patch("nutrition.nutrition.NavBar",               return_value=ResizableMock()),
+        patch("builtins.open",                            mock_open),
+    ):
+
+        app = NutritionPage(page, user_id=1)
+
+    app.update = lambda: None
+    return app, page
+
+
+
+#used to test the stats cards
+class TestStatsCard:
+    #is used to check that the correct text is displayed for each stat
+    def test_calories_text_shows_consumed_and_goal(self):
+        app, _ = make_nutrition()
+        assert "1500" in app.calories_text.value
+        assert "2500" in app.calories_text.value
+    def test_protein_text_shows_consumed_and_goal(self):
+        app, _ = make_nutrition()
+        assert "120" in app.protein_text.value
+        assert "150" in app.protein_text.value
+    def test_salts_text_shows_consumed_and_goal(self):
+        app, _ = make_nutrition()
+        assert "3"  in app.salts_text.value
+        assert "5"  in app.salts_text.value
+    def test_water_text_shows_consumed_and_goal(self):
+        app, _ = make_nutrition()
+        assert "1800" in app.water_text.value
+        assert "2000" in app.water_text.value
+    #checks to make sure the progress bar is correct for the values entered
+    def test_calories_progress_bar_ratio(self):
+        # 1500 / 2500 = 0.6
+        app, _ = make_nutrition()
+        assert app.calories_bar.value == pytest.approx(1500 / 2500)
+
+    def test_protein_progress_bar_ratio(self):
+        app, _ = make_nutrition()
+        assert app.protein_bar.value == pytest.approx(120 / 150)
+
+    def test_salts_progress_bar_ratio(self):
+        app, _ = make_nutrition()
+        assert app.salts_bar.value == pytest.approx(3 / 5)
+
+    def test_water_progress_bar_ratio(self):
+        app, _ = make_nutrition()
+        assert app.water_bar.value == pytest.approx(1800 / 2000)
+
+
+
+##used to test display food and water logs
+class TestLogDisplay:
+    #makes sure the number of food entries are correct
+    def test_foodlog_tiles_match_db_rows(self):
+        app, _ = make_nutrition(food_rows=user_food_rows)
+        tiles = app.foodlog_list.controls
+        assert len(tiles) == len(user_food_rows)
+    #makes sure the food entry is correct
+    def test_foodlog_tile_shows_food_name(self):
+        app, _ = make_nutrition(food_rows=user_food_rows)
+        assert app.foodlog_list.controls[0].title == "Chicken"
+    #makes sure the water log is correct
+    def test_waterlog_tiles_match_db_rows(self):
+        app, _ = make_nutrition(water_rows=user_water_rows)
+        tiles = app.waterlog_list.controls
+        assert len(tiles) == len(user_water_rows)
+    def test_waterlog_tile_shows_water_value(self):
+        app, _ = make_nutrition(water_rows=user_water_rows)
+        tiles = app.waterlog_list.controls
+        assert app.waterlog_list.controls[0].title == "500 ml"
+    #makes sure empty foodlog shows no tiles
+    def test_empty_foodlog_shows_no_tiles(self):
+        app, _ = make_nutrition(food_rows=[])
+        assert len(app.foodlog_list.controls) == 0
+    #makes sure empty waterlog shows no tiles
+    def test_empty_waterlog_shows_no_tiles(self):
+        app, _ = make_nutrition(water_rows=[])
+        assert len(app.waterlog_list.controls) == 0
+
+
+
+#tests food search function
+class TestFoodSearch:
+    def app_with_food_db(self):
+        app, page = make_nutrition()
+        app.food_db = fake_food_db
+        app.main_page = page
+        app.calories_input.update  = lambda: None
+        app.salts_input.update     = lambda: None
+        app.proteins_input.update  = lambda: None
+        page.update                = lambda: None
+        return app, page
+    #tests to make sure an exact match will automatically fill the fields
+    def test_exact_match_fills_calories(self):
+        app, _ = self.app_with_food_db()
+        app.food_input.value = "banana"
+        app.find_food_values(None)
+        assert app.calories_input.value == "89"
+
+    def test_exact_match_fills_salts(self):
+        app, _ = self.app_with_food_db()
+        app.food_input.value = "banana"
+        app.find_food_values(None)
+        assert app.salts_input.value == "0.0"
+
+    def test_exact_match_fills_proteins(self):
+        app, _ = self.app_with_food_db()
+        app.food_input.value = "banana"
+        app.find_food_values(None)
+        assert app.proteins_input.value == "1.1"
+    #check that its case-sensitive
+    def test_exact_match_is_case_insensitive(self):
+        app, _ = self.app_with_food_db()
+        app.food_input.value = "Banana"
+        app.find_food_values(None)
+        assert app.calories_input.value == "89"
+    #checks unknown/poor searches dont return anything
+    def test_unknown_food_does_not_fill_inputs(self):
+        app, _ = self.app_with_food_db()
+        app.food_input.value = "xy"   # too short for fuzzy match (len <= 2)
+        app.find_food_values(None)
+        assert app.calories_input.value == ""
+    #tests the suggestions return the correct value
+    def test_apply_suggestion_sets_food_input(self):
+        app, _ = self.app_with_food_db()
+        app.apply_suggestion("banana")
+        assert app.food_input.value == "Banana"
+        assert app.calories_input.value == "89"
+
+
+
+#tests when goals are empty
+class TestEmptySafety:
+    #makes sure app doesn't crash when default
+    def test_none_goals_do_not_raise(self):
+        app, _ = make_nutrition(user_goals=user_stats_goal_null)
+        assert app is not None
+    #makes sure app does display default values
+    def test_none_goal_shows_default(self):
+        app, _ = make_nutrition(user_goals=user_stats_goal_null)
+        assert app.calories_text.value == "1500 / 1"
+
+
+#tests boundary of values
+@pytest.mark.parametrize("stats,goals,attr,expected", [
+    ((0.0, 0.0, 0.0, 0.0), (2500.0, 5.0, 150.0, 2000.0), "calories_text", "0"),
+    ((2500.0, 5.0, 150.0, 2000.0), (2500.0, 5.0, 150.0, 2000.0), "calories_text", "2500"),
+    ((1000.0, 2.5, 80.0, 900.0), (2500.0, 5.0, 150.0, 2000.0), "water_text", "900"),
+])
+def test_stat_values_render_correctly(stats, goals, attr, expected):
+    app, _ = make_nutrition(daily_stats=stats, user_goals=goals)
+    assert expected in getattr(app, attr).value
