@@ -275,7 +275,7 @@ class SocialPage(ft.Column):
     def handle_add_friend(self, e):
         entered_username = self.friend_username_input.value
 
-        # Call the service layer in the UI.
+        # Call the service layer instead of querying the database directly in the UI.
         result_message = add_friend_by_username(self.user_id, entered_username)
         # Show feedback to the user.
         self.this_page.snack_bar = ft.SnackBar(
@@ -284,8 +284,9 @@ class SocialPage(ft.Column):
         self.this_page.snack_bar.open = True
         # Clear the input after submission for a cleaner user experience.
         self.friend_username_input.value = ""
-        # Reload the list so newly added friends appear immediately.
+        # Reload both the friend list and the social overview so the page reflects the new friendship immediately.
         self.load_friends()
+        self.load_social_overview()
 
         self.this_page.update()
         self.update()
