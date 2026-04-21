@@ -9,7 +9,7 @@ import flet as ft
 from components.userpfp import Userpfp
 from components.bottom_nav import NavBar
 from components.responsive import Responsive
-from nutrition.nutrition_queries import save_foodlog, retrieve_waterlog, save_waterlog,retrieve_foodlog, retrieve_daily_stats, retrieve_user_goals
+from nutrition.nutrition_queries import retrieve_waterlog, retrieve_foodlog, retrieve_daily_stats, retrieve_user_goals
 
 #used to generate the nutrition page
 class NutritionPage(ft.Column):
@@ -32,18 +32,6 @@ class NutritionPage(ft.Column):
         self.foodlog_list = ft.Column()
         self.waterlog_list = ft.Column()
         self.userpfp = Userpfp(page)
-        def handle_water_submit(e):
-            water = self.water_input.value
-            if not water: #checks water field isn't empty
-                print("Nope")
-                return
-            self.waterlog_list.controls.append(ft.ListTile(title=str(date.today()),subtitle=water)) #adds date and amount to tile
-            save_waterlog(water,str(date.today()),user_id,)
-            refresh_stats()
-            page.overlay.append(ft.SnackBar(
-                content=ft.Text("Water Entered", weight=ft.FontWeight.BOLD), bgcolor=ft.Colors.GREEN, open=True))
-            self.update() #updates the page
-
         # used to retrieve posts from database
         def retrieve_posts():
             two_days = date.today() - timedelta(days=2) # used to find two days ago
@@ -120,19 +108,6 @@ class NutritionPage(ft.Column):
             self.water_bar.value = total_water / goal_water
 
             self.update()
-
-        # creates tile that allow users to enter water logs
-        self.enter_waterlog = ft.ExpansionTile(bgcolor=ft.Colors.WHITE,title="Enter Water",
-                                               collapsed_bgcolor=ft.Colors.GREY_400,
-                                               shape=ft.RoundedRectangleBorder(radius=15),
-                                               collapsed_shape=ft.RoundedRectangleBorder(radius=15),
-                                               controls = [
-                                                   ft.Text("Enter Amount"),
-                                                   self.water_input,
-                                                   ft.Divider(height=5, color=ft.Colors.TRANSPARENT),
-                                                   ft.ElevatedButton("Enter",on_click=handle_water_submit),
-                                                   ft.Divider(height=5, color=ft.Colors.TRANSPARENT),
-                                               ])
         #used to display food logs in tile
         self.display_foodlog = ft.ExpansionTile(bgcolor=ft.Colors.WHITE,title="Food Logs",
                                                 collapsed_bgcolor=ft.Colors.GREY_400,
@@ -159,11 +134,25 @@ class NutritionPage(ft.Column):
             ),
             on_click=self.enter_foodlog
         )
+        self.enter_water_btn = ft.ElevatedButton(
+            content=ft.Row([
+                ft.Icon(ft.Icons.ADD_CIRCLE_OUTLINE, color=ft.Colors.BLACK, size=14),
+                ft.Text("Enter A Water", size=12, weight=ft.FontWeight.W_600, color=ft.Colors.BLACK)
+            ], alignment=ft.MainAxisAlignment.CENTER, spacing=6),
+            bgcolor=ft.Colors.WHITE,
+            height=38,
+            expand=True,
+            style=ft.ButtonStyle(
+                shape=ft.RoundedRectangleBorder(radius=10),
+                side=ft.BorderSide(color=ft.Colors.BLUE_400, width=1.5)
+            ),
+            on_click=self.enter_water_log
+        )
         scrollable = ft.Column([ #specifies the content which should be allowed to be scrolled
             self.header,
             self.stats_card,
             self.enter_food_btn,
-            self.enter_waterlog,
+            self.enter_water_btn,
             self.display_foodlog,
             self.display_waterlog,
         ],expand=True,scroll=ft.ScrollMode.HIDDEN)
@@ -179,6 +168,9 @@ class NutritionPage(ft.Column):
 
     def enter_foodlog(self,e):
         self.main_page.go("/log-food")
+
+    def enter_water_log(self,e):
+        self.main_page.go("/log-water")
 
 #function called to call upon the page
 def main_nutrition(page: ft.Page,user_id):

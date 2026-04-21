@@ -114,8 +114,6 @@ def make_nutrition(
         patch("nutrition.nutrition.retrieve_user_goals",  return_value=user_goals),
         patch("nutrition.nutrition.retrieve_foodlog",     return_value=food_rows),
         patch("nutrition.nutrition.retrieve_waterlog",    return_value=water_rows),
-        patch("nutrition.nutrition.save_foodlog",         return_value=None),
-        patch("nutrition.nutrition.save_waterlog",        return_value=None),
         patch("nutrition.nutrition.Responsive",           return_value=mock_responsive),
         patch("nutrition.nutrition.Userpfp",              return_value=ResizableMock()),
         patch("nutrition.nutrition.NavBar",               return_value=ResizableMock()),

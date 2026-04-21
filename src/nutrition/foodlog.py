@@ -2,7 +2,6 @@ import csv
 import difflib
 import os
 from datetime import date
-from re import search
 
 from plyer import notification
 
