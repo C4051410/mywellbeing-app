@@ -299,8 +299,8 @@ def get_social_feed(user_id):
 
 def get_leaderboard(user_id):
     """
-    Retrieve a leaderboard for the current user and their friends.
-    For now, score is based on total workout calories.
+    Retrieve a weekly leaderboard for the current user and their friends.
+    Score is calculated based on a combination of calories, distance and duration..
     TODO: upgrade to a more accurate weekly relative effort score
     """
     conn = connect()
@@ -308,20 +308,37 @@ def get_leaderboard(user_id):
     try:
         cur.execute(
             """
-            WITH friend_group AS (SELECT friend_id AS member_id
-                                  FROM friends
-                                  WHERE user_id = %s
+            WITH friend_group AS (
+                SELECT friend_id AS member_id
+                FROM friends
+                WHERE user_id = %s
 
-                                  UNION
+                UNION
 
-                                  SELECT %s AS member_id)
-            SELECT u.id,
-                   u.username,
-                   COALESCE(SUM(w.calories), 0) AS total_points
+                SELECT %s AS member_id
+            ),
+            weekly_workouts AS (
+                SELECT
+                    user_id,
+                    COALESCE(SUM(calories), 0) AS total_calories,
+                    COALESCE(SUM(distance_km), 0) AS total_distance,
+                    COALESCE(SUM(duration_seconds), 0) AS total_seconds
+                FROM workouts
+                WHERE start_date >= date_trunc('week', CURRENT_DATE)
+                GROUP BY user_id
+            )
+            SELECT
+                u.id,
+                u.username,
+                CAST(
+                    COALESCE(ww.total_calories, 0)
+                    + COALESCE(ww.total_distance, 0) * 100
+                    + COALESCE(ww.total_seconds, 0) / 60
+                    AS INTEGER
+                ) AS total_points
             FROM friend_group fg
-                     JOIN users u ON u.id = fg.member_id
-                     LEFT JOIN workouts w ON w.user_id = u.id
-            GROUP BY u.id, u.username
+            JOIN users u ON u.id = fg.member_id
+            LEFT JOIN weekly_workouts ww ON ww.user_id = u.id
             ORDER BY total_points DESC, u.username ASC
             """,
             (user_id, user_id)
