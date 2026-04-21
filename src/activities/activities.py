@@ -86,15 +86,36 @@ class ActivitiesPage(ft.Column):
 
         record_btn = ft.ElevatedButton(
             content=ft.Row([
-                ft.Icon(ft.Icons.FIBER_MANUAL_RECORD, color=ft.Colors.WHITE),
-                ft.Text("RECORD NEW ACTIVITY", size=14, weight=ft.FontWeight.BOLD, color=ft.Colors.WHITE)
-            ], alignment=ft.MainAxisAlignment.CENTER),
+                ft.Icon(ft.Icons.ADD_CIRCLE_OUTLINE, color=ft.Colors.WHITE, size=14),
+                ft.Text("New Activity", size=12, weight=ft.FontWeight.W_600, color=ft.Colors.WHITE)
+            ], alignment=ft.MainAxisAlignment.CENTER, spacing=6),
             bgcolor=ft.Colors.BLUE,
-            height=50,
-            style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=25)),
+            height=38,
+            expand=True,
+            style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=10)),
             on_click=self.start_activity
         )
 
+        past_exercises = ft.ElevatedButton(
+            content=ft.Row([
+                ft.Icon(ft.Icons.ADD_CIRCLE_OUTLINE, color=ft.Colors.BLUE, size=14),
+                ft.Text("Manual Activity", size=12, weight=ft.FontWeight.W_600, color=ft.Colors.BLUE)
+            ], alignment=ft.MainAxisAlignment.CENTER, spacing=6),
+            bgcolor=ft.Colors.WHITE,
+            height=38,
+            expand=True,
+            style=ft.ButtonStyle(
+                shape=ft.RoundedRectangleBorder(radius=10),
+                side=ft.BorderSide(color=ft.Colors.BLUE, width=1.5)
+            ),
+            on_click=self.past_activity
+        )
+
+        activity_buttons = ft.Row(
+            controls=[record_btn, past_exercises],
+            alignment=ft.MainAxisAlignment.CENTER,
+            spacing=10
+        )
         if not activities_list:
             # Empty State
             feed_column.controls.append(
@@ -143,7 +164,18 @@ class ActivitiesPage(ft.Column):
                 elif act_type == "Walk":
                     subtitle_text = f"{act.get('steps', act['dist'] + ' km')} in {act['time']}"
                 elif act_type == "Workout":
-                    subtitle_text = f"{act.get('calories', '—')} kcal • {act['time']}"
+                    parts = []
+                    if act.get("calories") and int(act["calories"]) > 0:
+                        parts.append(f"{act['calories']} kcal")
+                        # Only show distance for workouts if it exists and is > 0
+                    if act.get("dist") and float(act["dist"]) > 0:
+                        parts.append(f"{act['dist']} km")
+                        # Only show reps for workouts if it exists and is > 0
+                    if act.get("reps") and int(act["reps"]) > 0:
+                        parts.append(f"{act['reps']} reps")
+
+                    parts.append(act["time"])
+                    subtitle_text = " • ".join(parts)
                 else:
                     subtitle_text = act['time']
 
@@ -198,7 +230,7 @@ class ActivitiesPage(ft.Column):
                                     ]
                                 )
                             ),
-                            title=ft.Text(f"{act['type']} • {act['date']}", weight=ft.FontWeight.BOLD, size=13, max_lines=1),
+                            title=ft.Text(f"{act['title']} • {act['date']}", weight=ft.FontWeight.BOLD, size=13, max_lines=1),
                             subtitle=ft.Text(subtitle_text, color=ft.Colors.GREY_600, size=12),
                         )
                     )
@@ -213,7 +245,7 @@ class ActivitiesPage(ft.Column):
                 header,
                 ft.Container(content=self.strava_button, padding=ft.padding.symmetric(horizontal=15), margin=ft.margin.only(bottom=16)),
                 ft.Container(content=stats_card, padding=ft.padding.symmetric(horizontal=15), margin=ft.margin.only(bottom=16)),
-                ft.Container(content=record_btn, padding=ft.padding.symmetric(horizontal=15), margin=ft.margin.only(bottom=16)),
+                ft.Container(content=activity_buttons, padding=ft.padding.symmetric(horizontal=15), margin=ft.margin.only(bottom=16)),
                 ft.Container(content=feed_column, padding=ft.padding.symmetric(horizontal=15), expand=True)
             ],
             scroll=ft.ScrollMode.AUTO,
@@ -242,9 +274,11 @@ class ActivitiesPage(ft.Column):
 
             if current_user_id is not None:
                 rows = get_activities(current_user_id)
-                for activity_type, distance_km, start_date, duration_seconds, source in rows:
+                for title,activity_type, distance_km, start_date, duration_seconds,calories,reps, source in rows:
                     dist = float(distance_km or 0)
                     secs = int(duration_seconds or 0)
+                    cal = int(calories or 0)
+                    reps = int(reps or 0)
 
                     if start_date and start_date >= start_of_week:
                         total_distance += dist
@@ -252,12 +286,15 @@ class ActivitiesPage(ft.Column):
                         total_runs += 1
 
                     activities_list.append({
+                        "title": title,
                         "date": start_date.strftime("%b %d, %H:%M") if start_date else "No date",
                         "datetime": start_date,
                         "dist": f"{dist:.2f}",
                         "time": self.format_time(secs),
                         "type": activity_type or "Run",
-                        "source": source or "app"
+                        "source": source or "app",
+                        "calories": f"{cal:}",
+                        "reps": f"{reps:}"
                     })
         except Exception as e:
             print(f"Error reading DB activities: {e}")
@@ -312,6 +349,9 @@ class ActivitiesPage(ft.Column):
 
     def start_activity(self, e):
         self.main_page.go("/map")
+
+    def past_activity(self, e):
+        self.main_page.go("/past_activities")
 
     def connect_strava_clicked(self, e):
         try:
@@ -406,6 +446,8 @@ class ActivityDetailPage(ft.Column):
             stats.controls.append(stat_row("Calories", f"{act['calories']} kcal", ft.Icons.LOCAL_FIRE_DEPARTMENT,  ft.Colors.ORANGE))
         if act.get("heart_rate"):
             stats.controls.append(stat_row("Avg Heart Rate", f"{act['heart_rate']} bpm",ft.Icons.FAVORITE,              ft.Colors.RED))
+        if act.get("reps") and float(act.get("reps")) > 0:
+            stats.controls.append(stat_row("Reps",f"{act['reps']} reps",ft.Icons.REPEAT,ft.Colors.YELLOW))
         if act.get("steps"):
             stats.controls.append(stat_row("Steps", str(act["steps"]), ft.Icons.DIRECTIONS_WALK,       ft.Colors.GREEN))
 

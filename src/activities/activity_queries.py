@@ -1,5 +1,59 @@
+from datetime import date, timedelta
 from database.connection import connect
-from database.connection import connect
+
+def retrieve_streak(user_id):
+    conn = connect()
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT current_streak,longest_streak,last_active
+        FROM user_stats
+        WHERE user_id = %s
+    
+    """,(user_id,))
+    row = cur.fetchone()
+    cur.close()
+    conn.close()
+    return row
+
+def update_streak(user_id):
+    conn = connect()
+    cur = conn.cursor()
+    today = date.today()
+    yesterday = today - timedelta(days=1)
+    streak = retrieve_streak(user_id)
+    if streak is None:
+        return
+    current_s, longest_s, last_active = streak
+    if longest_s == 0:
+        longest_s = 1
+    if last_active == today:
+        cur.close()
+        conn.close()
+        return
+    elif last_active == yesterday:
+        current_s = current_s + 1
+        if current_s >= longest_s:
+            longest_s = current_s
+        cur.execute("""
+        UPDATE user_stats
+        SET current_streak = %s, longest_streak = %s, last_active = %s
+        WHERE user_id = %s
+        """,(current_s,longest_s,today,user_id))
+        conn.commit()
+        cur.close()
+        conn.close()
+        return
+    else:
+        cur.execute("""
+        UPDATE user_stats
+        SET current_streak = %s, last_active =%s
+        WHERE user_id = %s
+        """,(1,today,user_id))
+        conn.commit()
+        cur.close()
+        conn.close()
+        return
+
 
 def save_activity(user_id, activity_type, distance_km, duration_seconds, start_date, source="manual"):
     conn = connect()
@@ -10,11 +64,24 @@ def save_activity(user_id, activity_type, distance_km, duration_seconds, start_d
     conn.commit()
     cur.close()
     conn.close()
+    update_streak(user_id)
+
+
+
+def save_past_activities(user_id, title,calories,duration_seconds,reps,distance,start_date, source="manual",activity_type="Workout"):
+    conn = connect()
+    cur = conn.cursor()
+    cur.execute("INSERT INTO workouts (user_id,source,title,activity_type,calories,duration_seconds,reps,distance_km,start_date,duration) VALUES (%s, %s, %s, %s,%s, %s,%s,%s, %s, (%s || ' seconds')::interval)",
+                (user_id, source, title,activity_type, calories, duration_seconds, reps, distance, start_date,duration_seconds))
+    conn.commit()
+    cur.close()
+    conn.close()
+    update_streak(user_id)
 
 def get_activities(user_id):
     conn = connect()
     cur = conn.cursor()
-    cur.execute("SELECT activity_type, distance_km, start_date, duration_seconds, source FROM workouts "
+    cur.execute("SELECT title,activity_type, distance_km, start_date, duration_seconds,calories,reps, source FROM workouts "
                 "WHERE user_id = %s ORDER BY start_date DESC NULLS LAST, id DESC", (user_id,))
     rows = cur.fetchall()
     cur.close()

@@ -1,6 +1,7 @@
 '''
 File used for main homepage that logged-in users will be met with
 '''
+from datetime import date
 
 import flet as ft
 
@@ -8,6 +9,10 @@ from components.userpfp import Userpfp
 from components.bottom_nav import NavBar
 from components.responsive import Responsive
 from database.user_queries import get_user
+from flet import ScrollMode
+from home.home_queries import retrieve_daily_stats, retrieve_friends_activities,retrieve_current_streak
+
+
 
 #Sizes of all elements on homepage (as percent of screen)
 welcome_text_size = 0.1
@@ -27,8 +32,15 @@ class WorkoutApp(ft.Column):
 
         # order of unpacked values: id, username, email, role
         user = user_data[1]
-        calories = user_data[9] or 0
-        steps = user_data[11] or 0
+        calories_goal = user_data[9] or 0
+        salts_goal = user_data[14] or 0
+        protein_goal = user_data[15] or 0
+        water_goal = user_data[16] or 0
+        steps = user_data[13] or 0
+        friends_data = retrieve_friends_activities(user_id,date.today())
+        friends_list = []
+        streak = retrieve_current_streak(user_id)
+        daily_calories,daily_salts,daily_proteins,daily_water = retrieve_daily_stats(user_id,date.today())
 
         #TODO-Add slight variations to the welcome and motivational message
 
@@ -48,14 +60,29 @@ class WorkoutApp(ft.Column):
 
         #Text for steps widget
         self.steps_text = ft.Text(
-            value=f'{steps}',
+            value=f'Daily Steps: {steps}',
             size=self.r.w(widget_text_size)
         )
 
-        self.calories_text = ft.Text(
-            value=f'{calories}',
-            size=self.r.w(widget_text_size)
-        )
+        self.calories_text = ft.Text(f"Calories: {daily_calories} / {calories_goal} Kcal",size=self.r.w(widget_text_size))
+        self.salts_text = ft.Text(f"Salt: {daily_salts} / {salts_goal} g",size=self.r.w(widget_text_size))
+        self.protein_text = ft.Text(f"Protein: {daily_proteins} / {protein_goal} g",size=self.r.w(widget_text_size))
+        self.water_text = ft.Text(f"Water: {daily_water} / {water_goal} ml",size=self.r.w(widget_text_size))
+
+
+        for name, activity, f_streak in friends_data:
+            print(name + " " + activity)
+            friends_list.append(
+                ft.ListTile(title=ft.Text(name),
+                            subtitle=ft.Text(activity),
+                            dense=True,
+                            visual_density=ft.VisualDensity.COMPACT,
+                            trailing = ft.Text(f"Streak : {f_streak}🔥"))
+            )
+
+        self.current_streak_text = ft.Text(f"Current Streak: {streak[0]}")
+        self.longest_streak_text = ft.Text(f"Longest Streak: {streak[1]}")
+
 
         #Steps widget
         self.steps_container = ft.Container(
@@ -68,23 +95,45 @@ class WorkoutApp(ft.Column):
         )
 
         #Calories widget
-        self.calories_container = ft.Container(
+        self.foodlog_container = ft.Container(
             border = ft.Border.all(width=2, color=ft.Colors.GREY_400),
             content=ft.Column(
                 controls=[
-                    self.calories_text
+                    self.calories_text,
+                    self.salts_text,
+                    self.protein_text,
+                    self.water_text
                 ]
             )
         )
 
         #Friends widget
         self.friends_container = ft.Container(
-            bgcolor = ft.Colors.BLUE_300
+            bgcolor = ft.Colors.BLUE_300,
+            clip_behavior=ft.ClipBehavior.HARD_EDGE,
+            content= ft.Column(
+                controls=friends_list,
+                scroll = ft.ScrollMode.ALWAYS,
+                spacing = 0
+            )
         )
-
+        if friends_list == []:
+            self.friends_container = ft.Container(
+                bgcolor = ft.Colors.BLUE_300,
+                clip_behavior=ft.ClipBehavior.HARD_EDGE,
+                content= ft.Column(
+                    controls = [ft.Text("No Friends Have Posted An Activity")])
+            )
         #Streak widget
         self.streak_container = ft.Container(
-            border=ft.Border.all(width=2, color=ft.Colors.GREY_400)
+            border=ft.Border.all(width=2, color=ft.Colors.GREY_400),
+            clip_behavior=ft.ClipBehavior.HARD_EDGE,
+            content = ft.Column(
+                [
+                    self.current_streak_text,
+                    self.longest_streak_text
+                ]
+            )
         )
 
         async def open_url(): # used to create link to UN website, using async to perform the launch in the background
@@ -128,7 +177,7 @@ class WorkoutApp(ft.Column):
                 #vertical_alignment = ft.CrossAxisAlignment.START,
                 controls=[
                     self.steps_container,
-                    self.calories_container
+                    self.foodlog_container
                 ]
             ),
             self.friends_container,
@@ -140,13 +189,13 @@ class WorkoutApp(ft.Column):
         self.expand = True
         #Spread the elements apart
         self.alignment = ft.MainAxisAlignment.SPACE_BETWEEN
-
+        self.this_page = page
+        page.on_resize = self.resize
         #Initially set the widget and text size
         self.set_widget_size()
         self.set_text_size()
 
-        self.this_page = page
-        page.on_resize = self.resize
+
 
     #Set text size of all text on the page
     def set_text_size(self):
@@ -160,14 +209,16 @@ class WorkoutApp(ft.Column):
     def set_widget_size(self):
         #Set width and height of widgets
         #Steps - Square
+        full_width = self.this_page.width * 0.95
         self.steps_container.width = self.r.w(steps_h_size)
         self.steps_container.height = self.r.w(steps_h_size)
         #Calories - Square
-        self.calories_container.width = self.r.w(calories_h_size)
-        self.calories_container.height = self.r.w(calories_h_size)
+        self.foodlog_container.width = self.r.w(calories_h_size)
+        self.foodlog_container.height = self.r.w(calories_h_size)
         #Friends - Rectangle
         self.friends_container.height = self.r.h(friends_v_size)
         #Streak - Long rectange
+        self.streak_container.width = full_width
         self.streak_container.height = self.r.h(streak_v_size)
 
     #Function to be ran when page resizes

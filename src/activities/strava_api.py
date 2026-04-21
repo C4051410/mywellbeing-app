@@ -120,6 +120,7 @@ def format_strava_activities(strava_activities):
             activity_type = "WeightLifting"
 
         formatted.append({
+            "title": act.get("name", "Unamed Activity"),
             "date": formatted_date,
             "datetime": parsed_date,
             "dist": f"{distance_km:.2f}",

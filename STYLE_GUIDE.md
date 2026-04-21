@@ -8,6 +8,7 @@
 | Variables | snake_case |
 | Functions | snake_case |
 | Classes   | PascalCase |
+
 Follows the Python Methodology
 
 ***
@@ -23,4 +24,7 @@ Follows the Python Methodology
 
 ruff is used to enforce a coding standard across python code
 Its information is stored in pyproject.toml.
+It includes stating the maximum line length a code should be
+and what errors should be picked up. It also talks sets the 
+format and complexity.
 
