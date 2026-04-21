@@ -7,7 +7,7 @@ import flet as ft
 from components.userpfp import Userpfp
 from components.bottom_nav import NavBar
 from components.responsive import Responsive
-from social.social_service import add_friend_by_username, list_friends, get_social_overview
+from social.social_service import add_friend_by_username, remove_friend_by_id, list_friends, get_social_overview
 
 #Sizes of all elements on homepage (as a percent of screen)
 page_title_size = 0.1
@@ -285,6 +285,22 @@ class SocialPage(ft.Column):
         # Clear the input after submission for a cleaner user experience.
         self.friend_username_input.value = ""
         # Reload both the friend list and the social overview so the page reflects the new friendship immediately.
+        self.load_friends()
+        self.load_social_overview()
+
+        self.this_page.update()
+        self.update()
+
+    # Remove a friend, then refresh the list
+    def handle_remove_friend(self, friend_id):
+        result_message = remove_friend_by_id(self.user_id, friend_id)
+        # Show feedback to the user after the removal attempt.
+        self.this_page.snack_bar = ft.SnackBar(
+            content=ft.Text(result_message)
+        )
+        self.this_page.snack_bar.open = True
+
+        # Refresh both the friend list and the overview
         self.load_friends()
         self.load_social_overview()
 
