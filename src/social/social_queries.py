@@ -247,75 +247,103 @@ def get_social_feed(user_id):
         )
         friend_rows = cur.fetchall()
         friend_ids = [row[0] for row in friend_rows]
-        # if user has no friends return empty feed
+
+        # If user has no friends return empty feed
         if not friend_ids:
             return []
-        friend_ids_tuple = tuple(friend_ids)
-        # retrieve workout activities
+
+        # Retrieve workout activities
         cur.execute(
-            f"""
-            SELECT
-                'workout' AS activity_type,
-                u.username,
-                w.title,
-                w.calories,
-                w.id,
-                w.user_id
+            """
+            SELECT 'workout' AS activity_type,
+                   u.username,
+                   w.title,
+                   w.calories,
+                   w.id,
+                   w.user_id
             FROM workouts w
-            JOIN users u ON w.user_id = u.id
-            WHERE w.user_id IN %s
-            ORDER BY w.id DESC
-            LIMIT 5
+                     JOIN users u ON w.user_id = u.id
+            WHERE w.user_id = ANY (%s)
+            ORDER BY w.id DESC LIMIT 5
             """,
-            (friend_ids_tuple,)
+            (friend_ids,)
         )
         workouts = cur.fetchall()
-        # retrieve meal activities
+
+        # Retrieve meal activities
         cur.execute(
-            f"""
-            SELECT
-                'meal' AS activity_type,
-                u.username,
-                f.title,
-                f.calories,
-                f.id,
-                f.user_id
+            """
+            SELECT 'meal' AS activity_type,
+                   u.username,
+                   f.title,
+                   f.calories,
+                   f.id,
+                   f.user_id
             FROM foodlog f
-            JOIN users u ON f.user_id = u.id
-            WHERE f.user_id IN %s
-            ORDER BY f.id DESC
-            LIMIT 5
+                     JOIN users u ON f.user_id = u.id
+            WHERE f.user_id = ANY (%s)
+            ORDER BY f.id DESC LIMIT 5
             """,
-            (friend_ids_tuple,)
+            (friend_ids,)
         )
         meals = cur.fetchall()
-        # combine activities
+        # Combine activities
+        # Sort by target id descending as a temporary approximation of recency
         activity_feed = workouts + meals
-        return activity_feed
+        activity_feed.sort(key=lambda row: row[4], reverse=True)
+        return activity_feed[:6]
     finally:
         cur.close()
         conn.close()
 
 
-def get_leaderboard():
+def get_leaderboard(user_id):
     """
-    Retrieve top users based on total workout calories.
+    Retrieve a weekly leaderboard for the current user and their friends.
+    Score is calculated based on a combination of calories, distance and duration..
+    TODO: upgrade to a more accurate weekly relative effort score
     """
     conn = connect()
     cur = conn.cursor()
     try:
-        cur.execute("""
+        cur.execute(
+            """
+            WITH friend_group AS (
+                SELECT friend_id AS member_id
+                FROM friends
+                WHERE user_id = %s
+
+                UNION
+
+                SELECT %s AS member_id
+            ),
+            weekly_workouts AS (
+                SELECT
+                    user_id,
+                    COALESCE(SUM(calories), 0) AS total_calories,
+                    COALESCE(SUM(distance_km), 0) AS total_distance,
+                    COALESCE(SUM(duration_seconds), 0) AS total_seconds
+                FROM workouts
+                WHERE start_date >= date_trunc('week', CURRENT_DATE)
+                GROUP BY user_id
+            )
             SELECT
+                u.id,
                 u.username,
-                SUM(w.calories) AS total_calories
-            FROM workouts w
-            JOIN users u ON w.user_id = u.id
-            GROUP BY u.username
-            ORDER BY total_calories DESC
-            LIMIT 3
-            """)
-        leaderboard = cur.fetchall()
-        return leaderboard
+                CAST(
+                    COALESCE(ww.total_calories, 0)
+                    + COALESCE(ww.total_distance, 0) * 100
+                    + COALESCE(ww.total_seconds, 0) / 60
+                    AS INTEGER
+                ) AS total_points
+            FROM friend_group fg
+            JOIN users u ON u.id = fg.member_id
+            LEFT JOIN weekly_workouts ww ON ww.user_id = u.id
+            ORDER BY total_points DESC, u.username ASC
+            """,
+            (user_id, user_id)
+        )
+        return cur.fetchall()
     finally:
         cur.close()
         conn.close()

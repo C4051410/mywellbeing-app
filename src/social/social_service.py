@@ -81,6 +81,49 @@ def list_friends(user_id):
         })
     return friends
 
+# Social page data
+def get_social_overview(user_id):
+    """
+    Build the data needed by the Social UI page.
+    """
+    leaderboard_rows = get_leaderboard(user_id)
+    activity_rows = get_social_feed(user_id)
+    current_rank = None
+    current_points = 0
+    leaderboard = []
+
+    # Format leaderboard rows and find the current user's position
+    for index, row in enumerate(leaderboard_rows):
+        entry = {
+            "rank": index + 1,
+            "user_id": row[0],
+            "username": row[1],
+            "points": row[2]
+        }
+        leaderboard.append(entry)
+        if row[0] == user_id:
+            current_rank = index + 1
+            current_points = row[2]
+    activity = []
+
+    # Format activity rows
+    for row in activity_rows:
+        activity.append({
+            "activity_type": row[0],
+            "username": row[1],
+            "title": row[2],
+            "calories": row[3],
+            "target_id": row[4],
+            "owner_user_id": row[5]
+        })
+    return {
+        "rank": {
+            "position": current_rank,
+            "points": current_points
+        },
+        "leaderboard": leaderboard[:3],
+        "activity": activity
+    }
 
 # # Social Interaction - like and comments
 # def like_item(user_id, target_type, target_id):
@@ -129,56 +172,3 @@ def list_friends(user_id):
 #         })
 #     return comments
 #
-#
-# # Social page data
-# def get_social_overview(user_id):
-#     """
-#     Main function used by the Social UI page.
-#     """
-#     current_user = get_user_by_id(user_id)
-#     full_leaderboard = get_leaderboard(limit=None)
-#     top_three = full_leaderboard[:3]
-#     activity_rows = get_social_feed(user_id)
-#
-#     # Default values in case the user is not found
-#     current_username = None
-#     current_rank = None
-#
-#     if current_user:
-#         current_username = current_user[1]
-#
-#         # Find the current user's position
-#         for index, row in enumerate(full_leaderboard):
-#             if row[0] == current_username:
-#                 current_rank = index + 1
-#                 break
-#
-#     # Format leaderboard rows for UI
-#     leaderboard = []
-#     for index, row in enumerate(top_three):
-#         leaderboard.append({
-#             "rank": index + 1,
-#             "username": row[0],
-#             "score": row[1]
-#         })
-#
-#     # Format activity feed rows for UI
-#     activity = []
-#     for row in activity_rows:
-#         activity.append({
-#             "activity_type": row[0],
-#             "username": row[1],
-#             "title": row[2],
-#             "calories": row[3],
-#             "target_id": row[4],
-#             "owner_user_id": row[5]
-#         })
-#
-#     return {
-#         "rank": {
-#             "position": current_rank,
-#             "username": current_username
-#         },
-#         "leaderboard": leaderboard,
-#         "activity": activity
-#     }
