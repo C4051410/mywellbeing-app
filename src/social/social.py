@@ -257,12 +257,31 @@ class SocialPage(ft.Column):
             )
             return
 
-        # Build one list tile per friend so the UI is easy to read.
+        # Build one row per friend so the user can also remove a friend directly.
         for friend in friends:
             friend_controls.append(
-                ft.ListTile(
-                    title=ft.Text(friend["username"]),
-                    subtitle=ft.Text(friend["email"])
+                ft.Container(
+                    border=ft.Border(
+                        bottom=ft.BorderSide(1, ft.Colors.GREY_300)
+                    ),
+                    padding=ft.padding.symmetric(vertical=4),
+                    content=ft.Row(
+                        alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                        controls=[
+                            ft.Column(
+                                spacing=0,
+                                controls=[
+                                    ft.Text(friend["username"], weight=ft.FontWeight.BOLD),
+                                    ft.Text(friend["email"], color=ft.Colors.GREY_600),
+                                ]
+                            ),
+                            ft.IconButton(
+                                icon=ft.Icons.DELETE_OUTLINE,
+                                tooltip="Remove friend",
+                                on_click=lambda e, friend_id=friend["id"]: self.handle_remove_friend(friend_id)
+                            ),
+                        ]
+                    )
                 )
             )
 
