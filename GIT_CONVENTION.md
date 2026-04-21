@@ -15,7 +15,7 @@
 
 ***
 **Git Commits**
-"<category: description"
+"<category: description">
 
 | Category | When Used                                        |
 |-------|--------------------------------------------------|
