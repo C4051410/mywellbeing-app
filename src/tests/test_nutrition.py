@@ -168,82 +168,51 @@ class TestStatsCard:
 
 ##used to test display food and water logs
 class TestLogDisplay:
-    #makes sure the number of food entries are correct
+    #makes sure the number of food entries are correct + the header
     def test_foodlog_tiles_match_db_rows(self):
         app, _ = make_nutrition(food_rows=user_food_rows)
         tiles = app.foodlog_list.controls
-        assert len(tiles) == len(user_food_rows)
-    #makes sure the food entry is correct
-    def test_foodlog_tile_shows_food_name(self):
+        assert len(tiles) == len(user_food_rows) + 1 #for header
+    #makes sure the food title is present
+    def test_foodlog_tile_shows_food_header(self):
         app, _ = make_nutrition(food_rows=user_food_rows)
-        assert app.foodlog_list.controls[0].title == "Chicken"
-    #makes sure the water log is correct
+        assert app.foodlog_list.controls[0].value == "ALL RECENT FOOD LOGS"
+    #makes sure the food values are present
+    def test_foodlog_tile_shows_food(self):
+        app, _ = make_nutrition(food_rows=user_food_rows)
+        #makes sure all values in the title appear
+        tile_text = app.foodlog_list.controls[1].content.title.value
+        assert "Chicken" in tile_text
+        assert "2026-01-01" in tile_text
+        assert "Lunch" in tile_text
+        #makes sure all values in the subtitle appear
+        subtile_text = app.foodlog_list.controls[1].content.subtitle.value
+        assert "30.0" in subtile_text
+        assert "1.2" in subtile_text
+        assert "300" in subtile_text
+
+    #makes sure the water log is correct + header
     def test_waterlog_tiles_match_db_rows(self):
         app, _ = make_nutrition(water_rows=user_water_rows)
         tiles = app.waterlog_list.controls
-        assert len(tiles) == len(user_water_rows)
+        assert len(tiles) == len(user_water_rows) + 1
+    def test_foodlog_tile_shows_water_header(self):
+        app, _ = make_nutrition(food_rows=user_food_rows)
+        assert app.waterlog_list.controls[0].value == "ALL RECENT WATER LOGS"
     def test_waterlog_tile_shows_water_value(self):
         app, _ = make_nutrition(water_rows=user_water_rows)
-        tiles = app.waterlog_list.controls
-        assert app.waterlog_list.controls[0].title == "500 ml"
-    #makes sure empty foodlog shows no tiles
-    def test_empty_foodlog_shows_no_tiles(self):
+        tile_text = app.waterlog_list.controls[1].content.title.value
+        assert "500ml" in tile_text
+        assert "2026-01-01" in tile_text
+    #makes sure empty foodlog shows only title and empty message
+    def test_empty_foodlog(self):
         app, _ = make_nutrition(food_rows=[])
-        assert len(app.foodlog_list.controls) == 0
-    #makes sure empty waterlog shows no tiles
+        assert len(app.foodlog_list.controls) == 2
+    #makes sure empty waterlog shows only title and empty message
     def test_empty_waterlog_shows_no_tiles(self):
         app, _ = make_nutrition(water_rows=[])
-        assert len(app.waterlog_list.controls) == 0
+        assert len(app.waterlog_list.controls) == 2
 
-
-
-#tests food search function
-"""class TestFoodSearch:
-    def app_with_food_db(self):
-        app, page = make_nutrition()
-        app.food_db = fake_food_db
-        app.main_page = page
-        app.calories_input.update  = lambda: None
-        app.salts_input.update     = lambda: None
-        app.proteins_input.update  = lambda: None
-        page.update                = lambda: None
-        return app, page
-    #tests to make sure an exact match will automatically fill the fields
-    def test_exact_match_fills_calories(self):
-        app, _ = self.app_with_food_db()
-        app.food_input.value = "banana"
-        app.find_food_values(None)
-        assert app.calories_input.value == "89"
-
-    def test_exact_match_fills_salts(self):
-        app, _ = self.app_with_food_db()
-        app.food_input.value = "banana"
-        app.find_food_values(None)
-        assert app.salts_input.value == "0.0"
-
-    def test_exact_match_fills_proteins(self):
-        app, _ = self.app_with_food_db()
-        app.food_input.value = "banana"
-        app.find_food_values(None)
-        assert app.proteins_input.value == "1.1"
-    #check that its case-sensitive
-    def test_exact_match_is_case_insensitive(self):
-        app, _ = self.app_with_food_db()
-        app.food_input.value = "Banana"
-        app.find_food_values(None)
-        assert app.calories_input.value == "89"
-    #checks unknown/poor searches dont return anything
-    def test_unknown_food_does_not_fill_inputs(self):
-        app, _ = self.app_with_food_db()
-        app.food_input.value = "xy"   # too short for fuzzy match (len <= 2)
-        app.find_food_values(None)
-        assert app.calories_input.value == ""
-    #tests the suggestions return the correct value
-    def test_apply_suggestion_sets_food_input(self):
-        app, _ = self.app_with_food_db()
-        app.apply_suggestion("banana")
-        assert app.food_input.value == "Banana"
-        assert app.calories_input.value == "89"""
 
 
 
