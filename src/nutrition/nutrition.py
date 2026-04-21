@@ -3,12 +3,8 @@ File for nutrition page - accessible by clicking 'nutrition' on nav bar
 '''
 import csv
 import os
-import difflib
 from datetime import date, timedelta
-
 import flet as ft
-import flet_permission_handler as fph
-from plyer import notification
 
 from components.userpfp import Userpfp
 from components.bottom_nav import NavBar
@@ -20,7 +16,6 @@ class NutritionPage(ft.Column):
     #constructor method used to create page
     def __init__(self, page: ft.Page,user_id):
         super().__init__()
-        self.ph = fph.PermissionHandler()
         self.main_page = page
         self.r = Responsive(page) # lets page access size and layout
         self.food_db = {}
@@ -33,56 +28,10 @@ class NutritionPage(ft.Column):
                     self.food_db[row['name'].lower()] = row
         except FileNotFoundError:
             print('foods.csv not found')
-        self.food_input = ft.TextField(hint_text="Food",height=40,on_blur=self.find_food_values)
-        self.calories_input = ft.TextField(hint_text="Calories",input_filter=ft.InputFilter(allow=True,regex_string=r"^[0-9]*$",replacement_string=""),height=40) # only allow numerical values
-        self.salts_input = ft.TextField(hint_text="Salts",input_filter=ft.InputFilter(allow=True,regex_string=r"^\d*\.?\d*$",replacement_string=""),height=40) # only allow numerical values + "."
-        self.proteins_input = ft.TextField(hint_text="Proteins",input_filter=ft.InputFilter(allow=True,regex_string=r"^\d*\.?\d*$",replacement_string=""),height=40)
         self.water_input = ft.TextField(hint_text="ml",input_filter=ft.InputFilter(allow=True,regex_string=r"^[0-9]*$",replacement_string=""),height=40)
-        self.meal_types = ft.Dropdown(hint_text="Enter Meal Type", width=200, options=[
-            ft.DropdownOption(key="Breakfast", text="Breakfast"),
-            ft.DropdownOption(key="Lunch", text="Lunch"),
-            ft.DropdownOption(key="Dinner", text="Dinner"),
-            ft.DropdownOption(key="Snack", text="Snack"),]) # allow users to only select given options
         self.foodlog_list = ft.Column()
         self.waterlog_list = ft.Column()
         self.userpfp = Userpfp(page)
-        async def check_notification():
-            status = await self.ph.request(fph.Permission.NOTIFICATION)
-            return status
-        #used to handle when Enter Food button is pressed
-        async def handle_food_submit(e):
-            food = self.food_input.value
-            calories = self.calories_input.value
-            salts = self.salts_input.value
-            proteins = self.proteins_input.value
-            mealtype = self.meal_types.value
-            if not food or not calories or not salts or not proteins or not mealtype: # makes sure values arent empty
-                print("Nope")
-                return
-            self.foodlog_list.controls.append(ft.ExpansionTile(title=food, subtitle = str(date.today()) + " " + mealtype ,
-                                                               controls=[
-                                                                   ft.ListTile(title="Calories",subtitle=calories),
-                                                                   ft.ListTile(title="Salts",subtitle=salts),
-                                                                   ft.ListTile(title="Proteins",subtitle=proteins),
-                                                               ])) # adds all elements entered to foodlog_list
-            save_foodlog(food,calories,salts,proteins,str(date.today()),mealtype,user_id,)
-            notif_status = await check_notification()
-            if notif_status == fph.PermissionStatus.GRANTED:
-                notification.notify(
-                    title = "Food Logged",
-                    message = f"Meal Added - {food}",
-                    app_name = "MyWellBeing",
-                )
-            self.food_input.value = "" #used to empty textfield
-            self.calories_input.value = ""
-            self.salts_input.value = ""
-            self.proteins_input.value = ""
-            self.meal_types.value = ""
-            refresh_stats()
-            page.overlay.append(ft.SnackBar(
-                content=ft.Text("Food Entered",weight=ft.FontWeight.BOLD),bgcolor=ft.Colors.GREEN, open=True))
-            self.update() #updates the page
-        #used to handle when Enter Water button is pressed
         def handle_water_submit(e):
             water = self.water_input.value
             if not water: #checks water field isn't empty
@@ -172,27 +121,6 @@ class NutritionPage(ft.Column):
 
             self.update()
 
-        # creates tile that allows users to enter food logs
-        self.enter_foodlog = ft.ExpansionTile(bgcolor=ft.Colors.WHITE,title="Enter Food",
-                                              collapsed_bgcolor = ft.Colors.GREY_400,
-                                              shape=ft.RoundedRectangleBorder(radius=15),
-                                              collapsed_shape=ft.RoundedRectangleBorder(radius=15),
-                                     controls = [
-                                         ft.Text("Enter Food",size=10, weight=ft.FontWeight.BOLD, color=ft.Colors.BLACK),
-                                         self.food_input,
-                                         ft.Text("Enter Calories",size=10, weight=ft.FontWeight.BOLD, color=ft.Colors.BLACK),
-                                         self.calories_input,
-                                         ft.Text("Enter Salts",size=10, weight=ft.FontWeight.BOLD, color=ft.Colors.BLACK),
-                                         self.salts_input,
-                                         ft.Text("Enter Proteins",size=10, weight=ft.FontWeight.BOLD, color=ft.Colors.BLACK),
-                                         self.proteins_input,
-                                         ft.Text("Enter Meal Type",size=10, weight=ft.FontWeight.BOLD, color=ft.Colors.BLACK),
-                                         self.meal_types,
-                                         ft.Divider(height=5, color=ft.Colors.TRANSPARENT),
-                                         ft.ElevatedButton("Enter Food",on_click=handle_food_submit), #used to call on function when pressed
-                                         ft.Divider(height=5,color=ft.Colors.TRANSPARENT)
-
-                                     ])
         # creates tile that allow users to enter water logs
         self.enter_waterlog = ft.ExpansionTile(bgcolor=ft.Colors.WHITE,title="Enter Water",
                                                collapsed_bgcolor=ft.Colors.GREY_400,
@@ -217,10 +145,24 @@ class NutritionPage(ft.Column):
                                                  shape=ft.RoundedRectangleBorder(radius=15),
                                                  collapsed_shape=ft.RoundedRectangleBorder(radius=15),
                                              controls = [self.waterlog_list])
+        self.enter_food_btn = ft.ElevatedButton(
+            content=ft.Row([
+                ft.Icon(ft.Icons.ADD_CIRCLE_OUTLINE, color=ft.Colors.BLACK, size=14),
+                ft.Text("Enter A Food", size=12, weight=ft.FontWeight.W_600, color=ft.Colors.BLACK)
+            ], alignment=ft.MainAxisAlignment.CENTER, spacing=6),
+            bgcolor=ft.Colors.WHITE,
+            height=38,
+            expand=True,
+            style=ft.ButtonStyle(
+                shape=ft.RoundedRectangleBorder(radius=10),
+                side=ft.BorderSide(color=ft.Colors.GREEN_400, width=1.5)
+            ),
+            on_click=self.enter_foodlog
+        )
         scrollable = ft.Column([ #specifies the content which should be allowed to be scrolled
             self.header,
             self.stats_card,
-            self.enter_foodlog,
+            self.enter_food_btn,
             self.enter_waterlog,
             self.display_foodlog,
             self.display_waterlog,
@@ -234,41 +176,9 @@ class NutritionPage(ft.Column):
         self.expand = True #expandeds pages when possible
         self.alignment = ft.MainAxisAlignment.SPACE_BETWEEN #sets alignment for page
 
-    def find_food_values(self,e):
-        search_query = self.food_input.value.strip().lower()
-        self.main_page.overlay.clear()
-        if search_query in self.food_db:
-            data = self.food_db[search_query]
-            self.calories_input.value = str(data['calories'])
-            self.salts_input.value = str(data['salts'])
-            self.proteins_input.value = str(data['proteins'])
-            self.calories_input.update()
-            self.salts_input.update()
-            self.proteins_input.update()
-            self.main_page.overlay.append(ft.SnackBar(
-                content=ft.Text(f"Found values for '{data['name']}'"),
-                bgcolor=ft.Colors.BLUE_400,
-                open=True
-            ))
-            self.main_page.update()
-            self.update()
-        elif len(search_query)>2:
-            food_names = list(self.food_db.keys())
-            matches = difflib.get_close_matches(search_query,food_names,n=1,cutoff=0.6)
-            if matches:
-                suggestion = matches[0]
-                self.main_page.overlay.append(ft.SnackBar(
-                    content=ft.Text(f"Did you mean {suggestion.title()}?"),action="Yes!",
-                    on_action = lambda _: self.apply_suggestion(suggestion),bgcolor=ft.Colors.BLUE_400,
-                    open=True))
-            self.main_page.update()
 
-        else:
-            pass
-    def apply_suggestion(self,suggestion):
-        self.food_input.value = suggestion.title()
-        self.find_food_values(None)
-        self.update()
+    def enter_foodlog(self,e):
+        self.main_page.go("/log-food")
 
 #function called to call upon the page
 def main_nutrition(page: ft.Page,user_id):
