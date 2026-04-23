@@ -5,20 +5,29 @@ from database.connection import connect
 
 from admin.admin_queries import make_moderators_admin, delete_users_admin, retrieve_users_admin
 
-conn = connect()
+#use class to make factory for making page
 class AdminApp(ft.Column):
+    # constructor used to make page
     def __init__(self, page: ft.Page):
-
+        #refers to parent class, so it knows it's in a column
         super().__init__()
+        #sets page to admin_page
         self.admin_page = page
+        # makes page responsive to size change
         self.r = Responsive(page)
         self.Title = ft.Text("ADMIN PAGE")
+        #creates search bar
         self.search_bar = ft.TextField(label="SEARCH FOR USERS",
                                        on_change=self.on_search_change)
+        #will store users
         self.user_list = ft.Column()
+        #updates user_list
         self.retrieve_users()
+        #awlays try to expand when page size change
         self.expand = True
+        #allows for scrolling
         self.scroll = ft.ScrollMode.HIDDEN
+        #add content to page
         self.controls = [
             self.Title,
             self.search_bar,
@@ -26,9 +35,12 @@ class AdminApp(ft.Column):
         ]
 
     def retrieve_users(self,search_query=""):
+        #retrieve all users and moderators, with optional query
         rows = retrieve_users_admin(search_query)
+        #remove users from lists
         self.user_list.controls.clear()
         for data in rows:
+            #for each user create a row with details and buttons
             user_id = data[3]
             delete_button = ft.ElevatedButton(
                 content=ft.Text("DEL", size=10),
@@ -50,20 +62,25 @@ class AdminApp(ft.Column):
                 padding = 10,
                 border_radius = 5,
             ))
+            #adds each row to user_list
             self.user_list.controls.append(row_outline)
 
     def delete_user(self,user_id: int):
+        #calls upon delete user function
         delete_users_admin(user_id)
+        #updates user_list
         self.user_list.controls.clear()
         self.retrieve_users()
 
 
     def make_moderator(self,user_id: int):
+        #calls upon make_moderator
         make_moderators_admin(user_id)
         self.user_list.controls.clear()
         self.retrieve_users()
 
     def on_search_change(self,e):
+        #gets results which match the search bar
         self.retrieve_users(search_query=self.search_bar.value)
 
 
