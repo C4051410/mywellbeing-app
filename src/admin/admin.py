@@ -3,6 +3,9 @@ import flet as ft
 from components.responsive import Responsive
 from database.connection import connect
 
+from admin.admin_queries import make_M,delete_U,retrieve_U
+
+
 conn = connect()
 class AdminApp(ft.Column):
     def __init__(self, page: ft.Page):
@@ -24,15 +27,7 @@ class AdminApp(ft.Column):
         ]
 
     def retrieve_users(self,search_query=""):
-        if conn is not None:
-            cur = conn.cursor()
-            query = "SELECT username, email, role, id FROM users WHERE role != %s"
-            params = ["admin"]
-            if search_query:
-                query += " AND (username ILIKE %s)"
-                params.extend([f"%{search_query}%",])
-            cur.execute(query, tuple(params))
-            rows = cur.fetchall()
+            rows = retrieve_U(search_query)
             self.user_list.controls.clear()
             for data in rows:
                 user_id = data[3]
@@ -57,25 +52,17 @@ class AdminApp(ft.Column):
                     border_radius = 5,
                 ))
                 self.user_list.controls.append(row_outline)
-            cur.close()
 
     def delete_user(self,user_id: int):
-        if conn is not None:
-            cur = conn.cursor()
-            cur.execute("DELETE FROM users WHERE id = %s",(user_id,))
-            conn.commit()
-            cur.close()
-            self.user_list.controls.clear()
-            self.retrieve_users()
+        delete_U(user_id)
+        self.user_list.controls.clear()
+        self.retrieve_users()
+
 
     def make_moderator(self,user_id: int):
-        if conn is not None:
-            cur = conn.cursor()
-            cur.execute("UPDATE users SET role = %s WHERE id = %s", ("moderator",user_id,))
-            conn.commit()
-            cur.close()
-            self.user_list.controls.clear()
-            self.retrieve_users()
+        make_M(user_id)
+        self.user_list.controls.clear()
+        self.retrieve_users()
 
     def on_search_change(self,e):
         self.retrieve_users(search_query=self.search_bar.value)
