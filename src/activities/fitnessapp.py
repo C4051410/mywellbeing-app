@@ -1,5 +1,7 @@
 import flet as ft
-from database.user_queries import get_user
+from database.user_queries import get_user, user_calories
+from components.bottom_nav import NavBar
+from components.userpfp import Userpfp
 
 exercises = [
     "Push-ups",
@@ -26,7 +28,8 @@ exercises = [
     "Walking"
 ]
 
-def FitnessApp(user_id):
+
+def FitnessApp(page, user_id):
     user_data = get_user(user_id) # loads user data
     # loads users calorie goal and todays existing calories
     calorie_goal = user_data[10] or 0
@@ -58,9 +61,13 @@ def FitnessApp(user_id):
     #set calorie goals
     calorie_set = ft.TextField(hint_text="Enter your calories",input_filter=ft.InputFilter(allow=True,regex_string="^[0-9]*$",replacement_string=""))
     #used to display calorie goal
-    calories_ring = ft.ProgressRing(value=0,color="red")
+    calories_text = ft.Text(f"{total_calories} / {calorie_goal}", size=12, weight=ft.FontWeight.BOLD,
+                            color=ft.Colors.GREY_400)
+    calories_ring = ft.ProgressBar(width=200, height=16, color=ft.Colors.DEEP_ORANGE,
+                                   value=(total_calories / calorie_goal) if calorie_goal else 0)
+
     #used to set goal
-    set_goal_btn = ft.Button("Set Goal")
+    set_goal_btn = ft.ElevatedButton("Set Goal")
     #used to set on_click before container using lambda
     set_goal_btn.on_click = lambda e: open_dlg(e)
 
@@ -108,7 +115,23 @@ def FitnessApp(user_id):
             exercise_search.update()
             calories_search.update()
             calories_ring.update()
-    #returns container to display
-    return ft.Container(content=ft.Column([exercise_search,calories_search,
-                                           ft.FloatingActionButton("Enter",on_click=add_fitness),
-                                           calories_ring,exercise_list,set_goal_btn]))
+
+    header = ft.Container(
+        content=ft.Row(
+            controls=[ft.Text("Fitness", size=32, weight=ft.FontWeight.BOLD), Userpfp(page)],
+            alignment=ft.MainAxisAlignment.SPACE_BETWEEN
+        )
+    )
+
+    nav_bar = NavBar(page)
+    scrollable = ft.Column(
+    controls = [header, exercise_search, calories_search,
+                ft.ElevatedButton("Log Exercise", on_click=add_fitness, bgcolor=ft.Colors.BLUE, color=ft.Colors.WHITE),
+                calories_text, calories_ring, exercise_list, set_goal_btn],
+    expand = True, scroll = ft.ScrollMode.HIDDEN, spacing = 12
+    )
+    return ft.Column(
+        controls=[scrollable, nav_bar],
+        expand=True,
+        alignment=ft.MainAxisAlignment.SPACE_BETWEEN
+    )
