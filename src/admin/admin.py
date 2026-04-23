@@ -3,8 +3,7 @@ import flet as ft
 from components.responsive import Responsive
 from database.connection import connect
 
-from admin.admin_queries import make_M,delete_U,retrieve_U
-
+from admin.admin_queries import make_moderators_admin, delete_users_admin, retrieve_users_admin
 
 conn = connect()
 class AdminApp(ft.Column):
@@ -27,40 +26,40 @@ class AdminApp(ft.Column):
         ]
 
     def retrieve_users(self,search_query=""):
-            rows = retrieve_U(search_query)
-            self.user_list.controls.clear()
-            for data in rows:
-                user_id = data[3]
-                delete_button = ft.ElevatedButton(
-                    content=ft.Text("DEL", size=10),
-                    on_click=lambda e,u_id=user_id: self.delete_user(u_id))
-                moderator_button=ft.ElevatedButton(
-                    content=ft.Text("MOD", size=10),
-                    on_click = lambda e, u_id=user_id: self.make_moderator(u_id))
-                user_row = (ft.Row(controls = [
-                    ft.Text(str(data[0]),expand=2,size=10),
-                    ft.Text(str(data[1]), expand=2,size=10),
-                    ft.Text(str(data[2]),expand=2,size=10),
-                    ft.Column(controls=[delete_button, moderator_button],
-                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-                tight=True)]))
+        rows = retrieve_users_admin(search_query)
+        self.user_list.controls.clear()
+        for data in rows:
+            user_id = data[3]
+            delete_button = ft.ElevatedButton(
+                content=ft.Text("DEL", size=10),
+                on_click=lambda e,u_id=user_id: self.delete_user(u_id))
+            moderator_button=ft.ElevatedButton(
+                content=ft.Text("MOD", size=10),
+                on_click = lambda e, u_id=user_id: self.make_moderator(u_id))
+            user_row = (ft.Row(controls = [
+                ft.Text(str(data[0]),expand=2,size=10),
+                ft.Text(str(data[1]), expand=2,size=10),
+                ft.Text(str(data[2]),expand=2,size=10),
+                ft.Column(controls=[delete_button, moderator_button],
+            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+            tight=True)]))
 
-                row_outline = (ft.Container(
-                    content = user_row,
-                    border = ft.border.all(1, ft.Colors.OUTLINE_VARIANT),
-                    padding = 10,
-                    border_radius = 5,
-                ))
-                self.user_list.controls.append(row_outline)
+            row_outline = (ft.Container(
+                content = user_row,
+                border = ft.border.all(1, ft.Colors.OUTLINE_VARIANT),
+                padding = 10,
+                border_radius = 5,
+            ))
+            self.user_list.controls.append(row_outline)
 
     def delete_user(self,user_id: int):
-        delete_U(user_id)
+        delete_users_admin(user_id)
         self.user_list.controls.clear()
         self.retrieve_users()
 
 
     def make_moderator(self,user_id: int):
-        make_M(user_id)
+        make_moderators_admin(user_id)
         self.user_list.controls.clear()
         self.retrieve_users()
 

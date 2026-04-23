@@ -1,6 +1,6 @@
-from src.database.connection import connect
+from database.connection import connect
 
-def retrieve_U(search_query=""):
+def retrieve_users_admin(search_query=""):
     conn = connect()
     cur = conn.cursor()
     query = "SELECT username, email, role, id FROM users WHERE role != %s"
@@ -14,14 +14,14 @@ def retrieve_U(search_query=""):
     conn.close()
     return rows
 
-def delete_U(user_id: int):
+def delete_users_admin(user_id: int):
     conn = connect()
     cur = conn.cursor()
     cur.execute("DELETE FROM users WHERE id = %s",(user_id,))
     conn.commit()
     cur.close()
 
-def make_M(user_id: int):
+def make_moderators_admin(user_id: int):
     conn = connect()
     cur = conn.cursor()
     cur.execute(" UPDATE users SET role = %s WHERE id = %s",("moderator", user_id,))
