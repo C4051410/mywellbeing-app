@@ -160,7 +160,29 @@ def main_past_activities(page: ft.Page):
             mini=True
         ),
     )
-
-    enter_past_exercises = ft.Column(controls=[top_back_button,exercise_search,
-                                                calories_input,duration,reps,distance,save_button])
-    return ft.Column(controls=[enter_past_exercises],width=300)
+    return ft.Container(
+        expand=True,
+        padding=ft.padding.all(16),
+        content=ft.Column(
+            controls=[
+                # Header
+                ft.Row(
+                    controls=[
+                        top_back_button,
+                        ft.Text("Log Activity", size=28, weight=ft.FontWeight.BOLD),
+                    ],
+                    spacing=8,
+                ),
+                ft.Text("Record a past workout", size=13, color=ft.Colors.GREY_500),
+                exercise_search,
+                calories_input,
+                duration,
+                reps,
+                distance,
+                save_button,
+            ],
+            scroll=ft.ScrollMode.HIDDEN,
+            spacing=8,
+            expand=True,
+        )
+    )
