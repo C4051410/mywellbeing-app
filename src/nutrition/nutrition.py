@@ -9,100 +9,97 @@ import flet as ft
 from components.userpfp import Userpfp
 from components.bottom_nav import NavBar
 from components.responsive import Responsive
-from nutrition.nutrition_queries import retrieve_waterlog, retrieve_foodlog, retrieve_daily_stats, retrieve_user_goals
+from nutrition.nutrition_services import retrieve_foodlogs, retrieve_waterlogs,retrieve_daily_stats, retrieve_user_goals
+
 
 #used to generate the nutrition page
 class NutritionPage(ft.Column):
     #constructor method used to create page
     def __init__(self, page: ft.Page,user_id):
+        #inherits from class
         super().__init__()
+        #stores all values from page
         self.main_page = page
-        self.r = Responsive(page) # lets page access size and layout
-        self.food_db = {}
-        current_dir = os.path.dirname(__file__)
-        csv_path = os.path.join(current_dir, 'foods.csv')
-        try:
-            with open(csv_path,mode='r') as file:
-                reader = csv.DictReader(file)
-                for row in reader:
-                    self.food_db[row['name'].lower()] = row
-        except FileNotFoundError:
-            print('foods.csv not found')
-        self.water_input = ft.TextField(hint_text="ml",input_filter=ft.InputFilter(allow=True,regex_string=r"^[0-9]*$",replacement_string=""),height=40)
+        #lets page access size and layout
+        self.r = Responsive(page)
+        #stores foodlogs, adds header
         self.foodlog_list = ft.Column()
         self.foodlog_list.controls.append(ft.Text("ALL RECENT FOOD LOGS", size=12, weight=ft.FontWeight.BOLD, color=ft.Colors.GREY_500))
+        #stores waterlogs, adds header
         self.waterlog_list = ft.Column()
         self.waterlog_list.controls.append(ft.Text("ALL RECENT WATER LOGS", size=12, weight=ft.FontWeight.BOLD, color=ft.Colors.GREY_500))
+        #adds user profile
         self.userpfp = Userpfp(page)
-        # used to retrieve posts from database
-        def retrieve_posts():
-            two_days = date.today() - timedelta(days=2) # used to find two days ago
-            f_rows = retrieve_foodlog(user_id,str(two_days))
-            if len(f_rows) == 0:
-                self.foodlog_list.controls.append(
-                    ft.Container(
-                        content=ft.Column(
-                            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-                            alignment=ft.MainAxisAlignment.CENTER,
-                            controls=[
-                                ft.Container(height=25),
-                                ft.Icon(ft.Icons.FASTFOOD, size=80, color=ft.Colors.GREY_300),
-                                ft.Text("Enter Your Foods", size=24, weight=ft.FontWeight.BOLD),
-                                ft.Text("Keep Track of Your Daily Goals", color=ft.Colors.GREY_500, size=14),
-                                ft.Container(height=20),
-                            ]
-                        ),
-                        expand=True, alignment=ft.Alignment(0, 0)
-                    )
+        #retrievs foodlogs from user
+        food_posts = retrieve_foodlogs(user_id)
+        #if empty, display empty foodlog list
+        if len(food_posts) == 0:
+            self.foodlog_list.controls.append(
+                ft.Container(
+                    content=ft.Column(
+                        horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                        alignment=ft.MainAxisAlignment.CENTER,
+                        controls=[
+                            ft.Container(height=25),
+                            ft.Icon(ft.Icons.FASTFOOD, size=80, color=ft.Colors.GREY_300),
+                            ft.Text("Enter Your Foods", size=24, weight=ft.FontWeight.BOLD),
+                            ft.Text("Keep Track of Your Daily Goals", color=ft.Colors.GREY_500, size=14),
+                            ft.Container(height=20),
+                        ]
+                    ),
+                    expand=True, alignment=ft.Alignment(0, 0)
                 )
-            else:
-                for data in f_rows:
-                    self.foodlog_list.controls.append(ft.Container(
-                            bgcolor=ft.Colors.WHITE,
-                            border_radius=10,
-                            padding=5,
-                            shadow=ft.BoxShadow(spread_radius=1, blur_radius=5, color=ft.Colors.BLACK12),
-                            ink=True,
-                            content=ft.ListTile(
-                                title=ft.Text(f"{str(data[0])} • {str(data[5])} • {str(data[4])}"),
-                                subtitle=ft.Text(f"{str(data[1])} kcal • {str(data[2])}g • {str(data[3])}g")
-                            )))
-            w_rows = retrieve_waterlog(user_id,str(two_days))
-            if len(w_rows) == 0:
-                self.waterlog_list.controls.append(
-                    ft.Container(
-                        content=ft.Column(
-                            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-                            alignment=ft.MainAxisAlignment.CENTER,
-                            controls=[
-                                ft.Container(height=25),
-                                ft.Icon(ft.Icons.WATER_DROP, size=80, color=ft.Colors.GREY_300),
-                                ft.Text("Enter Your Water", size=24, weight=ft.FontWeight.BOLD),
-                                ft.Text("Keep Track of Your Water Intake", color=ft.Colors.GREY_500, size=14),
-                                ft.Container(height=20),
-                            ]
-                        ),
-                        expand=True, alignment=ft.Alignment(0, 0)
-                    )
-                )
-            else:
-                for data in w_rows:
-                    self.waterlog_list.controls.append(ft.Container(
+            )
+        #goes through each foodlog and display them in container
+        else:
+            for data in food_posts:
+                self.foodlog_list.controls.append(ft.Container(
                         bgcolor=ft.Colors.WHITE,
                         border_radius=10,
                         padding=5,
                         shadow=ft.BoxShadow(spread_radius=1, blur_radius=5, color=ft.Colors.BLACK12),
                         ink=True,
                         content=ft.ListTile(
-                            title=ft.Text(f"{str(data[0])}ml {str(data[1])}"),
-                        )
-                    ))
-
-        retrieve_posts() #used to retrieve posts before creating display
+                            title=ft.Text(f"{str(data[0])} • {str(data[5])} • {str(data[4])}"),
+                            subtitle=ft.Text(f"{str(data[1])} kcal • {str(data[2])}g • {str(data[3])}g")
+                        )))
+        #same as above but with water
+        water_posts = retrieve_waterlogs(user_id)
+        if len(water_posts) == 0:
+            self.waterlog_list.controls.append(
+                ft.Container(
+                    content=ft.Column(
+                        horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                        alignment=ft.MainAxisAlignment.CENTER,
+                        controls=[
+                            ft.Container(height=25),
+                            ft.Icon(ft.Icons.WATER_DROP, size=80, color=ft.Colors.GREY_300),
+                            ft.Text("Enter Your Water", size=24, weight=ft.FontWeight.BOLD),
+                            ft.Text("Keep Track of Your Water Intake", color=ft.Colors.GREY_500, size=14),
+                            ft.Container(height=20),
+                        ]
+                    ),
+                    expand=True, alignment=ft.Alignment(0, 0)
+                )
+            )
+        else:
+            for data in water_posts:
+                self.waterlog_list.controls.append(ft.Container(
+                    bgcolor=ft.Colors.WHITE,
+                    border_radius=10,
+                    padding=5,
+                    shadow=ft.BoxShadow(spread_radius=1, blur_radius=5, color=ft.Colors.BLACK12),
+                    ink=True,
+                    content=ft.ListTile(
+                        title=ft.Text(f"{str(data[0])}ml {str(data[1])}"),
+                    )
+                ))
+        #creates a header
         self.header = ft.Container(content=ft.Row(controls=[ft.Text("Nutrition",size=32,weight=ft.FontWeight.BOLD),self.userpfp],alignment=ft.MainAxisAlignment.SPACE_BETWEEN))
-        #used to retrieve daily stats
-        total_calories, total_salts, total_proteins, total_water = retrieve_daily_stats(user_id, date.today()) #retrieves users totals from today
-        goal_calories, goal_salts, goal_proteins, goal_water = retrieve_user_goals(user_id) # retrieves users goals
+        #used to retrieve daily stats and goals
+        total_calories, total_salts, total_proteins, total_water = retrieve_daily_stats(user_id, date.today())
+        goal_calories, goal_salts, goal_proteins, goal_water = retrieve_user_goals(user_id)
+        #creates texts and progress bars of above
         self.calories_text = ft.Text(f"{total_calories:.0f} / {goal_calories:.0f}",size=12,weight=ft.FontWeight.BOLD,color=ft.Colors.GREY_400)
         self.calories_bar = ft.ProgressBar(width=100, height=20,color=ft.Colors.ORANGE_400,value=total_calories / goal_calories)
         self.protein_text = ft.Text(f"{total_proteins:.2f} / {goal_proteins:.2f}",size=12, weight=ft.FontWeight.BOLD,color=ft.Colors.GREY_400)
@@ -146,6 +143,7 @@ class NutritionPage(ft.Column):
                                               ])
                                        ])
         )
+        #create button to enter food
         self.enter_food_btn = ft.ElevatedButton(
             content=ft.Row([
                 ft.Icon(ft.Icons.ADD_CIRCLE_OUTLINE, color=ft.Colors.BLACK, size=14),
@@ -158,8 +156,10 @@ class NutritionPage(ft.Column):
                 shape=ft.RoundedRectangleBorder(radius=10),
                 side=ft.BorderSide(color=ft.Colors.GREEN_400, width=1.5)
             ),
+            #takes user to foodlog page
             on_click=self.enter_foodlog
         )
+        #create button to enter water
         self.enter_water_btn = ft.ElevatedButton(
             content=ft.Row([
                 ft.Icon(ft.Icons.ADD_CIRCLE_OUTLINE, color=ft.Colors.BLACK, size=14),
@@ -172,9 +172,11 @@ class NutritionPage(ft.Column):
                 shape=ft.RoundedRectangleBorder(radius=10),
                 side=ft.BorderSide(color=ft.Colors.BLUE_400, width=1.5)
             ),
-            on_click=self.enter_water_log
+            #takes user to waterlog page
+            on_click=self.enter_waterlog
         )
-        scrollable = ft.Column([ #specifies the content which should be allowed to be scrolled
+        #specifies the content which should be allowed to be scrolled
+        scrollable = ft.Column([
             self.header,
             self.stats_card,
             self.enter_food_btn,
@@ -183,6 +185,7 @@ class NutritionPage(ft.Column):
             self.waterlog_list,
         ],expand=True,scroll=ft.ScrollMode.HIDDEN)
         self.nav_bar = NavBar(page)
+        #adds scrollable content and navbar to page
         self.controls = [
             scrollable,
             self.nav_bar,
@@ -191,12 +194,15 @@ class NutritionPage(ft.Column):
         self.expand = True #expandeds pages when possible
         self.alignment = ft.MainAxisAlignment.SPACE_BETWEEN #sets alignment for page
 
-
-    def enter_foodlog(self,e):
+    #takes user to foodlog page
+    def enter_foodlog(self, e):
         self.main_page.go("/log-food")
-
-    def enter_water_log(self,e):
+    #take user to waterlog page
+    def enter_waterlog(self, e):
         self.main_page.go("/log-water")
+
+
+
 
 #function called to call upon the page
 def main_nutrition(page: ft.Page,user_id):

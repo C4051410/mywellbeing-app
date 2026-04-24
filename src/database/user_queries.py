@@ -78,3 +78,25 @@ def user_streak(user_id):
         cur.close()
         conn.close()
 
+def check_admin(user_id):
+    conn = connect()
+    if conn is not None:
+        cur = conn.cursor()
+        cur.execute("SELECT role FROM users WHERE id = %s",(user_id,))
+        user = cur.fetchone()
+        if user is None or user[0] != "admin":
+            return False
+        else:
+            return True
+
+
+def check_mod(user_id):
+    conn = connect()
+    if conn is not None:
+        cur = conn.cursor()
+        cur.execute("SELECT role FROM users WHERE id = %s",(user_id,))
+        user = cur.fetchone()
+        if user is None or user[0] != "moderator":
+            return False
+        else:
+            return True
