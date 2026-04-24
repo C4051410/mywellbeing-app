@@ -1,7 +1,7 @@
 import flet as ft
 from components.bottom_nav import NavBar
 from components.responsive import Responsive
-from settings.settings_queries import update_password, update_goals
+from settings.settings_services import update_password, update_goals
 
 
 class AccountSettingsPage(ft.Column):
@@ -12,6 +12,7 @@ class AccountSettingsPage(ft.Column):
         self.r = Responsive(page)
 
         # 1. Reset Password Fields.
+        self.current_pw = ft.TextField(label="Current Password",password=True,can_reveal_password=True)
         self.new_pw = ft.TextField(label="New Password", password=True, can_reveal_password=True)
         self.confirm_pw = ft.TextField(label="Confirm Password", password=True)
 
@@ -35,6 +36,7 @@ class AccountSettingsPage(ft.Column):
                 padding=ft.padding.only(bottom=20)
             ),
             ft.Text("Security", size=20, weight="bold"),
+            self.current_pw,
             self.new_pw,
             self.confirm_pw,
             ft.ElevatedButton("Update Password", on_click=self.handle_pw_reset),
@@ -48,21 +50,25 @@ class AccountSettingsPage(ft.Column):
         self.expand = True
 
     def handle_pw_reset(self, e):
-        # Edge Case: Password Mismatch
-        if self.new_pw.value != self.confirm_pw.value:
-            self.show_snack("Passwords do not match!", ft.Colors.RED)
-            return
-
-        # Security Requirement (NFR7): Password check
-        if len(self.new_pw.value) < 8:
-            self.show_snack("Password must be at least 8 characters", ft.Colors.RED)
-            return
-
-        success = update_password(self.user_id, self.new_pw.value)
-        if success is True:
-            self.show_snack("Password updated locally and synced!", ft.Colors.GREEN)
+        #calls upon update password
+        success,message = update_password(self.user_id,self.current_pw.value,self.new_pw.value,self.confirm_pw.value)
+        #if returns true, display snackbar to show success
+        if success:
+            self.page.overlay.append(ft.SnackBar(
+                content=ft.Text("Password Updated"),
+                bgcolor=ft.Colors.GREEN_400,
+                open=True
+            ))
+            self.page.update()
+        #else displays failure with specific message
         else:
-            self.show_snack(f"Database error: {success}", ft.Colors.RED)
+            self.page.overlay.append(ft.SnackBar(
+                content=ft.Text(message),
+                bgcolor=ft.Colors.RED_400,
+                open=True
+            ))
+            self.page.update()
+            return
 
     def handle_goal_reset(self, e):
         # Edge Case: Ensure fields are not empty
