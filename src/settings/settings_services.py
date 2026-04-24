@@ -33,12 +33,17 @@ def update_password(user_id,current_password, new_password,confirm_password):
     return True, "Password Updated"
 
 def update_goals(user_id, calorie_goal,water_goal):
+    #if some values empty retun false
     if not all([user_id, calorie_goal, water_goal]):
         return False, "All Fields Required"
     try:
+        #if values are less then 0 return false
          if float(calorie_goal) < 0 or float(water_goal) < 0:
              return False, "Calories and Water Must Be Greater Than 0"
-    except Exception as e:
-        return False, e
+    #if of wrong type return false
+    except ValueError as e:
+        return False, "Invalid Value"
+    #commit changes
     commit_update_goals(user_id,calorie_goal,water_goal)
+    #return true
     return True, "Goals Updated"
