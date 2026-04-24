@@ -2,7 +2,8 @@ import re
 
 import bcrypt
 
-from settings.settings_queries import commit_update_password, retrieve_current_password
+from settings.settings_queries import commit_update_password, retrieve_current_password, commit_update_goals
+
 
 #used to check password is okay to update
 def update_password(user_id,current_password, new_password,confirm_password):
@@ -32,4 +33,12 @@ def update_password(user_id,current_password, new_password,confirm_password):
     return True, "Password Updated"
 
 def update_goals(user_id, calorie_goal,water_goal):
-    return
+    if not all([user_id, calorie_goal, water_goal]):
+        return False, "All Fields Required"
+    try:
+         if float(calorie_goal) < 0 or float(water_goal) < 0:
+             return False, "Calories and Water Must Be Greater Than 0"
+    except Exception as e:
+        return False, e
+    commit_update_goals(user_id,calorie_goal,water_goal)
+    return True, "Goals Updated"

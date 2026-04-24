@@ -40,5 +40,15 @@ def commit_update_password(user_id, new_password):
         conn.close()
 
 
-def update_goals(user_id, goals):
-    return
+def commit_update_goals(user_id, calorie_goal,water_goal):
+    conn = connect()
+    cur = conn.cursor()
+    try:
+        cur.execute("UPDATE user_stats SET calorie_goal = %s, water_goal = %s WHERE user_id = %s",
+                    (calorie_goal,water_goal,user_id))
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        conn.rollback()
+        print(e)
+        conn.close()

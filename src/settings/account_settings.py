@@ -71,16 +71,24 @@ class AccountSettingsPage(ft.Column):
             return
 
     def handle_goal_reset(self, e):
-        # Edge Case: Ensure fields are not empty
-        if not self.cal_goal.value or not self.water_goal.value:
-            self.show_snack("Please fill in both goal fields", ft.Colors.ORANGE)
+        success, message = update_goals(self.user_id, self.cal_goal.value, self.water_goal.value)
+        if success is True:
+            self.page.overlay.append(ft.SnackBar(
+                content=ft.Text("Goals Updated"),
+                bgcolor=ft.Colors.GREEN_400,
+                open=True
+            ))
+            self.page.update()
+            return
+        else:
+            self.page.overlay.append(ft.SnackBar(
+                content=ft.Text(message),
+                bgcolor=ft.Colors.RED_400,
+                open=True
+            ))
+            self.page.update()
             return
 
-        success = update_goals(self.user_id, int(self.cal_goal.value), int(self.water_goal.value))
-        if success is True:
-            self.show_snack("Goals updated successfully!", ft.Colors.GREEN)
-        else:
-            self.show_snack(f"Error: {success}", ft.Colors.RED)
 
     def show_snack(self, message, color):
         self.main_page.snack_bar = ft.SnackBar(ft.Text(message), bgcolor=color)
