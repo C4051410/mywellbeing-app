@@ -1,0 +1,136 @@
+from unittest.mock import patch
+
+import bcrypt
+import pytest
+
+from settings.settings_services import update_password, update_goals
+
+#used to prevent functions within which could cause errors
+@patch('settings.settings_services.retrieve_current_password')
+@patch('settings.settings_services.commit_update_password')
+#used to test password update
+class Test_Password_Update():
+    #sets values used in tests
+    st_pwsd = "Password1!"
+    hs_pswd = bcrypt.hashpw(st_pwsd.encode("utf-8"), bcrypt.gensalt(12))
+    cu_pswd = "Password1!"
+    nw_pswd = "Password2!"
+    cn_pswd = "Password2!"
+
+    #tests a valid update
+    def test_valid_update(self,mock_commit,mock_retrieve):
+        #used to mock return of password with set value
+        mock_retrieve.return_value = self.hs_pswd
+        #provides a successful update example
+        success, message = update_password(1,self.cu_pswd,
+                                           self.nw_pswd,self.cn_pswd)
+        #checks results are true and message is correct
+        assert success == True
+        assert message == "Password Updated"
+
+    #checks it catches missing fields
+    def test_missing_field(self,mock_commit,mock_retrieve):
+        mock_retrieve.return_value = self.cu_pswd
+        #returns None as missing fields
+        success, message = update_password(1,
+                                           None,
+                                           None,
+                                           None)
+        #checks it fails and displays right message
+        assert success == False
+        assert message == "All Fields Required"
+
+    #checks for when password is incorrect
+    def test_password_incorrect(self,mock_commit,mock_retrieve):
+        mock_retrieve.return_value = self.hs_pswd
+        #password doesnt match that returned from db
+        success, message = update_password(1,
+                                           "WrongPass1!",
+                                           self.nw_pswd,
+                                           self.cn_pswd)
+        assert success == False
+        assert message == "Current Password Incorrect"
+
+    #checks for when new password is the same as old
+    def test_same_password(self,mock_commit,mock_retrieve):
+        mock_retrieve.return_value = self.hs_pswd
+        #new password is the same as last
+        success, message = update_password(1,
+                                           self.cu_pswd,
+                                           self.cu_pswd,
+                                           self.cu_pswd)
+        assert success == False
+        assert message == "New Password Cant Be Same as Old"
+
+    #checks password is the correct length
+    def test_password_length(self,mock_commit,mock_retrieve):
+        mock_retrieve.return_value = self.hs_pswd
+        #password is too short
+        success, message = update_password(1,
+                                           self.cu_pswd,
+                                           "ToShrt!",
+                                           "ToShrt!")
+        assert success == False
+        assert message == "Password must be at least 8 characters long"
+
+    #makes sure that minimum number of each type appears
+    def test_password_character(self,mock_commit,mock_retrieve):
+        mock_retrieve.return_value = self.hs_pswd
+        #password without lowercase
+        success, message = update_password(1,
+                                           self.cu_pswd,
+                                           "NOLOWER!",
+                                           "NOLOWER!")
+        assert success == False
+        assert message == "Password must contain at least 1 Uppercase,lowercase and special character"
+        #password without uppercase
+        success, message = update_password(1,
+                                           self.cu_pswd,
+                                           "noupper!",
+                                           "noupper!")
+        assert success == False
+        assert message == "Password must contain at least 1 Uppercase,lowercase and special character"
+        #password without special character
+        success, message = update_password(1,
+                                           self.cu_pswd,
+                                           "NoSpecial",
+                                           "NoSpecial")
+        assert success == False
+        assert message == "Password must contain at least 1 Uppercase,lowercase and special character"
+
+
+@patch('settings.settings_services.commit_update_goals')
+#tests goal update
+class Test_Goal_Update():
+    #sets values
+    calories = 2500
+    water = 2600
+    #tests a valid update
+    def test_valid_update(self,mock_goals):
+        #valid inputs for update goal
+        success,message = update_goals(1,self.calories,self.water)
+        #checks it returns true and correct message
+        assert success == True
+        assert message == "Goals Updated"
+
+    #checks if missing fields are caught
+    def test_missing_field(self,mock_goals):
+        #None used to represent missing fields
+        success,message = update_goals(1,None,None)
+        #checks it false and correct message
+        assert success == False
+        assert message == "All Fields Required"
+
+    def test_invalid_goals(self,mock_goals):
+        #checks that negative values arent allowed
+        success,message = update_goals(1,-1,-1)
+        assert success == False
+        assert message == "Calories and Water Must Be Greater Than 0"
+        #checks incorrect type isnt allowed
+        success, message = update_goals(1,"Invalid","Invalid")
+        assert success == False
+        assert message == "Invalid Value"
+
+
+
+
