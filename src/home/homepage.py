@@ -8,8 +8,6 @@ import flet as ft
 from components.userpfp import Userpfp
 from components.bottom_nav import NavBar
 from components.responsive import Responsive
-from database.user_queries import get_user
-from flet import ScrollMode
 from home.home_services import retrieve_friends_activities, retrieve_current_streaks,retrieve_username
 from nutrition.nutrition_services import retrieve_daily_stats,retrieve_user_goals
 

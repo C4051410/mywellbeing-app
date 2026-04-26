@@ -15,37 +15,16 @@ for mod in [
     "components.userpfp",
     "components.bottom_nav",
     "components.responsive",
-    "database.connection",
-    "database.user_queries",
     "home.home_queries",
 ]:
     sys.modules.setdefault(mod, MagicMock())
 
 
 
-#Creates a Basic User
-base_user = (
-    1,          # [0]  id
-    "TestUser", # [1]  username
-    "test@gmail.com",  # [2]  email
-    "user",     # [3]  role
-    18,       # [4] age
-    "Female",       # [5] gender
-    185,       # [6] height
-    85,       # [7] current weight
-    75,       # [8] target eight
-    2500,       # [9]  calories goal
-    5,       # [10] current streak
-    25,       # [11] longest streak
-    datetime.today(),       # [12] last active
-    8000,       # [13] steps
-    5,          # [14] salts_goal
-    150,        # [15] protein_goal
-    2000,       # [16] water_goal
-)
-
+user_username = "TestUser"
 user_daily_stats       = (1500, 3, 120, 1800)   # calories, salts, protein, water
-user_streak            = (base_user[10], base_user[11])                 # current, longest
+user_daily_goals = (2500, 5, 150, 2000)
+user_streak            = (5,25)                 # current, longest
 user_friends_data = [("Alice", "Running", 5), ("Bob", "Cycling", 3)] # two friends examples
 user_friends_empty     = [] # empty friends example
 
@@ -85,16 +64,18 @@ class MockPage:
 
 #function to add data to page to test
 def make_app(
-    user_data=None,
+    username=None,
     daily_stats=None,
+    daily_goals=None,
     friends=None,
     streak=None,
     page_width=360,
     page_height=800):
 
     #either uses data entered via function or uses default
-    user_data   = user_data   or base_user
+    user = username or user_username
     daily_stats = daily_stats or user_daily_stats
+    daily_goals = daily_goals or user_daily_goals
     friends     = friends     if friends is not None else user_friends_data
     streak      = streak      or user_streak
 
@@ -106,13 +87,14 @@ def make_app(
     page = MockPage(width=page_width, height=page_height)
     #uses functions with appropriate data for proper testing
     with (
-        patch("home.homepage.get_user",                   return_value=user_data),
-        patch("home.homepage.retrieve_daily_stats",        return_value=daily_stats),
-        patch("home.homepage.retrieve_friends_activities", return_value=friends),
-        patch("home.homepage.retrieve_current_streak",     return_value=streak),
-        patch("home.homepage.Responsive",                  return_value=mock_responsive),
-        patch("home.homepage.Userpfp",                     return_value=ResizableMock()),
-        patch("home.homepage.NavBar",                      return_value=ResizableMock()),
+        patch("home.homepage.retrieve_username",return_value=user),
+        patch("home.homepage.retrieve_user_goals",return_value=daily_goals),
+        patch("home.homepage.retrieve_daily_stats",return_value=daily_stats),
+        patch("home.homepage.retrieve_friends_activities",return_value=friends),
+        patch("home.homepage.retrieve_current_streaks",return_value=streak),
+        patch("home.homepage.Responsive",return_value=mock_responsive),
+        patch("home.homepage.Userpfp",return_value=ResizableMock()),
+        patch("home.homepage.NavBar",return_value=ResizableMock()),
     ):
 
         app = WorkoutApp(page, user_id=1)
@@ -130,7 +112,7 @@ class TestTextContent:
     #makes sure steps appear correctly
     def test_steps_text_shows_step_count(self):
         app, _ = make_app()
-        assert "8000" in app.steps_text.value
+        assert "3000" in app.steps_text.value
 
     # make sure the values appear in the app
     def test_calories_text_shows_consumed_and_goal(self):
@@ -162,27 +144,18 @@ class TestTextContent:
 
 #tests with results are null to show how it can deal with nulltype
 class TestNullSafety:
-    #sets all goals to none for testing
-    def user_with_none_goals(self):
-        user = list(base_user)
-        user[9]  = None   # calories_goal
-        user[14] = None   # salts_goal
-        user[15] = None   # protein_goal
-        user[16] = None   # water_goal
-        user[13] = None   # steps
-        return tuple(user)
-
+    none_goals = (0,0,0,0)
     #makes sure they don't crash the page
     def test_none_goals_do_not_raise(self):
-        app, _ = make_app(user_data=self.user_with_none_goals())
+        app, _ = make_app(daily_goals=self.none_goals)
         assert app is not None
     #makes sure the goals default
     def test_none_calories_goal_shows_zero(self):
-        app, _ = make_app(user_data=self.user_with_none_goals())
+        app, _ = make_app(daily_goals=self.none_goals)
         assert "/ 0" in app.calories_text.value
 
     def test_none_steps_shows_zero(self):
-        app, _ = make_app(user_data=self.user_with_none_goals())
+        app, _ = make_app(daily_goals=self.none_goals)
         assert "0" in app.steps_text.value
 
 
