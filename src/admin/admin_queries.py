@@ -1,6 +1,6 @@
 from database.connection import connect
 
-def retrieve_users_admin(search_query=""):
+def get_users_admin(search_query=""):
     #connects to database
     conn = connect()
     #uses try to catch for errors
@@ -38,7 +38,7 @@ def delete_users_admin(user_id: int):
         conn.rollback()
         print(e)
 
-def make_moderators_admin(user_id: int):
+def update_moderators_admin(user_id: int):
     conn = connect()
     try:
         cur = conn.cursor()
@@ -50,6 +50,17 @@ def make_moderators_admin(user_id: int):
         print(e)
         conn.rollback()
         conn.close()
+
+def get_admin(user_id):
+    conn = connect()
+    try:
+        cur = conn.cursor()
+        cur.execute("SELECT role FROM users WHERE id = %s",(user_id,))
+        user = cur.fetchone()[0]
+        return user
+    except Exception as e:
+        print(e)
+        return None
 
 
 
