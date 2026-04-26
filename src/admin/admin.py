@@ -1,9 +1,11 @@
 
 import flet as ft
+
+from admin.admin_services import retrieve_users_admin, remove_users_admin, make_moderators_admin
 from components.responsive import Responsive
 from database.connection import connect
 
-from admin.admin_queries import make_moderators_admin, delete_users_admin, retrieve_users_admin
+
 
 #use class to make factory for making page
 class AdminApp(ft.Column):
@@ -67,7 +69,7 @@ class AdminApp(ft.Column):
 
     def delete_user(self,user_id: int):
         #calls upon delete user function
-        delete_users_admin(user_id)
+        remove_users_admin(user_id)
         #updates user_list
         self.user_list.controls.clear()
         self.retrieve_users()
