@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 import flet as ft
 
+from activities.activities_services import retrieve_activities
 from activities.activity_queries import get_activities
 from activities.strava_api import connect_strava, get_saved_activities, format_strava_activities, save_tokens_for_user, load_tokens_for_user
 from components.bottom_nav import NavBar
@@ -273,7 +274,7 @@ class ActivitiesPage(ft.Column):
             print("LOAD ACTIVITY PAGE USER ID:", current_user_id)
 
             if current_user_id is not None:
-                rows = get_activities(current_user_id)
+                rows = retrieve_activities(current_user_id)
                 for title,activity_type, distance_km, start_date, duration_seconds,calories,reps, source in rows:
                     dist = float(distance_km or 0)
                     secs = int(duration_seconds or 0)
