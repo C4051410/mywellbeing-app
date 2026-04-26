@@ -8,11 +8,8 @@ import flet as ft
 from components.userpfp import Userpfp
 from components.bottom_nav import NavBar
 from components.responsive import Responsive
-from database.user_queries import get_user
-from flet import ScrollMode
-from home.home_queries import retrieve_daily_stats, retrieve_friends_activities,retrieve_current_streak
-
-
+from home.home_services import retrieve_friends_activities, retrieve_current_streaks,retrieve_username
+from nutrition.nutrition_services import retrieve_daily_stats,retrieve_user_goals
 
 #Sizes of all elements on homepage (as percent of screen)
 welcome_text_size = 0.1
@@ -27,20 +24,18 @@ class WorkoutApp(ft.Column):
     def __init__(self, page: ft.Page, user_id):
         super().__init__()
         self.r = Responsive(page)
-        # retrieves logged in users data
-        user_data = get_user(user_id)
-
-        # order of unpacked values: id, username, email, role
-        user = user_data[1]
-        calories_goal = user_data[9] or 0
-        salts_goal = user_data[14] or 0
-        protein_goal = user_data[15] or 0
-        water_goal = user_data[16] or 0
-        steps = user_data[13] or 0
+        #gets username
+        user = retrieve_username(user_id)
+        steps = 3000
+        #retrieves users goal and current stats
+        calories_goal, salts_goal, protein_goal, water_goal = retrieve_user_goals(user_id)
+        daily_calories, daily_salts, daily_proteins, daily_water = retrieve_daily_stats(user_id, date.today())
+        #retrieves friends data
         friends_data = retrieve_friends_activities(user_id,date.today())
         friends_list = []
-        streak = retrieve_current_streak(user_id)
-        daily_calories,daily_salts,daily_proteins,daily_water = retrieve_daily_stats(user_id,date.today())
+        #gets users current streak and best streak
+        streak = retrieve_current_streaks(user_id)
+
 
         #TODO-Add slight variations to the welcome and motivational message
 
