@@ -4,7 +4,6 @@ from admin.admin import main_admin
 from auth.authpage import authPage
 from activities.activities import main_activities, main_activity_detail
 from database.connection import connect
-from database.user_queries import check_mod
 from home.homepage import main_homepage
 from activities.map import main_map
 from activities.past_activities import main_past_activities
@@ -16,6 +15,7 @@ from settings.settings import main_settings
 from settings.account_settings import main_account_settings
 from social.social import main_social
 from admin.admin_services import check_admin
+from moderator.moderator_services import check_mod
 
 
 def main(page: ft.Page):

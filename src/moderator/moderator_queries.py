@@ -1,6 +1,6 @@
 from database.connection import connect
 
-def retrieve_users_moderators(search_query=""):
+def get_posts_moderators(search_query=""):
     #connects to database
     conn = connect()
     try:
@@ -51,3 +51,11 @@ def delete_posts_moderator(post_id:int, source:str):
         #undos any actions if error occurred
         conn.rollback()
         conn.close()
+
+def get_mod(user_id):
+    conn = connect()
+    if conn is not None:
+        cur = conn.cursor()
+        cur.execute("SELECT role FROM users WHERE id = %s",(user_id,))
+        user = cur.fetchone()[0]
+        return user

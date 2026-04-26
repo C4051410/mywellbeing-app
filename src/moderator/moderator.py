@@ -2,8 +2,8 @@ import flet as ft
 
 from components.responsive import Responsive
 from database.connection import connect
+from moderator.moderator_services import retrieve_posts_moderator, remove_posts_moderator
 
-from src.moderator.moderator_queries import delete_posts_moderator, retrieve_users_moderators
 
 #use class to make factory for making page
 class ModeratorApp(ft.Column):
@@ -38,7 +38,7 @@ class ModeratorApp(ft.Column):
         #clear user posts
         self.user_posts.controls.clear()
         #retrieve all users, with optional search_query
-        rows = retrieve_users_moderators(search_query)
+        rows = retrieve_posts_moderator(search_query)
         for data in rows:
             #for each post create a row with the details and buttons
             posts_id = data[2]
@@ -60,7 +60,7 @@ class ModeratorApp(ft.Column):
 
     def delete_posts(self,post_id: int,src:str):
         #calls upon delete post function
-        delete_posts_moderator(post_id,src)
+        remove_posts_moderator(post_id,src)
         #updates user_posts
         self.user_posts.controls.clear()
         self.retrieve_posts()
