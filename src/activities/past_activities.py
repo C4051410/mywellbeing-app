@@ -1,7 +1,7 @@
 from datetime import datetime
 import flet as ft
 from plyer import notification
-from activities.activity_queries import  save_past_activities
+from activities.activities_services import save_past_activity
 
 exercises = [
     "Push-ups",
@@ -93,18 +93,12 @@ def main_past_activities(page: ft.Page):
         if exercise_search.value != "" and calories_input.value != "":
             exercise = exercise_search.value
             calories = calories_input.value
-            distance = distance_input.value or None
-            reps = reps_input.value or None
+            distance = distance_input.value or 0
+            reps = reps_input.value or 0
             if duration_seconds == None:
                 duration_seconds = 0
             start_date = datetime.now()
-            save_past_activities(page.user_id,exercise,calories,duration_seconds,reps,distance,start_date)
-            notification.notify(
-                title = "Activity Logged",
-                message = f"{exercise} Recorded",
-                app_name = "MyWellBeing"
-
-            )
+            save_past_activity(page.user_id,exercise,calories,duration_seconds,reps,distance,start_date)
             page.go("/activities")
 
     # used to enter the exercises

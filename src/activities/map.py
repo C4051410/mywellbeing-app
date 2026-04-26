@@ -6,7 +6,7 @@ import flet as ft
 import flet_map as ftm
 from flet_geolocator import Geolocator
 from plyer import notification
-from activities.activity_queries import save_activity
+from activities.activities_services import save_activity
 
 
 def calculate_distance(lat1, lon1, lat2, lon2):
@@ -218,12 +218,6 @@ def main_map(page: ft.Page):
         paused_row.visible = False
         tracking_row.visible = False
         start_btn.visible = True
-        notification.notify(
-            title="Activity Logged",
-            message=f"{selected_activity} Recorded",
-            app_name="MyWellBeing"
-
-        )
 
         page.go("/activities")
 
