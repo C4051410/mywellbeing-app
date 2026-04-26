@@ -85,7 +85,7 @@ def make_activities(
 
     #used to mock the return function
     with (
-        patch("activities.activities.get_activities",           return_value=db_rows),
+        patch("activities.activities.retrieve_activities",           return_value=db_rows),
         patch("activities.activities.get_saved_activities",     return_value=strava_rows),
         patch("activities.activities.format_strava_activities", return_value=strava_rows),
         patch("activities.activities.load_tokens_for_user",     return_value={"token": "x"} if has_strava_tokens else None),
