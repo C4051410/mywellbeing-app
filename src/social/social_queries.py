@@ -164,10 +164,9 @@ def like_target(user_id, target_type, target_id):
         cur.close()
         conn.close()
 
-
 def unlike_target(user_id, target_type, target_id):
     """
-    Remove a like from a workout.
+    Remove a like from a workout (target).
     """
     conn = connect()
     cur = conn.cursor()
@@ -208,7 +207,6 @@ def has_user_liked(user_id, target_type, target_id):
         cur.close()
         conn.close()
 
-
 def count_likes(target_type, target_id):
     """
     Return the number of likes for one target.
@@ -231,14 +229,14 @@ def count_likes(target_type, target_id):
 
 def add_comment(user_id, target_type, target_id, content):
     """
-    Add a comment to a workout or meal.
+    Add a comment to a workout (target).
     """
     conn = connect()
     cur = conn.cursor()
     try:
         cur.execute(
             """
-            INSERT INTO social_comments (id, target_type, target_id, user_id, content)
+            INSERT INTO social_comments (target_type, target_id, user_id, content)
             VALUES (%s, %s, %s, %s)
             """,
             (target_type, target_id, user_id, content)
@@ -252,10 +250,28 @@ def add_comment(user_id, target_type, target_id, content):
         cur.close()
         conn.close()
 
+def count_comments(target_type, target_id):
+    """
+    Return the number of comments for one target.
+    """
+    conn = connect()
+    cur = conn.cursor()
+    try:
+        cur.execute(
+            """
+            SELECT COUNT(*) FROM social_comments
+            WHERE target_type = %s AND target_id = %s
+            """,
+            (target_type, target_id)
+        )
+        return cur.fetchone()[0]
+    finally:
+        cur.close()
+        conn.close()
 
 def get_comments(target_type, target_id):
     """
-    Retrieve comments for a workout or meal.
+    Retrieve comments for a workout (target).
     """
     conn = connect()
     cur = conn.cursor()
