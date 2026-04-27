@@ -97,12 +97,15 @@ def like_item(user_id, target_type, target_id):
     return str(result)
 
 def unlike_item(user_id, target_type, target_id):
+    """
+    Remove a like from one workout activity item.
+    """
     if target_type != "workout":
         return "Invalid target type"
 
     result = unlike_target(user_id, target_type, target_id)
     if result is True:
-        return "Liked removed successfully"
+        return "Like removed successfully"
     return str(result)
 
 
