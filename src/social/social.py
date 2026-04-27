@@ -387,6 +387,83 @@ class SocialPage(ft.Column):
         self.this_page.update()
         self.update()
 
+    # Open a dialog that shows comments for one workout activity and to add a new comments
+    def open_comments_dialog(self, activity_item):
+        comments = list_comments(activity_item["activity_type"], activity_item["target_id"])
+
+        comment_controls = []
+        if not comments:
+            comment_controls.append(ft.Text("No comments yet."))
+        else:
+            for comment in comments:
+                comment_controls.append(
+                    ft.Container(
+                        padding=ft.padding.symmetric(vertical=4),
+                        content=ft.Column(
+                            spacing=0,
+                            controls=[
+                                ft.Text(comment["username"], weight=ft.FontWeight.BOLD),
+                                ft.Text(comment["content"]),
+                            ]
+                        )
+                    )
+                )
+
+        comment_input = ft.TextField(
+            hint_text="Write a comment..."
+        )
+
+        dialog = ft.AlertDialog(
+            modal=True,
+            title=ft.Text("Comments"),
+            content=ft.Column(
+                controls=comment_controls + [ft.Divider(), comment_input],
+                tight=True,
+                scroll=ft.ScrollMode.AUTO,
+                height=300
+            ),
+            actions=[
+                ft.TextButton("Close", on_click=lambda e: self.close_dialog(dialog)),
+                ft.ElevatedButton(
+                    "Post",
+                    on_click=lambda e: self.submit_comment(
+                        dialog,
+                        activity_item["activity_type"],
+                        activity_item["target_id"],
+                        comment_input.value
+                    )
+                )
+            ]
+        )
+
+        self.this_page.overlay.append(dialog)
+        dialog.open = True
+        self.this_page.update()
+
+    # Submit a comment, close the dialog and refresh the social overview
+    def submit_comment(self, dialog, target_type, target_id, content):
+        result_message = comment_on_item(self.user_id, target_type, target_id, content)
+
+        dialog.open = False
+        self.this_page.overlay.remove(dialog)
+
+        self.this_page.snack_bar = ft.SnackBar(
+            content=ft.Text(result_message)
+        )
+        self.this_page.snack_bar.open = True
+
+        # Refresh the overview so comment counts update after posting.
+        self.load_social_overview()
+
+        self.this_page.update()
+        self.update()
+
+    # Close comments dialog
+    def close_dialog(self, dialog):
+        dialog.open = False
+        self.this_page.overlay.remove(dialog)
+        self.this_page.update()
+
     #Set size of all text on screen
     def set_text_size(self):
         self.page_title.size = self.r.w(page_title_size)
