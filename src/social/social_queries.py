@@ -151,7 +151,7 @@ def like_target(user_id, target_type, target_id):
             """
             INSERT INTO social_likes (target_type, target_id, user_id)
             VALUES (%s, %s, %s)
-            ON CONFLICT (target_type, target_id) DO NOTHING
+            ON CONFLICT (user_id, target_type, target_id) DO NOTHING
             """,
             (target_type, target_id, user_id)
         )
