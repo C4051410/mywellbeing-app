@@ -141,15 +141,17 @@ def get_friend_ids(user_id):
 # Likes and comments
 def like_target(user_id, target_type, target_id):
     """
-    Add a like to a workout or meal.
+    Add a like to a workout.
+    The user can only like the same target once.
     """
     conn = connect()
     cur = conn.cursor()
     try:
         cur.execute(
             """
-            INSERT INTO social_likes (id, target_type, target_id, user_id)
+            INSERT INTO social_likes (target_type, target_id, user_id)
             VALUES (%s, %s, %s)
+            ON CONFLICT (target_type, target_id) DO NOTHING
             """,
             (target_type, target_id, user_id)
         )
@@ -165,7 +167,7 @@ def like_target(user_id, target_type, target_id):
 
 def unlike_target(user_id, target_type, target_id):
     """
-    Remove a like from a workout or meal.
+    Remove a like from a workout.
     """
     conn = connect()
     cur = conn.cursor()
@@ -182,6 +184,46 @@ def unlike_target(user_id, target_type, target_id):
     except Exception as e:
         conn.rollback()
         return str(e)
+    finally:
+        cur.close()
+        conn.close()
+
+def has_user_liked(user_id, target_type, target_id):
+    """
+    Return True if the user has liked the target.
+    """
+    conn = connect()
+    cur = conn.cursor()
+    try:
+        cur.execute(
+            """
+            SELECT 1 FROM social_likes
+            WHERE user_id = %s AND target_type = %s AND target_id = %s
+            LIMIT 1
+            """,
+            (user_id, target_type, target_id)
+        )
+        return cur.fetchone() is not None
+    finally:
+        cur.close()
+        conn.close()
+
+
+def count_likes(target_type, target_id):
+    """
+    Return the number of likes for one target.
+    """
+    conn = connect()
+    cur = conn.cursor()
+    try:
+        cur.execute(
+            """
+            SELECT COUNT(*) FROM social_likes
+            WHERE target_type = %s AND target_id = %s
+            """,
+            (target_type, target_id)
+        )
+        return cur.fetchone()[0]
     finally:
         cur.close()
         conn.close()
