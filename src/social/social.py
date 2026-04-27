@@ -261,11 +261,21 @@ class SocialPage(ft.Column):
                             ft.Row(
                                 alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
                                 controls=[
-                                    ft.Text(f"{item['like_count']} likes"),
-                                    ft.TextButton(
-                                        like_label,
-                                        # Capture the current activity item so each button updates the correct row.
-                                        on_click=lambda e, activity=item: self.handle_like_action(activity)
+                                    ft.Text(
+                                        f"{item['like_count']} likes • {item['comment_count']} comments"
+                                    ),
+                                    ft.Row(
+                                        spacing=6,
+                                        controls=[
+                                            ft.TextButton(
+                                                like_label,
+                                                on_click=lambda e, activity=item: self.handle_like_action(activity)
+                                            ),
+                                            ft.TextButton(
+                                                "Comments",
+                                                on_click=lambda e, activity=item: self.open_comments_dialog(activity)
+                                            )
+                                        ]
                                     )
                                 ]
                             )
