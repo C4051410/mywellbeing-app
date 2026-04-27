@@ -113,6 +113,6 @@ def save_setup(user_id, age, gender, height_cm, current_weight_kg, weight_goal_k
         if int(water_goal) < 0:
             return False
     except ValueError:
-        return
+        return False
     commit_setup(user_id, age, gender, height_cm, current_weight_kg, weight_goal_kg, calorie_goal,salts_goal,protein_goal,water_goal)
     return True
