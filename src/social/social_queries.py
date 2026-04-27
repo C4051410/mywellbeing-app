@@ -236,7 +236,7 @@ def get_comments(target_type, target_id):
 # Social feed
 def get_social_feed(user_id):
     """
-    Retrieve recent activity (workouts & meals(foodlog)) from user's friends.
+    Retrieve recent workout activity from user's friends.
     """
     conn = connect()
     cur = conn.cursor()
@@ -262,36 +262,14 @@ def get_social_feed(user_id):
                    w.id,
                    w.user_id
             FROM workouts w
-                     JOIN users u ON w.user_id = u.id
+            JOIN users u ON w.user_id = u.id
             WHERE w.user_id = ANY (%s)
-            ORDER BY w.id DESC LIMIT 5
+            ORDER BY w.start_date DESC NULLS LAST, w.id DESC
+            LIMIT 6
             """,
             (friend_ids,)
         )
-        workouts = cur.fetchall()
-
-        # Retrieve meal activities
-        cur.execute(
-            """
-            SELECT 'meal' AS activity_type,
-                   u.username,
-                   f.title,
-                   f.calories,
-                   f.id,
-                   f.user_id
-            FROM foodlog f
-                     JOIN users u ON f.user_id = u.id
-            WHERE f.user_id = ANY (%s)
-            ORDER BY f.id DESC LIMIT 5
-            """,
-            (friend_ids,)
-        )
-        meals = cur.fetchall()
-        # Combine activities
-        # Sort by target id descending as a temporary approximation of recency
-        activity_feed = workouts + meals
-        activity_feed.sort(key=lambda row: row[4], reverse=True)
-        return activity_feed[:6]
+        return cur.fetchall()
     finally:
         cur.close()
         conn.close()
