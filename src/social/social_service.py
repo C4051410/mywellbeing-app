@@ -130,7 +130,7 @@ def get_social_overview(user_id):
 # Social Interaction - like and comments
 def like_item(user_id, target_type, target_id):
     """
-    Add a like to an activity item.
+    Add a like to one workout activity item.
     """
     if target_type != "workout":
         return "Invalid target type"
@@ -148,4 +148,44 @@ def unlike_item(user_id, target_type, target_id):
     if result is True:
         return "Liked removed successfully"
     return str(result)
+
+
+def comment_on_item(user_id, target_type, target_id, content):
+    """
+    Add a comment to one workout activity item.
+    """
+    if target_type != "workout":
+        return "Invalid target type"
+
+    if not content or not content.strip():
+        return "Comment cannot be empty"
+
+    cleaned_content = content.strip()
+
+    if len(cleaned_content) > 300:
+        return "Comment is too long"
+
+    if contains_blacklisted_word(cleaned_content):
+        return "Comment contains inappropriate language"
+
+    result = add_comment(user_id, target_type, target_id, cleaned_content)
+    if result is True:
+        return "Comment added successfully"
+    return str(result)
+
+def list_comments(target_type, target_id):
+    """
+    Return comments formatted for the UI.
+    """
+    rows = get_comments(target_type, target_id)
+    comments = []
+    for row in rows:
+        comments.append({
+            "comment_id": row[0],
+            "user_id": row[1],
+            "username": row[2],
+            "content": row[3],
+            "created_at": str(row[4])
+        })
+    return comments
 
