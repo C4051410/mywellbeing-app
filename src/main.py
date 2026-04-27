@@ -1,6 +1,7 @@
 import flet as ft
 
 from admin.admin import main_admin
+from auth.auth_services import check_setup_complete
 from auth.authpage import authPage
 from activities.activities import main_activities, main_activity_detail
 from database.connection import connect
@@ -16,6 +17,7 @@ from settings.account_settings import main_account_settings
 from social.social import main_social
 from admin.admin_services import check_admin
 from moderator.moderator_services import check_mod
+from auth.setup import setupGoalsPage
 
 
 def main(page: ft.Page):
@@ -75,11 +77,13 @@ def main(page: ft.Page):
         elif (check_mod(user_id)):
             page.add(main_moderator(page))
         else:
-            page.add(WorkoutApp(page, user_id))
+            if check_setup_complete(user_id):
+                page.add(WorkoutApp(page, user_id))
+            else:
+                page.add(setupGoalsPage(user_id, on_setup_complete))
         page.update()
 
     def on_register_success(user_id):
-        from auth.setup import setupGoalsPage
         page.user_id = user_id
         page.clean()
         page.add(setupGoalsPage(user_id, on_setup_complete))

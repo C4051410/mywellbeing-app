@@ -3,7 +3,7 @@ import re
 import bcrypt
 from plyer import notification
 
-from auth.login import login
+from auth.login import login, get_user_setup
 from auth.register import register, get_existing_user
 
 
@@ -74,5 +74,19 @@ def register_user(username,email, password):
         print(e)
     #return true with user data
     return True,user_id
+
+
+def check_setup_complete(user_id):
+    if not user_id:
+        return False
+    try:
+        if int(user_id) < 0:
+            return False
+    except ValueError:
+        return False
+    setup = get_user_setup(user_id)
+    if not setup:
+        return False
+    return True
 
 

@@ -35,6 +35,6 @@ def retrieve_current_streaks(user_id):
     #if streaks are not None return rows
     if streaks:
         return streaks
-    #else return empty list
+    #else return a default [0,0] to avoid crash
     else:
-        return []
+        return [0,0]

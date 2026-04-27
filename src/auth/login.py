@@ -14,3 +14,16 @@ def login(email,password):
         return user
     except Exception as e:
         return str(e)
+
+def get_user_setup(user_id):
+    conn = connect()
+    try:
+        cur = conn.cursor()
+        cur.execute("SELECT user_id FROM user_stats WHERE user_id = %s", (user_id,))
+        user = cur.fetchone()
+        cur.close()
+        conn.close()
+        return user
+    except Exception as e:
+        conn.close()
+        return str(e)
