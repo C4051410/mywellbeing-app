@@ -83,50 +83,6 @@ def list_friends(user_id):
     return friends
 
 
-# Social page data
-def get_social_overview(user_id):
-    """
-    Build the data needed by the Social UI page.
-    """
-    leaderboard_rows = get_leaderboard(user_id)
-    activity_rows = get_social_feed(user_id)
-    current_rank = None
-    current_points = 0
-    leaderboard = []
-
-    # Format leaderboard rows and find the current user's position
-    for index, row in enumerate(leaderboard_rows):
-        entry = {
-            "rank": index + 1,
-            "user_id": row[0],
-            "username": row[1],
-            "points": row[2]
-        }
-        leaderboard.append(entry)
-        if row[0] == user_id:
-            current_rank = index + 1
-            current_points = row[2]
-    activity = []
-
-    # Format activity rows
-    for row in activity_rows:
-        activity.append({
-            "activity_type": row[0],
-            "username": row[1],
-            "title": row[2],
-            "calories": row[3],
-            "target_id": row[4],
-            "owner_user_id": row[5]
-        })
-    return {
-        "rank": {
-            "position": current_rank,
-            "points": current_points
-        },
-        "leaderboard": leaderboard[:3],
-        "activity": activity
-    }
-
 # Social Interaction - like and comments
 def like_item(user_id, target_type, target_id):
     """
@@ -189,3 +145,53 @@ def list_comments(target_type, target_id):
         })
     return comments
 
+
+# Social page data
+def get_social_overview(user_id):
+    """
+    Build the data needed by the Social UI page.
+    """
+    leaderboard_rows = get_leaderboard(user_id)
+    activity_rows = get_social_feed(user_id)
+    current_rank = None
+    current_points = 0
+    leaderboard = []
+
+    # Format leaderboard rows and find the current user's position
+    for index, row in enumerate(leaderboard_rows):
+        entry = {
+            "rank": index + 1,
+            "user_id": row[0],
+            "username": row[1],
+            "points": row[2]
+        }
+        leaderboard.append(entry)
+        if row[0] == user_id:
+            current_rank = index + 1
+            current_points = row[2]
+    activity = []
+
+    # Format activity rows
+    for row in activity_rows:
+        activity_type = row[0]
+        target_id = row[4]
+
+        activity.append({
+            "activity_type": activity_type,
+            "username": row[1],
+            "title": row[2],
+            "calories": row[3],
+            "target_id": target_id,
+            "owner_user_id": row[5],
+            "like_count": count_likes(activity_type, target_id),
+            "liked_by_user": has_user_liked(user_id, activity_type, target_id),
+            "comment_count": count_comments(activity_type, target_id)
+        })
+    return {
+        "rank": {
+            "position": current_rank,
+            "points": current_points
+        },
+        "leaderboard": leaderboard[:3],
+        "activity": activity
+    }
