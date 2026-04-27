@@ -4,7 +4,7 @@ import bcrypt
 from plyer import notification
 
 from auth.login import login, get_user_setup
-from auth.register import register, get_existing_user
+from auth.register import register, get_existing_user, commit_setup
 
 
 def login_user(email, password):
@@ -89,4 +89,30 @@ def check_setup_complete(user_id):
         return False
     return True
 
-
+def save_setup(user_id, age, gender, height_cm, current_weight_kg, weight_goal_kg, calorie_goal,salts_goal,protein_goal,water_goal):
+    fields = [user_id, age, gender, height_cm, current_weight_kg, weight_goal_kg, calorie_goal,salts_goal,protein_goal,water_goal]
+    if any(field is None for field in fields):
+        return False
+    try:
+        if int(user_id) < 0:
+            return False
+        if int(age) < 0:
+            return False
+        if int(height_cm) < 0:
+            return False
+        if float(current_weight_kg) < 0:
+            return False
+        if float(weight_goal_kg) < 0:
+            return False
+        if int(calorie_goal) < 0:
+            return False
+        if float(salts_goal) < 0:
+            return False
+        if float(protein_goal) < 0:
+            return False
+        if int(water_goal) < 0:
+            return False
+    except ValueError:
+        return
+    commit_setup(user_id, age, gender, height_cm, current_weight_kg, weight_goal_kg, calorie_goal,salts_goal,protein_goal,water_goal)
+    return True

@@ -91,7 +91,7 @@ def main(page: ft.Page):
 
 
 
-    def on_setup_complete(user_id, age, gender, height, current_weight, goal_weight):
+    def on_setup_complete(user_id):
         page.user_id = user_id
 
         page.clean()
