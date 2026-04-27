@@ -244,11 +244,33 @@ class SocialPage(ft.Column):
             return
 
         for item in self.activity_data:
+            like_label = "Unlike" if item["liked_by_user"] else "Like"
+
             activity_controls.append(
-                ft.ListTile(
-                    title=ft.Text(item["name"]),
-                    subtitle=ft.Text(item["activity"]),
-                    trailing=ft.Text(item["time"])
+                ft.Container(
+                    border=ft.Border(bottom=ft.BorderSide(1, ft.Colors.GREY_300)),
+                    padding=ft.padding.symmetric(vertical=6),
+                    content=ft.Column(
+                        spacing=4,
+                        controls=[
+                            ft.ListTile(
+                                title=ft.Text(item["name"]),
+                                subtitle=ft.Text(item["activity"]),
+                                trailing=ft.Text(item["time"])
+                            ),
+                            ft.Row(
+                                alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                                controls=[
+                                    ft.Text(f"{item['like_count']} likes"),
+                                    ft.TextButton(
+                                        like_label,
+                                        # Capture the current activity item so each button updates the correct row.
+                                        on_click=lambda e, activity=item: self.handle_like_action(activity)
+                                    )
+                                ]
+                            )
+                        ]
+                    )
                 )
             )
 
@@ -335,6 +357,31 @@ class SocialPage(ft.Column):
 
         # Refresh both the friend list and the overview
         self.load_friends()
+        self.load_social_overview()
+
+        self.this_page.update()
+        self.update()
+
+    # Like or unlike one activity item, then refresh the social overview
+    def handle_like_action(self, activity_item):
+        if activity_item["liked_by_user"]:
+            result_message = unlike_item(
+                self.user_id,
+                activity_item["activity_type"],
+                activity_item["target_id"]
+            )
+        else:
+            result_message = like_item(
+                self.user_id,
+                activity_item["activity_type"],
+                activity_item["target_id"]
+            )
+
+        self.this_page.snack_bar = ft.SnackBar(
+            content=ft.Text(result_message)
+        )
+        self.this_page.snack_bar.open = True
+        # Refresh the overview so like counts and button state update immediately.
         self.load_social_overview()
 
         self.this_page.update()
