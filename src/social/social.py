@@ -13,6 +13,7 @@ from social.social_service import (
     like_item,
     unlike_item,
     comment_on_item,
+    delete_comment_item,
     list_comments,
     list_friends,
     get_social_overview)
@@ -459,6 +460,20 @@ class SocialPage(ft.Column):
         self.this_page.pop_dialog()
 
         # Refresh the overview so comment counts update after posting.
+        self.load_social_overview()
+
+        self.this_page.update()
+        self.update()
+        self.show_snack(result_message)
+
+    # Delete one comment, close the dialog and refresh the social overview.
+    def handle_delete_comment(self, activity_item, comment_id):
+        result_message = delete_comment_item(self.user_id, comment_id)
+
+        # Close the current dialog first.
+        self.this_page.pop_dialog()
+
+        # Refresh the overview so the comment count updates immediately.
         self.load_social_overview()
 
         self.this_page.update()
