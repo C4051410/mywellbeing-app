@@ -338,11 +338,11 @@ class SocialPage(ft.Column):
 
     # Show a snackbar message at page level
     def show_snack(self, message):
-        self.this_page.snack_bar = ft.SnackBar(
-            content=ft.Text(message)
+        self.this_page.show_dialog(
+            ft.SnackBar(
+                content=ft.Text(message)
+            )
         )
-        self.this_page.snack_bar.open = True
-        self.this_page.update()
 
     # Add a friend using the entered username, then refresh the list
     def handle_add_friend(self, e):
@@ -432,10 +432,14 @@ class SocialPage(ft.Column):
                 height=300
             ),
             actions=[
-                ft.TextButton("Close", on_click=lambda e: self.close_dialog()),
+                ft.TextButton(
+                    "Close",
+                    on_click=lambda e: self.close_dialog(dialog)
+                ),
                 ft.ElevatedButton(
                     "Post",
                     on_click=lambda e: self.submit_comment(
+                        dialog,
                         activity_item["activity_type"],
                         activity_item["target_id"],
                         comment_input.value
@@ -443,18 +447,16 @@ class SocialPage(ft.Column):
                 )
             ]
         )
-        # Use page.dialog for more reliable open and close behavior.
-        self.this_page.dialog = dialog
-        dialog.open = True
-        self.this_page.update()
+
+        # Use Flet's dialog api so the dialog can be opened and removed reliably.
+        self.this_page.show_dialog(dialog)
 
     # Submit a comment, close the dialog and refresh the social overview
     def submit_comment(self, dialog, target_type, target_id, content):
         result_message = comment_on_item(self.user_id, target_type, target_id, content)
 
-        # Close the current dialog first so feedback is visible immediately.
-        if self.this_page.dialog is not None:
-            self.this_page.dialog.open = False
+        # Close the current dialog first.
+        self.this_page.pop_dialog()
 
         # Refresh the overview so comment counts update after posting.
         self.load_social_overview()
@@ -465,9 +467,7 @@ class SocialPage(ft.Column):
 
     # Close comments dialog
     def close_dialog(self, dialog):
-        if self.this_page.dialog is not None:
-            self.this_page.dialog.open = False
-            self.this_page.update()
+        self.this_page.pop_dialog()
 
     #Set size of all text on screen
     def set_text_size(self):
