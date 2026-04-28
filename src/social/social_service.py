@@ -17,6 +17,7 @@ from social.social_queries import (
     add_comment,
     count_comments,
     get_comments,
+    delete_comment,
     get_social_feed,
     get_leaderboard
 )
@@ -147,6 +148,17 @@ def list_comments(target_type, target_id):
             "created_at": str(row[4])
         })
     return comments
+
+def delete_comment_item(user_id, comment_id):
+    """
+    Delete comment item if it belongs to the current user.
+    """
+    result = delete_comment(comment_id, user_id)
+    if result is True:
+        return "Comment deleted successfully"
+    if result is False:
+        return "Comment could not be deleted"
+    return str(result)
 
 
 # Social page data
