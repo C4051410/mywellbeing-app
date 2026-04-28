@@ -432,11 +432,10 @@ class SocialPage(ft.Column):
                 height=300
             ),
             actions=[
-                ft.TextButton("Close", on_click=lambda e: self.close_dialog(dialog)),
+                ft.TextButton("Close", on_click=lambda e: self.close_dialog()),
                 ft.ElevatedButton(
                     "Post",
                     on_click=lambda e: self.submit_comment(
-                        dialog,
                         activity_item["activity_type"],
                         activity_item["target_id"],
                         comment_input.value
@@ -444,8 +443,8 @@ class SocialPage(ft.Column):
                 )
             ]
         )
-
-        self.this_page.overlay.append(dialog)
+        # Use page.dialog for more reliable open and close behavior.
+        self.this_page.dialog = dialog
         dialog.open = True
         self.this_page.update()
 
@@ -453,22 +452,22 @@ class SocialPage(ft.Column):
     def submit_comment(self, dialog, target_type, target_id, content):
         result_message = comment_on_item(self.user_id, target_type, target_id, content)
 
-        dialog.open = False
-        self.this_page.overlay.remove(dialog)
-
-        self.show_snack(result_message)
+        # Close the current dialog first so feedback is visible immediately.
+        if self.this_page.dialog is not None:
+            self.this_page.dialog.open = False
 
         # Refresh the overview so comment counts update after posting.
         self.load_social_overview()
 
         self.this_page.update()
         self.update()
+        self.show_snack(result_message)
 
     # Close comments dialog
     def close_dialog(self, dialog):
-        dialog.open = False
-        self.this_page.overlay.remove(dialog)
-        self.this_page.update()
+        if self.this_page.dialog is not None:
+            self.this_page.dialog.open = False
+            self.this_page.update()
 
     #Set size of all text on screen
     def set_text_size(self):
