@@ -336,6 +336,14 @@ class SocialPage(ft.Column):
             spacing=5,
         )
 
+    # Show a snackbar message at page level
+    def show_snack(self, message):
+        self.this_page.snack_bar = ft.SnackBar(
+            content=ft.Text(message)
+        )
+        self.this_page.snack_bar.open = True
+        self.this_page.update()
+
     # Add a friend using the entered username, then refresh the list
     def handle_add_friend(self, e):
         entered_username = self.friend_username_input.value
@@ -343,10 +351,7 @@ class SocialPage(ft.Column):
         # Call the service layer instead of querying the database directly in the UI.
         result_message = add_friend_by_username(self.user_id, entered_username)
         # Show feedback to the user.
-        self.this_page.snack_bar = ft.SnackBar(
-            content=ft.Text(result_message)
-        )
-        self.this_page.snack_bar.open = True
+        self.show_snack(result_message)
         # Clear the input after submission for a cleaner user experience.
         self.friend_username_input.value = ""
         # Reload both the friend list and the social overview so the page reflects the new friendship immediately.
@@ -360,10 +365,7 @@ class SocialPage(ft.Column):
     def handle_remove_friend(self, friend_id):
         result_message = remove_friend_by_id(self.user_id, friend_id)
         # Show feedback to the user after the removal attempt.
-        self.this_page.snack_bar = ft.SnackBar(
-            content=ft.Text(result_message)
-        )
-        self.this_page.snack_bar.open = True
+        self.show_snack(result_message)
 
         # Refresh both the friend list and the overview
         self.load_friends()
@@ -387,10 +389,7 @@ class SocialPage(ft.Column):
                 activity_item["target_id"]
             )
 
-        self.this_page.snack_bar = ft.SnackBar(
-            content=ft.Text(result_message)
-        )
-        self.this_page.snack_bar.open = True
+        self.show_snack(result_message)
         # Refresh the overview so like counts and button state update immediately.
         self.load_social_overview()
 
@@ -457,10 +456,7 @@ class SocialPage(ft.Column):
         dialog.open = False
         self.this_page.overlay.remove(dialog)
 
-        self.this_page.snack_bar = ft.SnackBar(
-            content=ft.Text(result_message)
-        )
-        self.this_page.snack_bar.open = True
+        self.show_snack(result_message)
 
         # Refresh the overview so comment counts update after posting.
         self.load_social_overview()
