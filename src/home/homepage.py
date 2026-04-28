@@ -60,12 +60,12 @@ class WorkoutApp(ft.Column):
         )
 
         # activities progress display
-        self.activities_text = ft.Text(value=f"{activities_completed} / {daily_goal}", size=self.r.w(widget_text_size))
-        self.activities_bar = ft.ProgressBar(value=activities_completed / daily_goal, width=150)
+        self.activities_text = ft.Text(value=f"{activities_completed} / {daily_goal}", size=self.r.w(widget_text_size), weight=ft.FontWeight.BOLD)
+        self.activities_bar = ft.ProgressBar(value=activities_completed / daily_goal, width=150, height=10, color=ft.Colors.BLUE, border_radius=5)
 
         # calorie progress display
-        self.calories_text = ft.Text(f"{daily_calories} / {calories_goal} Kcal", size=self.r.w(widget_text_size))
-        self.calories_bar = ft.ProgressBar(value=min(daily_calories, calories_goal, 1), width=150)
+        self.calories_text = ft.Text(f"{daily_calories} / {calories_goal} Kcal", size=self.r.w(widget_text_size), weight=ft.FontWeight.BOLD)
+        self.calories_bar = ft.ProgressBar(value=min(daily_calories / calories_goal, 1), width=150, height=10, color=ft.Colors.DEEP_ORANGE, border_radius=5, bgcolor="#FFDBBB")
 
         self.salts_text = ft.Text(f"Salt: {daily_salts} / {salts_goal} g",size=self.r.w(widget_text_size))
         self.protein_text = ft.Text(f"Protein: {daily_proteins} / {protein_goal} g",size=self.r.w(widget_text_size))
@@ -87,14 +87,15 @@ class WorkoutApp(ft.Column):
 
         # activities widget
         self.activity_container = ft.Container(
-            border = ft.Border.all(width=2, color=ft.Colors.GREY_400),
-            padding=40,
-            border_radius=10,
+            bgcolor=ft.Colors.WHITE,
+            border_radius=15,
+            padding=20,
+            shadow=ft.BoxShadow(spread_radius=1, blur_radius=10, color=ft.Colors.BLACK12),
             content=ft.Column(
                 alignment=ft.MainAxisAlignment.CENTER,
                 horizontal_alignment=ft.CrossAxisAlignment.CENTER,
                 controls=[
-                    ft.Text("Activities Completed", weight=ft.FontWeight.BOLD),
+                    ft.Text("Activities Completed", weight=ft.FontWeight.BOLD, color=ft.Colors.GREY_500, size=15),
                     self.activities_text,
                     self.activities_bar,
                 ]
@@ -103,14 +104,15 @@ class WorkoutApp(ft.Column):
 
         #Calories widget
         self.calories_container = ft.Container(
-            border = ft.Border.all(width=2, color=ft.Colors.GREY_400),
-            padding=40,
-            border_radius=10,
+            bgcolor=ft.Colors.WHITE,
+            border_radius=15,
+            padding=20,
+            shadow=ft.BoxShadow(spread_radius=1, blur_radius=10, color=ft.Colors.BLACK12),
             content=ft.Column(
                 alignment=ft.MainAxisAlignment.CENTER,
                 horizontal_alignment=ft.CrossAxisAlignment.CENTER,
                 controls=[
-                    ft.Text("Calories Consumed", weight=ft.FontWeight.BOLD),
+                    ft.Text("Calories Consumed", weight=ft.FontWeight.BOLD, color=ft.Colors.GREY_500, size=15),
                     self.calories_text,
                     self.calories_bar
                 ]
