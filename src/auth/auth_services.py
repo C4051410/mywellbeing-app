@@ -147,22 +147,20 @@ def load_template(file_path, username):
 
 
 def refresh_inactivity_timer(user_id,username):
-    # 1. Check DB for an existing scheduled email ID
-    # SELECT last_scheduled_email_id FROM users WHERE id = %s
+    #gets last email ready to be sent
     old_email_id = get_last_email(user_id)
-
-    # 2. If there is an old one, cancel it
+    #if the email exists, try and cancel it being sent using its id
     if old_email_id:
         try:
             resend.Emails.cancel(old_email_id)
         except Exception:
-            pass  # It might have already sent or been cancelled
+            pass
 
-    # 3. Schedule a new email for 20 hours from now
     try:
         template_path = os.path.join(current_dir, "reminder.html")
         html_body = load_template(template_path, username)
         test_email = "m.austoni2@newcastle.ac.uk"
+        #send to user in 20 hours time
         sent_email = resend.Emails.send({
             "from": "MyWellBeing <reminders@resend.dev>",
             "to": test_email,
@@ -170,9 +168,7 @@ def refresh_inactivity_timer(user_id,username):
             "html":html_body,
             "scheduled_at": "in 20 hours",
         })
-
-        # 4. Save the NEW email ID to your database
-        # UPDATE users SET last_scheduled_email_id = %s WHERE id = %s
+        #store the last email id in the db
         commit_last_email(user_id, sent_email["id"])
 
     except Exception as e:

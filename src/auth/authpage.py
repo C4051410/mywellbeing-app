@@ -18,6 +18,7 @@ def authPage(on_login_success, on_register_success):
         success,user = login_user(email.value, password.value)
         #logs in user if successful
         if success:
+            #refreshes the inactivity timer used to send email notification
             refresh_inactivity_timer(user[0],user[1])
             on_login_success(user[0])
         #displays specific failed category
