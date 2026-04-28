@@ -406,15 +406,34 @@ class SocialPage(ft.Column):
             comment_controls.append(ft.Text("No comments yet."))
         else:
             for comment in comments:
+                comment_row_controls = [
+                    ft.Column(
+                        spacing=0,
+                        controls=[
+                            ft.Text(comment["username"], weight=ft.FontWeight.BOLD),
+                            ft.Text(comment["content"]),
+                        ]
+                    )
+                ]
+
+                # Only show the delete button for comments created by the current user.
+                if comment["user_id"] == self.user_id:
+                    comment_row_controls.append(
+                        ft.IconButton(
+                            icon=ft.Icons.DELETE_OUTLINE,
+                            tooltip="Delete comment",
+                            on_click=lambda e,
+                                            comment_id=comment["comment_id"],
+                                            activity=activity_item: self.handle_delete_comment(activity, comment_id)
+                        )
+                    )
+
                 comment_controls.append(
                     ft.Container(
                         padding=ft.padding.symmetric(vertical=4),
-                        content=ft.Column(
-                            spacing=0,
-                            controls=[
-                                ft.Text(comment["username"], weight=ft.FontWeight.BOLD),
-                                ft.Text(comment["content"]),
-                            ]
+                        content=ft.Row(
+                            alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                            controls=comment_row_controls
                         )
                     )
                 )
@@ -435,12 +454,11 @@ class SocialPage(ft.Column):
             actions=[
                 ft.TextButton(
                     "Close",
-                    on_click=lambda e: self.close_dialog(dialog)
+                    on_click=lambda e: self.close_dialog()
                 ),
                 ft.ElevatedButton(
                     "Post",
                     on_click=lambda e: self.submit_comment(
-                        dialog,
                         activity_item["activity_type"],
                         activity_item["target_id"],
                         comment_input.value
@@ -453,7 +471,7 @@ class SocialPage(ft.Column):
         self.this_page.show_dialog(dialog)
 
     # Submit a comment, close the dialog and refresh the social overview
-    def submit_comment(self, dialog, target_type, target_id, content):
+    def submit_comment(self, target_type, target_id, content):
         result_message = comment_on_item(self.user_id, target_type, target_id, content)
 
         # Close the current dialog first.
@@ -481,7 +499,7 @@ class SocialPage(ft.Column):
         self.show_snack(result_message)
 
     # Close comments dialog
-    def close_dialog(self, dialog):
+    def close_dialog(self):
         self.this_page.pop_dialog()
 
     #Set size of all text on screen
