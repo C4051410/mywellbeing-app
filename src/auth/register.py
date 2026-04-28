@@ -3,54 +3,58 @@ import bcrypt
 from database.connection import connect
 from plyer import notification
 
-
-def register(username, password, email):
-    # TODO: (UI) add field level error messages next to each input
-    # eg: username.error = "Please enter a username"
-    if not all ([username, password, email]):
-        return "All fields are required"
-
-    # email validation
-    email_regex = r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"
-    if not re.match(email_regex, email):
-        return "Please enter a valid email"
-
-    # TODO: accept other special characters
-    # password validation
-    password_regex = r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$"
-    if not re.search(password_regex, password):
-        return "Password must have minimum eight characters, at least one uppercase letter, one lowercase letter, one number and one special character"
-
+#registers user into db
+def register(username, email, password):
     conn = connect()
-    cur = conn.cursor()
-
     try:
-        # check if email is already in use
-        cur.execute("SELECT id FROM users WHERE email = %s", (email,))
-        existing_user = cur.fetchone()
-
-        if existing_user:
-            return "Email already registered"
-
-        # hash user password
+        cur = conn.cursor()
+        #encrypts password
         hashed_password = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt(12)).decode("utf-8")
-
         # insert row into database
         cur.execute("INSERT INTO users (username, password, email, role) VALUES (%s, %s, %s, %s) RETURNING id",(username, hashed_password, email, "user"))
+        #retrieves the users new id
         user_id = cur.fetchone()[0]
         conn.commit()
-        notification.notify(
-            title="Registration Successful",
-            message="Account Created Successfully",
-            app_name="MyWellBeing",
-        )
-        return (user_id,)
+        cur.close()
+        conn.close()
+        return user_id
     except Exception as e:
         conn.rollback()
         return str(e)
 
-    finally:
+#check for existing user
+def get_existing_user(username, email):
+    conn = connect()
+    try:
+        cur = conn.cursor()
+        #check for existing user, Cap Sensitive
+        cur.execute("SELECT username FROM users WHERE username = %s", (username,))
+        ex_username = cur.fetchone()
+        #check for email, NOT Cap sensitive
+        cur.execute("SELECT email FROM users WHERE LOWER(email) = LOWER(%s)", (email,))
+        ex_email = cur.fetchone()
         cur.close()
         conn.close()
+        #return if any existing users or email
+        return  ex_username, ex_email
+    except Exception as e:
+        conn.close()
+        return str(e)
 
+def commit_setup(user_id, age, gender, height_cm, current_weight_kg, weight_goal_kg, calorie_goal,salts_goal,protein_goal,water_goal):
+    conn = connect()
+    try:
+        cur = conn.cursor()
+        cur.execute(
+                "INSERT INTO user_stats (user_id, age, gender, height_cm, current_weight_kg, weight_goal_kg, "
+                "calorie_goal,salts_goal,proteins_goal,water_goal,current_streak,longest_streak) VALUES (%s, %s, %s, %s, %s, %s, %s,%s, %s,%s,%s,%s)",
+                (user_id, age, gender, height_cm, current_weight_kg, weight_goal_kg, calorie_goal,salts_goal,protein_goal,water_goal,1,1))
+        conn.commit()
+        cur.close()
+        conn.close()
+        return "Setup saved"
 
+    except Exception as e:
+        conn.rollback()
+        conn.close()
+        return str(e)

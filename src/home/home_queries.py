@@ -5,7 +5,7 @@ def get_username(user_id):
     conn = connect()
     try:
         cur = conn.cursor()
-        cur.execute("SELECT username FROM users WHERE user_id = ?", (user_id,))
+        cur.execute("SELECT username FROM users WHERE id = %s", (user_id,))
         row = cur.fetchone()
         cur.close()
         conn.close()

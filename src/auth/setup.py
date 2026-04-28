@@ -3,14 +3,14 @@ File used for profile setup - users will be redirected here after registration
 '''
 
 import flet as ft
-from database.user_queries import save_setup
+from auth.auth_services import save_setup
 
 def setupGoalsPage(user_id, on_setup_complete):
     message = ft.Text()
 
     # user data fields
     age = ft.TextField(label="Age")
-    gender = ft.Dropdown(label="Gender", options=[ft.dropdown.Option("Male"), ft.dropdown.Option("Female"),ft.Dropdown("Non-Binary"), ft.Dropdown("Other")])
+    gender = ft.Dropdown(label="Gender", options=[ft.dropdown.Option("Male"), ft.dropdown.Option("Female"),ft.dropdown.Option("Non-Binary"), ft.dropdown.Option("Other")])
     height = ft.TextField(label="Height (cm)")
     current_weight = ft.TextField(label="Current Weight (kg)")
     goal_weight = ft.TextField(label="Goal Weight (kg)")
@@ -83,8 +83,10 @@ def setupGoalsPage(user_id, on_setup_complete):
                 calorie_goal = round(daily_calories)
 
             # save and store users setup data
-            save_setup(user_id, age_val, gender.value, height_val, current_weight_val, goal_weight_val, calorie_goal,salts_val,protein_val,water_val)
-            on_setup_complete(user_id, age_val, gender.value, height_val, current_weight_val, goal_weight_val)
+            success = save_setup(user_id, age_val, gender.value, height_val, current_weight_val, goal_weight_val, calorie_goal,salts_val,protein_val,water_val)
+            if not success:
+                message.value = "Error Upon Completion, Please Try Again"
+            on_setup_complete(user_id)
 
         except ValueError:
             message.value = "Please enter valid numbers"

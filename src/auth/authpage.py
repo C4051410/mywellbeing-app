@@ -1,9 +1,11 @@
 import flet as ft
 from auth.register import register
 from auth.login import login
+from auth.auth_services import login_user, register_user
+
 
 def authPage(on_login_success, on_register_success):
-    message = ft.Text()
+    message = ft.Text(color=ft.Colors.RED)
     # signup fields
     username = ft.TextField(label="Username")
     email = ft.TextField(label="Email")
@@ -13,23 +15,26 @@ def authPage(on_login_success, on_register_success):
     signup = [username]
 
     def handle_login(e):
-        # logs in users
-        logged_in = login(email.value, password.value)
-        if isinstance(logged_in, tuple):
-            on_login_success(logged_in[0])
+        success,user = login_user(email.value, password.value)
+        #logs in user if successful
+        if success:
+            on_login_success(user[0])
+        #displays specific failed category
         else:
-            message.value = str(logged_in)
+            message.value = user
             e.page.update()
 
     def handle_register(e):
         # registers users
         message.value = ""
         e.page.update()
-        registered = register(username.value, password.value, email.value)
-        if isinstance(registered, tuple):
-            on_register_success(registered[0])
+        success,user = register_user(username.value,email.value, password.value)
+        #successfully registers user if successful
+        if success:
+            on_register_success(user)
+        #display specific failed category
         else:
-            message.value = str(registered)
+            message.value = user
             e.page.update()
 
     def show_register(e):
