@@ -5,10 +5,12 @@ import bcrypt
 import resend
 from plyer import notification
 
-from auth.login import login, get_user_setup, get_last_email, commit_last_email
+from auth.login import login, get_user_setup,get_last_email,commit_last_email
 from auth.register import register, get_existing_user, commit_setup
 from database.connection import email_key
 current_dir = os.path.dirname(__file__)
+#gets API key
+resend.api_key = email_key()
 
 def login_user(email, password):
     #checks fields arent empty
@@ -75,8 +77,6 @@ def register_user(username,email, password):
         )
     except Exception as e:
         print(e)
-    #gets api keys
-    resend.api_key = email_key()
     #uses the test email, as we dont have the costs to buy domain
     #on deployment, would remove this and use email
     test_email = "m.austoni2@newcastle.ac.uk"
@@ -144,3 +144,36 @@ def load_template(file_path, username):
         content = file.read()
     # Replace the placeholder with the actual variable
     return content.replace("{{username}}", username)
+
+
+def refresh_inactivity_timer(user_id,username):
+    # 1. Check DB for an existing scheduled email ID
+    # SELECT last_scheduled_email_id FROM users WHERE id = %s
+    old_email_id = get_last_email(user_id)
+
+    # 2. If there is an old one, cancel it
+    if old_email_id:
+        try:
+            resend.Emails.cancel(old_email_id)
+        except Exception:
+            pass  # It might have already sent or been cancelled
+
+    # 3. Schedule a new email for 20 hours from now
+    try:
+        template_path = os.path.join(current_dir, "reminder.html")
+        html_body = load_template(template_path, username)
+        test_email = "m.austoni2@newcastle.ac.uk"
+        sent_email = resend.Emails.send({
+            "from": "MyWellBeing <reminders@resend.dev>",
+            "to": test_email,
+            "subject": "We miss you!",
+            "html":html_body,
+            "scheduled_at": "in 20 hours",
+        })
+
+        # 4. Save the NEW email ID to your database
+        # UPDATE users SET last_scheduled_email_id = %s WHERE id = %s
+        commit_last_email(user_id, sent_email["id"])
+
+    except Exception as e:
+        print(f"Error scheduling email: {e}")
