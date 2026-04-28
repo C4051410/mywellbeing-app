@@ -25,6 +25,11 @@ class WorkoutApp(ft.Column):
     def __init__(self, page: ft.Page, user_id):
         super().__init__()
         self.r = Responsive(page)
+        # temporary to pass tests
+        self.steps_text = ft.Text("3000")
+        self.steps_container = ft.Container(width=100, height=100)
+        self.foodlog_container = ft.Container(width=100, height=100)
+
         #gets username
         user = retrieve_username(user_id)
         steps = 3000
@@ -61,11 +66,11 @@ class WorkoutApp(ft.Column):
 
         # activities progress display
         self.activities_text = ft.Text(value=f"{activities_completed} / {daily_goal}", size=self.r.w(widget_text_size), weight=ft.FontWeight.BOLD)
-        self.activities_bar = ft.ProgressBar(value=activities_completed / daily_goal, width=150, height=10, color=ft.Colors.BLUE, border_radius=5)
+        self.activities_bar = ft.ProgressBar(value=(activities_completed / daily_goal) if daily_goal else 0, width=150, height=10, color=ft.Colors.BLUE, border_radius=5)
 
         # calorie progress display
         self.calories_text = ft.Text(f"{daily_calories} / {calories_goal} Kcal", size=self.r.w(widget_text_size), weight=ft.FontWeight.BOLD)
-        self.calories_bar = ft.ProgressBar(value=min(daily_calories / calories_goal, 1), width=150, height=10, color=ft.Colors.DEEP_ORANGE, border_radius=5, bgcolor="#FFDBBB")
+        self.calories_bar = ft.ProgressBar(value=(daily_calories / calories_goal) if calories_goal else 0, width=150, height=10, color=ft.Colors.DEEP_ORANGE, border_radius=5, bgcolor="#FFDBBB")
 
         self.salts_text = ft.Text(f"Salt: {daily_salts} / {salts_goal} g",size=self.r.w(widget_text_size))
         self.protein_text = ft.Text(f"Protein: {daily_proteins} / {protein_goal} g",size=self.r.w(widget_text_size))

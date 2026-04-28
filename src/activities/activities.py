@@ -167,6 +167,10 @@ class ActivitiesPage(ft.Column):
         # 3. Individual Activities Feed OR Empty State
         feed_column = ft.Column(spacing=15)
 
+        feed_column.controls.append(
+            ft.Text("ALL RECENT ACTIVITIES", size=12, weight=ft.FontWeight.BOLD, color=ft.Colors.GREY_500)
+        )
+
         record_btn = ft.ElevatedButton(
             content=ft.Row([
                 ft.Icon(ft.Icons.ADD_CIRCLE_OUTLINE, color=ft.Colors.WHITE, size=14),
@@ -219,9 +223,7 @@ class ActivitiesPage(ft.Column):
             )
         else:
             # Populated History Feed
-            feed_column.controls.append(
-                ft.Text("ALL RECENT ACTIVITIES", size=12, weight=ft.FontWeight.BOLD, color=ft.Colors.GREY_500)
-            )
+
 
             # Map the activity types to unique icons!
             icon_map = {
@@ -390,6 +392,9 @@ class ActivitiesPage(ft.Column):
                 open=True
             )
             self.main_page.update()
+
+    def format_time(self, seconds: int) -> str:
+        return format_time(seconds)
 
 class ActivityDetailPage(ft.Column):
     def __init__(self, page: ft.Page):

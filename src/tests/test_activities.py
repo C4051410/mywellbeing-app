@@ -85,7 +85,7 @@ def make_activities(
 
     #used to mock the return function
     with (
-        patch("activities.activities.retrieve_activities",           return_value=db_rows),
+        patch("activities.activities.get_activities",           return_value=db_rows),
         patch("activities.activities.get_saved_activities",     return_value=strava_rows),
         patch("activities.activities.format_strava_activities", return_value=strava_rows),
         patch("activities.activities.load_tokens_for_user",     return_value={"token": "x"} if has_strava_tokens else None),
@@ -156,8 +156,10 @@ class TestActivityFeed:
     def test_empty_state_rendered_when_no_activities(self):
         app, _ = make_activities(db_rows=[])
         feed = self.feed_column(app)
-        assert len(feed.controls) == 1
-        assert isinstance(feed.controls[0], ft.Container)
+        assert len(feed.controls) == 2
+        assert isinstance(feed.controls[0], ft.Text)
+        assert isinstance(feed.controls[1], ft.Container)
+
     #makes sure a single populated displays the activity and header
     def test_populated_feed_has_header_plus_tiles(self):
         rows = [make_db_row()]
@@ -170,7 +172,7 @@ class TestActivityFeed:
         rows = [make_db_row(title=f"Run {i}") for i in range(3)]
         app, _ = make_activities(db_rows=rows)
         feed = self.feed_column(app)
-        assert len(feed.controls) == 4
+        assert len(feed.controls) == 1 + len(rows)
 
 
 
