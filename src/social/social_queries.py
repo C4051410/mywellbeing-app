@@ -291,6 +291,29 @@ def get_comments(target_type, target_id):
         cur.close()
         conn.close()
 
+def delete_comment(comment_id, user_id):
+    """
+    Delete comment if it belongs to the current user.
+    """
+    conn = connect()
+    cur = conn.cursor()
+    try:
+        cur.execute(
+            """
+            DELETE FROM social_comments
+            WHERE id = %s AND user_id = %s
+            """,
+            (comment_id, user_id)
+        )
+        conn.commit()
+        return cur.rowcount > 0
+    except Exception as e:
+        conn.rollback()
+        return str(e)
+    finally:
+        cur.close()
+        conn.close()
+
 # Social feed
 def get_social_feed(user_id):
     """
