@@ -5,6 +5,7 @@ from datetime import date
 
 import flet as ft
 
+from activities.activities import load_activity_data
 from components.userpfp import Userpfp
 from components.bottom_nav import NavBar
 from components.responsive import Responsive
@@ -36,6 +37,11 @@ class WorkoutApp(ft.Column):
         #gets users current streak and best streak
         streak = retrieve_current_streaks(user_id)
 
+        # ignore other return values, only need activitiy count
+        _, _, activities_completed, _ = load_activity_data(page)
+        activities_completed = int(activities_completed)
+
+        daily_goal = 5
 
         #TODO-Add slight variations to the welcome and motivational message
 
@@ -53,13 +59,14 @@ class WorkoutApp(ft.Column):
             color=ft.Colors.GREY
         )
 
-        #Text for steps widget
-        self.steps_text = ft.Text(
-            value=f'Daily Steps: {steps}',
-            size=self.r.w(widget_text_size)
-        )
+        # activities progress display
+        self.activities_text = ft.Text(value=f"{activities_completed} / {daily_goal}", size=self.r.w(widget_text_size))
+        self.activities_bar = ft.ProgressBar(value=activities_completed / daily_goal, width=150)
 
-        self.calories_text = ft.Text(f"Calories: {daily_calories} / {calories_goal} Kcal",size=self.r.w(widget_text_size))
+        # calorie progress display
+        self.calories_text = ft.Text(f"{daily_calories} / {calories_goal} Kcal", size=self.r.w(widget_text_size))
+        self.calories_bar = ft.ProgressBar(value=min(daily_calories, calories_goal, 1), width=150)
+
         self.salts_text = ft.Text(f"Salt: {daily_salts} / {salts_goal} g",size=self.r.w(widget_text_size))
         self.protein_text = ft.Text(f"Protein: {daily_proteins} / {protein_goal} g",size=self.r.w(widget_text_size))
         self.water_text = ft.Text(f"Water: {daily_water} / {water_goal} ml",size=self.r.w(widget_text_size))
@@ -78,26 +85,34 @@ class WorkoutApp(ft.Column):
         self.current_streak_text = ft.Text(f"Current Streak: {streak[0]}")
         self.longest_streak_text = ft.Text(f"Longest Streak: {streak[1]}")
 
-
-        #Steps widget
-        self.steps_container = ft.Container(
+        # activities widget
+        self.activity_container = ft.Container(
             border = ft.Border.all(width=2, color=ft.Colors.GREY_400),
+            padding=40,
+            border_radius=10,
             content=ft.Column(
+                alignment=ft.MainAxisAlignment.CENTER,
+                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
                 controls=[
-                    self.steps_text
+                    ft.Text("Activities Completed", weight=ft.FontWeight.BOLD),
+                    self.activities_text,
+                    self.activities_bar,
                 ]
             )
         )
 
         #Calories widget
-        self.foodlog_container = ft.Container(
+        self.calories_container = ft.Container(
             border = ft.Border.all(width=2, color=ft.Colors.GREY_400),
+            padding=40,
+            border_radius=10,
             content=ft.Column(
+                alignment=ft.MainAxisAlignment.CENTER,
+                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
                 controls=[
+                    ft.Text("Calories Consumed", weight=ft.FontWeight.BOLD),
                     self.calories_text,
-                    self.salts_text,
-                    self.protein_text,
-                    self.water_text
+                    self.calories_bar
                 ]
             )
         )
@@ -166,15 +181,21 @@ class WorkoutApp(ft.Column):
                     self.userpfp
                 ],
             ),
-            #Row with steps and calories
+            #Row with activities and calories
             ft.Row(
-                alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
-                #vertical_alignment = ft.CrossAxisAlignment.START,
+                spacing=8,
                 controls=[
-                    self.steps_container,
-                    self.foodlog_container
+                    ft.Container(
+                        content=self.activity_container,
+                        expand=1,
+                    ),
+                    ft.Container(
+                        content=self.calories_container,
+                        expand=1,
+                    ),
                 ]
             ),
+
             self.friends_container,
             self.streak_container,
             self.un_link],expand=True,scroll=ft.ScrollMode.HIDDEN)
@@ -197,7 +218,7 @@ class WorkoutApp(ft.Column):
         self.welcome_text.size = self.r.w(welcome_text_size)
         self.motivational_text.size = self.r.w(motivational_msg_size)
 
-        self.steps_text.size = self.r.w(widget_text_size)
+        self.activities_text.size = self.r.w(widget_text_size)
         self.calories_text.size = self.r.w(widget_text_size)
 
 
@@ -205,11 +226,9 @@ class WorkoutApp(ft.Column):
         #Set width and height of widgets
         #Steps - Square
         full_width = self.this_page.width * 0.95
-        self.steps_container.width = self.r.w(steps_h_size)
-        self.steps_container.height = self.r.w(steps_h_size)
+        self.activity_container.height = self.r.w(steps_h_size)
         #Calories - Square
-        self.foodlog_container.width = self.r.w(calories_h_size)
-        self.foodlog_container.height = self.r.w(calories_h_size)
+        self.calories_container.height = self.r.w(calories_h_size)
         #Friends - Rectangle
         self.friends_container.height = self.r.h(friends_v_size)
         #Streak - Long rectange
