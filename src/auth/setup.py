@@ -91,12 +91,58 @@ def setupGoalsPage(user_id, on_setup_complete):
             e.page.update()
 
     return ft.Container(
-        content=ft.Column([
-            ft.Text("Set Up Your Goals", size=24, weight=ft.FontWeight.BOLD),
-            ft.Text("Enter your details to calculate your calorie goal"),
-            age, gender, height, current_weight, goal_weight,goal_salts,
-            goal_proteins,goal_water,activity_level,
-            ft.ElevatedButton("Continue", on_click=handle_continue),
-            message
-        ])
+        expand=True,
+        gradient=ft.LinearGradient(
+            begin=ft.Alignment.TOP_LEFT,
+            end=ft.Alignment.BOTTOM_RIGHT,
+            colors=[ft.Colors.ORANGE_100, ft.Colors.WHITE, ft.Colors.DEEP_ORANGE_50],
+        ),
+        content=ft.Column(
+            controls=[
+                ft.Container(height=20),
+                ft.Container(
+                    bgcolor=ft.Colors.WHITE,
+                    border_radius=24,
+                    padding=ft.padding.symmetric(horizontal=28, vertical=32),
+                    shadow=ft.BoxShadow(spread_radius=0, blur_radius=30,
+                                        color=ft.Colors.with_opacity(0.12, ft.Colors.BLACK),
+                                        offset=ft.Offset(0, 8)),
+                    margin=ft.margin.symmetric(horizontal=20),
+                    content=ft.Column([
+                        ft.Text("Set Up Your Profile", size=24, weight=ft.FontWeight.BOLD,
+                                text_align=ft.TextAlign.CENTER),
+                        ft.Text("Help us personalise your experience", size=13,
+                                color=ft.Colors.GREY_500, text_align=ft.TextAlign.CENTER),
+                        ft.Divider(height=16, color=ft.Colors.TRANSPARENT),
+                        ft.Text("About You", size=12, weight=ft.FontWeight.BOLD, color=ft.Colors.DEEP_ORANGE),
+                        age, gender,
+                        ft.Divider(height=8, color=ft.Colors.TRANSPARENT),
+                        ft.Text("Body Metrics", size=12, weight=ft.FontWeight.BOLD, color=ft.Colors.DEEP_ORANGE),
+                        height, current_weight, goal_weight,
+                        ft.Divider(height=8, color=ft.Colors.TRANSPARENT),
+                        ft.Text("Nutrition Goals", size=12, weight=ft.FontWeight.BOLD, color=ft.Colors.DEEP_ORANGE),
+                        goal_salts, goal_proteins, goal_water,
+                        ft.Divider(height=8, color=ft.Colors.TRANSPARENT),
+                        ft.Text("Activity Level", size=12, weight=ft.FontWeight.BOLD, color=ft.Colors.DEEP_ORANGE),
+                        activity_level,
+                        ft.Divider(height=16, color=ft.Colors.TRANSPARENT),
+                        message,
+                        ft.Container(
+                            content=ft.Text("Continue", color=ft.Colors.WHITE,
+                                            weight=ft.FontWeight.BOLD, size=15,
+                                            text_align=ft.TextAlign.CENTER),
+                            bgcolor=ft.Colors.DEEP_ORANGE,
+                            border_radius=12,
+                            padding=ft.padding.symmetric(vertical=14),
+                            on_click=handle_continue,
+                            ink=True,
+                            expand=True,
+                        ),
+                    ], scroll=ft.ScrollMode.HIDDEN, spacing=10),
+                ),
+                ft.Container(height=20),
+            ],
+            scroll=ft.ScrollMode.HIDDEN,
+            expand=True,
+        )
     )
