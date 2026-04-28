@@ -141,15 +141,17 @@ def get_friend_ids(user_id):
 # Likes and comments
 def like_target(user_id, target_type, target_id):
     """
-    Add a like to a workout or meal.
+    Add a like to a workout.
+    The user can only like the same target once.
     """
     conn = connect()
     cur = conn.cursor()
     try:
         cur.execute(
             """
-            INSERT INTO social_likes (id, target_type, target_id, user_id)
+            INSERT INTO social_likes (target_type, target_id, user_id)
             VALUES (%s, %s, %s)
+            ON CONFLICT (user_id, target_type, target_id) DO NOTHING
             """,
             (target_type, target_id, user_id)
         )
@@ -162,10 +164,9 @@ def like_target(user_id, target_type, target_id):
         cur.close()
         conn.close()
 
-
 def unlike_target(user_id, target_type, target_id):
     """
-    Remove a like from a workout or meal.
+    Remove a like from a workout (target).
     """
     conn = connect()
     cur = conn.cursor()
@@ -186,17 +187,56 @@ def unlike_target(user_id, target_type, target_id):
         cur.close()
         conn.close()
 
-
-def add_comment(user_id, target_type, target_id, content):
+def has_user_liked(user_id, target_type, target_id):
     """
-    Add a comment to a workout or meal.
+    Return True if the user has liked the target.
     """
     conn = connect()
     cur = conn.cursor()
     try:
         cur.execute(
             """
-            INSERT INTO social_comments (id, target_type, target_id, user_id, content)
+            SELECT 1 FROM social_likes
+            WHERE user_id = %s AND target_type = %s AND target_id = %s
+            LIMIT 1
+            """,
+            (user_id, target_type, target_id)
+        )
+        return cur.fetchone() is not None
+    finally:
+        cur.close()
+        conn.close()
+
+def count_likes(target_type, target_id):
+    """
+    Return the number of likes for one target.
+    """
+    conn = connect()
+    cur = conn.cursor()
+    try:
+        cur.execute(
+            """
+            SELECT COUNT(*) FROM social_likes
+            WHERE target_type = %s AND target_id = %s
+            """,
+            (target_type, target_id)
+        )
+        return cur.fetchone()[0]
+    finally:
+        cur.close()
+        conn.close()
+
+
+def add_comment(user_id, target_type, target_id, content):
+    """
+    Add a comment to a workout (target).
+    """
+    conn = connect()
+    cur = conn.cursor()
+    try:
+        cur.execute(
+            """
+            INSERT INTO social_comments (target_type, target_id, user_id, content)
             VALUES (%s, %s, %s, %s)
             """,
             (target_type, target_id, user_id, content)
@@ -210,10 +250,28 @@ def add_comment(user_id, target_type, target_id, content):
         cur.close()
         conn.close()
 
+def count_comments(target_type, target_id):
+    """
+    Return the number of comments for one target.
+    """
+    conn = connect()
+    cur = conn.cursor()
+    try:
+        cur.execute(
+            """
+            SELECT COUNT(*) FROM social_comments
+            WHERE target_type = %s AND target_id = %s
+            """,
+            (target_type, target_id)
+        )
+        return cur.fetchone()[0]
+    finally:
+        cur.close()
+        conn.close()
 
 def get_comments(target_type, target_id):
     """
-    Retrieve comments for a workout or meal.
+    Retrieve comments for a workout (target).
     """
     conn = connect()
     cur = conn.cursor()
@@ -233,10 +291,33 @@ def get_comments(target_type, target_id):
         cur.close()
         conn.close()
 
+def delete_comment(comment_id, user_id):
+    """
+    Delete comment if it belongs to the current user.
+    """
+    conn = connect()
+    cur = conn.cursor()
+    try:
+        cur.execute(
+            """
+            DELETE FROM social_comments
+            WHERE id = %s AND user_id = %s
+            """,
+            (comment_id, user_id)
+        )
+        conn.commit()
+        return cur.rowcount > 0
+    except Exception as e:
+        conn.rollback()
+        return str(e)
+    finally:
+        cur.close()
+        conn.close()
+
 # Social feed
 def get_social_feed(user_id):
     """
-    Retrieve recent activity (workouts & meals(foodlog)) from user's friends.
+    Retrieve recent workout activity from user's friends.
     """
     conn = connect()
     cur = conn.cursor()
@@ -262,36 +343,14 @@ def get_social_feed(user_id):
                    w.id,
                    w.user_id
             FROM workouts w
-                     JOIN users u ON w.user_id = u.id
+            JOIN users u ON w.user_id = u.id
             WHERE w.user_id = ANY (%s)
-            ORDER BY w.id DESC LIMIT 5
+            ORDER BY w.start_date DESC NULLS LAST, w.id DESC
+            LIMIT 6
             """,
             (friend_ids,)
         )
-        workouts = cur.fetchall()
-
-        # Retrieve meal activities
-        cur.execute(
-            """
-            SELECT 'meal' AS activity_type,
-                   u.username,
-                   f.title,
-                   f.calories,
-                   f.id,
-                   f.user_id
-            FROM foodlog f
-                     JOIN users u ON f.user_id = u.id
-            WHERE f.user_id = ANY (%s)
-            ORDER BY f.id DESC LIMIT 5
-            """,
-            (friend_ids,)
-        )
-        meals = cur.fetchall()
-        # Combine activities
-        # Sort by target id descending as a temporary approximation of recency
-        activity_feed = workouts + meals
-        activity_feed.sort(key=lambda row: row[4], reverse=True)
-        return activity_feed[:6]
+        return cur.fetchall()
     finally:
         cur.close()
         conn.close()

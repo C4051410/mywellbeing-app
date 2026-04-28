@@ -7,7 +7,16 @@ import flet as ft
 from components.userpfp import Userpfp
 from components.bottom_nav import NavBar
 from components.responsive import Responsive
-from social.social_service import add_friend_by_username, remove_friend_by_id, list_friends, get_social_overview
+from social.social_service import (
+    add_friend_by_username,
+    remove_friend_by_id,
+    like_item,
+    unlike_item,
+    comment_on_item,
+    delete_comment_item,
+    list_comments,
+    list_friends,
+    get_social_overview)
 
 #Sizes of all elements on homepage (as a percent of screen)
 page_title_size = 0.1
@@ -169,11 +178,17 @@ class SocialPage(ft.Column):
             for item in overview["leaderboard"]
         ]
 
+        # Interaction metadata on each activity item
         self.activity_data = [
             {
                 "name": item["username"],
                 "activity": f"{item['activity_type']}: {item['title']} ({item['calories']} cal)",
-                "time": "Recent"
+                "time": "Recent",
+                "activity_type": item["activity_type"],
+                "target_id": item["target_id"],
+                "like_count": item["like_count"],
+                "liked_by_user": item["liked_by_user"],
+                "comment_count": item["comment_count"]
             }
             for item in overview["activity"]
         ]
@@ -230,11 +245,43 @@ class SocialPage(ft.Column):
             return
 
         for item in self.activity_data:
+            like_label = "Unlike" if item["liked_by_user"] else "Like"
+
             activity_controls.append(
-                ft.ListTile(
-                    title=ft.Text(item["name"]),
-                    subtitle=ft.Text(item["activity"]),
-                    trailing=ft.Text(item["time"])
+                ft.Container(
+                    border=ft.Border(bottom=ft.BorderSide(1, ft.Colors.GREY_300)),
+                    padding=ft.padding.symmetric(vertical=6),
+                    content=ft.Column(
+                        spacing=4,
+                        controls=[
+                            ft.ListTile(
+                                title=ft.Text(item["name"]),
+                                subtitle=ft.Text(item["activity"]),
+                                trailing=ft.Text(item["time"])
+                            ),
+                            ft.Row(
+                                alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                                controls=[
+                                    ft.Text(
+                                        f"{item['like_count']} likes • {item['comment_count']} comments"
+                                    ),
+                                    ft.Row(
+                                        spacing=6,
+                                        controls=[
+                                            ft.TextButton(
+                                                like_label,
+                                                on_click=lambda e, activity=item: self.handle_like_action(activity)
+                                            ),
+                                            ft.TextButton(
+                                                "Comments",
+                                                on_click=lambda e, activity=item: self.open_comments_dialog(activity)
+                                            )
+                                        ]
+                                    )
+                                ]
+                            )
+                        ]
+                    )
                 )
             )
 
@@ -290,6 +337,14 @@ class SocialPage(ft.Column):
             spacing=5,
         )
 
+    # Show a snackbar message at page level
+    def show_snack(self, message):
+        self.this_page.show_dialog(
+            ft.SnackBar(
+                content=ft.Text(message)
+            )
+        )
+
     # Add a friend using the entered username, then refresh the list
     def handle_add_friend(self, e):
         entered_username = self.friend_username_input.value
@@ -297,10 +352,7 @@ class SocialPage(ft.Column):
         # Call the service layer instead of querying the database directly in the UI.
         result_message = add_friend_by_username(self.user_id, entered_username)
         # Show feedback to the user.
-        self.this_page.snack_bar = ft.SnackBar(
-            content=ft.Text(result_message)
-        )
-        self.this_page.snack_bar.open = True
+        self.show_snack(result_message)
         # Clear the input after submission for a cleaner user experience.
         self.friend_username_input.value = ""
         # Reload both the friend list and the social overview so the page reflects the new friendship immediately.
@@ -314,10 +366,7 @@ class SocialPage(ft.Column):
     def handle_remove_friend(self, friend_id):
         result_message = remove_friend_by_id(self.user_id, friend_id)
         # Show feedback to the user after the removal attempt.
-        self.this_page.snack_bar = ft.SnackBar(
-            content=ft.Text(result_message)
-        )
-        self.this_page.snack_bar.open = True
+        self.show_snack(result_message)
 
         # Refresh both the friend list and the overview
         self.load_friends()
@@ -325,6 +374,133 @@ class SocialPage(ft.Column):
 
         self.this_page.update()
         self.update()
+
+    # Like or unlike one activity item, then refresh the social overview
+    def handle_like_action(self, activity_item):
+        if activity_item["liked_by_user"]:
+            result_message = unlike_item(
+                self.user_id,
+                activity_item["activity_type"],
+                activity_item["target_id"]
+            )
+        else:
+            result_message = like_item(
+                self.user_id,
+                activity_item["activity_type"],
+                activity_item["target_id"]
+            )
+
+        self.show_snack(result_message)
+        # Refresh the overview so like counts and button state update immediately.
+        self.load_social_overview()
+
+        self.this_page.update()
+        self.update()
+
+    # Open a dialog that shows comments for one workout activity and to add a new comments
+    def open_comments_dialog(self, activity_item):
+        comments = list_comments(activity_item["activity_type"], activity_item["target_id"])
+
+        comment_controls = []
+        if not comments:
+            comment_controls.append(ft.Text("No comments yet."))
+        else:
+            for comment in comments:
+                comment_row_controls = [
+                    ft.Column(
+                        spacing=0,
+                        controls=[
+                            ft.Text(comment["username"], weight=ft.FontWeight.BOLD),
+                            ft.Text(comment["content"]),
+                        ]
+                    )
+                ]
+
+                # Only show the delete button for comments created by the current user.
+                if comment["user_id"] == self.user_id:
+                    comment_row_controls.append(
+                        ft.IconButton(
+                            icon=ft.Icons.DELETE_OUTLINE,
+                            tooltip="Delete comment",
+                            on_click=lambda e,
+                                            comment_id=comment["comment_id"],
+                                            activity=activity_item: self.handle_delete_comment(activity, comment_id)
+                        )
+                    )
+
+                comment_controls.append(
+                    ft.Container(
+                        padding=ft.padding.symmetric(vertical=4),
+                        content=ft.Row(
+                            alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                            controls=comment_row_controls
+                        )
+                    )
+                )
+
+        comment_input = ft.TextField(
+            hint_text="Write a comment..."
+        )
+
+        dialog = ft.AlertDialog(
+            modal=True,
+            title=ft.Text("Comments"),
+            content=ft.Column(
+                controls=comment_controls + [ft.Divider(), comment_input],
+                tight=True,
+                scroll=ft.ScrollMode.AUTO,
+                height=300
+            ),
+            actions=[
+                ft.TextButton(
+                    "Close",
+                    on_click=lambda e: self.close_dialog()
+                ),
+                ft.ElevatedButton(
+                    "Post",
+                    on_click=lambda e: self.submit_comment(
+                        activity_item["activity_type"],
+                        activity_item["target_id"],
+                        comment_input.value
+                    )
+                )
+            ]
+        )
+
+        # Use Flet's dialog api so the dialog can be opened and removed reliably.
+        self.this_page.show_dialog(dialog)
+
+    # Submit a comment, close the dialog and refresh the social overview
+    def submit_comment(self, target_type, target_id, content):
+        result_message = comment_on_item(self.user_id, target_type, target_id, content)
+
+        # Close the current dialog first.
+        self.this_page.pop_dialog()
+
+        # Refresh the overview so comment counts update after posting.
+        self.load_social_overview()
+
+        self.this_page.update()
+        self.update()
+        self.show_snack(result_message)
+
+    # Delete one comment, close the dialog and refresh the social overview.
+    def handle_delete_comment(self, activity_item, comment_id):
+        result_message = delete_comment_item(self.user_id, comment_id)
+
+        # Close the current dialog first.
+        self.this_page.pop_dialog()
+
+        # Refresh the overview so the comment count updates immediately.
+        self.load_social_overview()
+
+        self.this_page.update()
+        self.update()
+        self.show_snack(result_message)
+
+    # Close comments dialog
+    def close_dialog(self):
+        self.this_page.pop_dialog()
 
     #Set size of all text on screen
     def set_text_size(self):

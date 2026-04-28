@@ -12,8 +12,12 @@ from social.social_queries import (
     get_friends,
     like_target,
     unlike_target,
+    has_user_liked,
+    count_likes,
     add_comment,
+    count_comments,
     get_comments,
+    delete_comment,
     get_social_feed,
     get_leaderboard
 )
@@ -56,7 +60,6 @@ def add_friend_by_username(user_id, friend_username):
         return "Friend added successfully"
     return str(result)
 
-
 def remove_friend_by_id(user_id, friend_id):
     """
     Remove an existing friend relationship.
@@ -65,7 +68,6 @@ def remove_friend_by_id(user_id, friend_id):
     if result is True:
         return "Friend removed successfully"
     return str(result)
-
 
 def list_friends(user_id):
     """
@@ -80,6 +82,84 @@ def list_friends(user_id):
             "email": row[2]
         })
     return friends
+
+
+# Social Interaction - like and comments
+def like_item(user_id, target_type, target_id):
+    """
+    Add a like to one workout activity item.
+    """
+    if target_type != "workout":
+        return "Invalid target type"
+
+    result = like_target(user_id, target_type, target_id)
+    if result is True:
+        return "Liked successfully"
+    return str(result)
+
+def unlike_item(user_id, target_type, target_id):
+    """
+    Remove a like from one workout activity item.
+    """
+    if target_type != "workout":
+        return "Invalid target type"
+
+    result = unlike_target(user_id, target_type, target_id)
+    if result is True:
+        return "Like removed successfully"
+    return str(result)
+
+
+def comment_on_item(user_id, target_type, target_id, content):
+    """
+    Add a comment to one workout activity item.
+    """
+    if target_type != "workout":
+        return "Invalid target type"
+
+    if not content or not content.strip():
+        return "Comment cannot be empty"
+
+    cleaned_content = content.strip()
+
+    if len(cleaned_content) > 300:
+        return "Comment is too long"
+
+    if contains_blacklisted_word(cleaned_content):
+        return "Comment contains inappropriate language"
+
+    result = add_comment(user_id, target_type, target_id, cleaned_content)
+    if result is True:
+        return "Comment added successfully"
+    return str(result)
+
+def list_comments(target_type, target_id):
+    """
+    Return comments formatted for the UI.
+    """
+    rows = get_comments(target_type, target_id)
+    comments = []
+    for row in rows:
+        comments.append({
+            "comment_id": row[0],
+            "user_id": row[1],
+            "username": row[2],
+            "content": row[3],
+            "created_at": str(row[4])
+        })
+    return comments
+
+def delete_comment_item(user_id, comment_id):
+    """
+    Delete comment item if it belongs to the current user.
+    """
+    result = delete_comment(comment_id, user_id)
+    if result is True:
+        return "Comment deleted successfully"
+    if result is False:
+        return "Comment could not be deleted"
+    return str(result)
+
 
 # Social page data
 def get_social_overview(user_id):
@@ -108,13 +188,19 @@ def get_social_overview(user_id):
 
     # Format activity rows
     for row in activity_rows:
+        activity_type = row[0]
+        target_id = row[4]
+
         activity.append({
-            "activity_type": row[0],
+            "activity_type": activity_type,
             "username": row[1],
             "title": row[2],
             "calories": row[3],
-            "target_id": row[4],
-            "owner_user_id": row[5]
+            "target_id": target_id,
+            "owner_user_id": row[5],
+            "like_count": count_likes(activity_type, target_id),
+            "liked_by_user": has_user_liked(user_id, activity_type, target_id),
+            "comment_count": count_comments(activity_type, target_id)
         })
     return {
         "rank": {
@@ -124,51 +210,3 @@ def get_social_overview(user_id):
         "leaderboard": leaderboard[:3],
         "activity": activity
     }
-
-# # Social Interaction - like and comments
-# def like_item(user_id, target_type, target_id):
-#     if target_type not in ("workout", "meal"):
-#         return "Invalid target type"
-#     result = like_target(user_id, target_type, target_id)
-#     if result is True:
-#         return "Liked successfully"
-#     return str(result)
-#
-#
-# def unlike_item(user_id, target_type, target_id):
-#     if target_type not in ("workout", "meal"):
-#         return "Invalid target type"
-#     result = unlike_target(user_id, target_type, target_id)
-#     if result is True:
-#         return "Unliked successfully"
-#     return str(result)
-#
-#
-# def comment_on_item(user_id, target_type, target_id, content):
-#     if target_type not in ("workout", "meal"):
-#         return "Invalid target type"
-#     if not content or not content.strip():
-#         return "Comment cannot be empty"
-#     if len(content.strip()) > 300:
-#         return "Comment is too long"
-#     if contains_blacklisted_word(content):
-#         return "Comment contains inappropriate language"
-#     result = add_comment(user_id, target_type, target_id, content.strip())
-#     if result is True:
-#         return "Comment added successfully"
-#     return str(result)
-#
-#
-# def list_comments(target_type, target_id):
-#     rows = get_comments(target_type, target_id)
-#     comments = []
-#     for row in rows:
-#         comments.append({
-#             "comment_id": row[0],
-#             "user_id": row[1],
-#             "username": row[2],
-#             "content": row[3],
-#             "created_at": str(row[4])
-#         })
-#     return comments
-#
