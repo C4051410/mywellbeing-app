@@ -144,8 +144,6 @@ def main_past_activities(page: ft.Page):
     reps = ft.Row([ft.Text("Reps (Optional)" ),reps_input],expand=True)
     distance = ft.Row([ft.Text("Distance (Optional)"),distance_input],expand=True)
 
-    save_button = ft.FloatingActionButton(content=ft.Text("FINISH", weight=ft.FontWeight.BOLD, color=ft.Colors.WHITE),
-                                         bgcolor=ft.Colors.RED, width=140,on_click=save_and_finish)
     top_back_button = ft.Container(
         content=ft.FloatingActionButton(
             content=ft.Icon(ft.Icons.ARROW_BACK, color=ft.Colors.BLACK),
@@ -154,7 +152,46 @@ def main_past_activities(page: ft.Page):
             mini=True
         ),
     )
-
-    enter_past_exercises = ft.Column(controls=[top_back_button,exercise_search,
-                                                calories_input,duration,reps,distance,save_button])
-    return ft.Column(controls=[enter_past_exercises],width=300)
+    return ft.Container(
+        expand=True,
+        padding=ft.padding.all(16),
+        content=ft.Column(
+            controls=[
+                # Header
+                ft.Row(
+                    controls=[
+                        top_back_button,
+                        ft.Text("Log Activity", size=28, weight=ft.FontWeight.BOLD),
+                    ],
+                    spacing=8,
+                ),
+                ft.Text("Record a past workout", size=13, color=ft.Colors.GREY_500),
+                ft.Divider(height=16, color=ft.Colors.TRANSPARENT),
+                ft.Text("Exercise", size=12, weight=ft.FontWeight.BOLD, color=ft.Colors.DEEP_ORANGE),
+                exercise_search,
+                ft.Divider(height=8, color=ft.Colors.TRANSPARENT),
+                ft.Text("Calories Burned", size=12, weight=ft.FontWeight.BOLD, color=ft.Colors.DEEP_ORANGE),
+                calories_input,
+                ft.Divider(height=8, color=ft.Colors.TRANSPARENT),
+                ft.Text("Duration", size=12, weight=ft.FontWeight.BOLD, color=ft.Colors.DEEP_ORANGE),
+                duration,
+                ft.Text("Optional", size=12, weight=ft.FontWeight.BOLD, color=ft.Colors.GREY_500),
+                reps,
+                distance,
+                ft.Divider(height=16, color=ft.Colors.TRANSPARENT),
+                ft.Container(
+                    content=ft.Text("FINISH", color=ft.Colors.WHITE, weight=ft.FontWeight.BOLD, size=15,
+                                    text_align=ft.TextAlign.CENTER),
+                    bgcolor=ft.Colors.DEEP_ORANGE,
+                    border_radius=12,
+                    padding=ft.padding.symmetric(vertical=14),
+                    on_click=lambda e: save_and_finish(),
+                    ink=True,
+                    expand=True,
+                ),
+            ],
+            scroll=ft.ScrollMode.HIDDEN,
+            spacing=8,
+            expand=True,
+        )
+    )

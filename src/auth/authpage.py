@@ -66,7 +66,30 @@ def authPage(on_login_success, on_register_success):
     ], visible=False)
 
     return ft.Container(
-        content=ft.Column([
-            username, email, password,
-            signup_buttons, login_buttons, message
-        ]))
+        expand=True,
+        gradient=ft.LinearGradient(
+            begin=ft.Alignment.TOP_LEFT,
+            end=ft.Alignment.BOTTOM_RIGHT,
+            colors=[ft.Colors.ORANGE_100, ft.Colors.WHITE, ft.Colors.DEEP_ORANGE_50],
+        ),
+        content=ft.Column(
+            controls=[
+                ft.Container(expand=True),
+                ft.Container(
+                    bgcolor=ft.Colors.WHITE,
+                    border_radius=24,
+                    padding=ft.padding.symmetric(horizontal=28, vertical=32),
+                    shadow=ft.BoxShadow(spread_radius=0, blur_radius=30,
+                                        color=ft.Colors.with_opacity(0.12, ft.Colors.BLACK),
+                                        offset=ft.Offset(0, 8)),
+                    content=ft.Column([
+                        username, email, password,
+                        signup_buttons, login_buttons, message
+                    ]),
+                    margin=ft.margin.symmetric(horizontal=20),
+                ),
+                ft.Container(expand=True),
+            ],
+            expand=True,
+        )
+    )
