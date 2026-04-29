@@ -8,7 +8,7 @@ TEST_DATABASE = os.getenv("TEST_DATABASE_URL")
 EMAIL_KEY = os.getenv("EMAIL_KEY")
 #return connection to database
 def connect():
-    conn = psycopg2.connect(TEST_DATABASE)
+    conn = psycopg2.connect(DATABASE)
     return conn
 #return email key
 def email_key():
