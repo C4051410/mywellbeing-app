@@ -19,7 +19,7 @@ widget_text_size = 0.055
 steps_h_size = 0.4
 calories_h_size = 0.4
 friends_v_size = 0.15
-streak_v_size = 0.225
+streak_v_size = 0.40
 
 class WorkoutApp(ft.Column):
     def __init__(self, page: ft.Page, user_id):
@@ -43,8 +43,29 @@ class WorkoutApp(ft.Column):
         streak = retrieve_current_streaks(user_id)
 
         # ignore other return values, only need activitiy count
-        _, _, activities_completed, _ = load_activity_data(page)
+        tot_dist, tot_time, activities_completed, activities_list = load_activity_data(page)
         activities_completed = int(activities_completed)
+
+        # Get last activity (if exists)
+        if activities_list:
+            last = activities_list[0]
+            act_type = last["type"]
+            act_title = last["title"]
+            act_time = last["time"]
+
+            # Build a readable summary depending on type
+            if act_type in ("Run", "Cycle"):
+                act_summary = f"{last['dist']} km • {act_time}"
+            elif act_type == "Walk":
+                act_summary = f"{last.get('steps', '—')} steps • {act_time}"
+            elif act_type in ("Workout", "WeightLifting"):
+                act_summary = f"{last['calories']} kcal • {act_time}"
+            else:
+                act_summary = act_time
+
+            last_activity_text = f"{act_title} • {act_summary}"
+        else:
+            last_activity_text = "No recent activity"
 
         daily_goal = 5
 
@@ -149,19 +170,52 @@ class WorkoutApp(ft.Column):
                     controls = [ft.Text("Your feed is empty", weight=ft.FontWeight.BOLD, size=18, color=ft.Colors.WHITE70),
                                 ft.Text("Follow more friends to see their activity.", size=14, color=ft.Colors.WHITE70),])
             )
+
         #Streak widget
         self.streak_container = ft.Container(
             border_radius=15,
-            padding=20,
             shadow=ft.BoxShadow(spread_radius=1, blur_radius=10, color=ft.Colors.BLACK12),
-            gradient=ft.LinearGradient(begin=ft.alignment.Alignment(-1, 0), end=ft.alignment.Alignment(1, 0),
-                                       colors=["#FF69D2", "#E92020"]),
-            content = ft.Column(
-                alignment=ft.MainAxisAlignment.CENTER,
-                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+            padding=0,
+            content=ft.Column(
+                spacing=0,
                 controls=[
-                    self.current_streak_text,
-                    ft.Text("Current Streak", weight=ft.FontWeight.BOLD, color=ft.Colors.WHITE70, size=20),
+                    ft.Container(
+                        padding=20,
+                        width=350,
+                        gradient=ft.LinearGradient(
+                            begin=ft.alignment.Alignment(-1, 0),
+                            end=ft.alignment.Alignment(1, 0),
+                            colors=["#FF69D2", "#E92020"]
+                        ),
+                        content=ft.Column(
+                            alignment=ft.MainAxisAlignment.CENTER,
+                            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                            controls=[
+                                self.current_streak_text,
+                                ft.Text(
+                                    "Current Streak",
+                                    weight=ft.FontWeight.BOLD,
+                                    color=ft.Colors.WHITE70,
+                                    size=20
+                                )
+                            ]
+                        )
+                    ),
+                    # recent activities
+                    ft.Container(
+                        padding=20,
+                        bgcolor=ft.Colors.WHITE,
+                        width=350,
+                        content=ft.Column(
+                            alignment=ft.MainAxisAlignment.CENTER,
+                            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                            controls=[
+                                ft.Text("Last Activity:", size=16, weight=ft.FontWeight.BOLD, color=ft.Colors.GREY_700),
+                                ft.Text(last_activity_text, size=14, color=ft.Colors.GREY_600)
+                            ]
+                        )
+                    )
+
                 ]
             )
         )
@@ -213,7 +267,6 @@ class WorkoutApp(ft.Column):
 
                 # friends/social widget
                 ft.Container(
-                    expand = 1,
                     padding=ft.padding.only(top=20),
                     content=ft.Container(
                         expand=1,
@@ -265,7 +318,7 @@ class WorkoutApp(ft.Column):
         self.friends_container.width = self.this_page.width * 0.95
         #Streak - Long rectange
         self.streak_container.width = full_width
-        self.streak_container.height = self.r.h(streak_v_size)
+        #self.streak_container.height = self.r.h(streak_v_size)
 
     #Function to be ran when page resizes
     def resize(self, e):
