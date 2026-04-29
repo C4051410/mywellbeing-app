@@ -1,90 +1,65 @@
-import importlib
-import os
-
-import pytest
 from unittest.mock import patch
 
-
-# 3. NOW import the functions you need for the test
-from auth.auth_services import register_user,login_user
+import pytest
+from auth.auth_services import register_user, login_user
 from database.connection import connect
 
-@pytest.fixture(autouse=True)
-def stop_all_mocks():
-    """Force-stops any leaked mocks from unit tests."""
-    patch.stopall() # This kills any 'MagicMock' leaked from other files
-    yield
+
 @pytest.fixture
 def db_cleanup():
-    """Wipes everything and PRINTS the DB URL for debugging."""
-    test_user = "int_test_jobs"
-    test_email = "bob@integration.com"
-
-    # DEBUG: This will show up in the GitHub logs
-    print(f"\n--- DEBUG: CONNECTING TO: {os.getenv('DATABASE_URL')} ---")
-
-    def cleanup():
-        try:
-            conn = connect()
-            cur = conn.cursor()
-            # Wipe both to prevent the 'Already Exists' error
-            cur.execute("DELETE FROM users WHERE username = %s OR email = %s", (test_user, test_email))
-            conn.commit()
-            cur.close()
-            conn.close()
-        except Exception as e:
-            print(f"Cleanup failed: {e}")
-
-    cleanup()
+    """Ensures the test user is removed even if the test fails."""
+    test_user = "int_test_bob"
+    #used to return username for registration, wait to complete rest until function is returned
     yield test_user
-    cleanup()
+    #cleans db if tests fails
+    conn = connect()
+    cur = conn.cursor()
+    cur.execute("DELETE FROM users WHERE username = %s", (test_user,))
+    conn.commit()
+    cur.close()
+    conn.close()
 
-
-def test_full_registration_flow(db_cleanup):
+@patch("auth.auth_services.notification")
+@patch("auth.auth_services.resend")
+def test_full_registration_flow(mock_resend,mock_notification,db_cleanup):
+    """
+    INTEGRATION TEST: Checks that the functions are properly integrated with the db
+    Checks that a registration creates the user and that the user can log in with that account
+    """
+    #sets up data for test
     test_user = db_cleanup
     test_email = "bob@integration.com"
     test_pass = "SecurePass123!"
 
-    with patch("auth.auth_services.resend"), \
-            patch("auth.auth_services.notification"):
-        success, message = register_user(test_user, test_email, test_pass)
+    #call on register to create an account
+    success, message = register_user(test_user, test_email, test_pass)
+    #check that success is true
+    assert success is True
 
-        if not success:
-            # IF IT FAILS, LET'S SEE WHAT'S ACTUALLY IN THE DB
-            conn = connect()
-            cur = conn.cursor()
-            cur.execute("SELECT username, email FROM users")
-            users = cur.fetchall()
-            cur.close()
-            conn.close()
-            print(f"\n--- DATABASE CONTENTS: {users} ---")
+    #check that values are actually stored in db
+    conn = connect()
+    cur = conn.cursor()
+    cur.execute("SELECT id, username, email FROM users WHERE username = %s", (test_user,))
+    row = cur.fetchone()
+    #checks row isnt empty
+    assert row is not None
+    #checks username matches db
+    assert row[1] == test_user
+    #checks email matches db
+    assert row[2] == test_email
+    #check id matches users
+    assert row[0] == message
 
-        assert success is True, f"FAILED! Message: {message}"
-
-        #check that values are actually stored in db
-        conn = connect()
-        cur = conn.cursor()
-        cur.execute("SELECT id, username, email FROM users WHERE username = %s", (test_user,))
-        row = cur.fetchone()
-        #checks row isnt empty
-        assert row is not None
-        #checks username matches db
-        assert row[1] == test_user
-        #checks email matches db
-        assert row[2] == test_email
-        #check id matches users
-        assert row[0] == message
-
-        #tries and logs in
-        success, message = login_user(test_email, test_pass)
-        #checks login was successful
-        assert success is True
-        #check id username matches current user
-        assert message[1] == test_user
+    #tries and logs in
+    success, message = login_user(test_email, test_pass)
+    #checks login was successful
+    assert success is True
+    #check id username matches current user
+    assert message[1] == test_user
 
 
-        #cleans up db after testing is complete
-        cur.execute("DELETE FROM users WHERE username = %s", (test_user,))
-        conn.commit()
-        cur.close()
-        conn.close()
+    #cleans up db after testing is complete
+    cur.execute("DELETE FROM users WHERE username = %s", (test_user,))
+    conn.commit()
+    cur.close()
+    conn.close()
