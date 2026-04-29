@@ -14,7 +14,7 @@ from nutrition.nutrition_services import retrieve_daily_stats,retrieve_user_goal
 
 #Sizes of all elements on homepage (as percent of screen)
 welcome_text_size = 0.1
-motivational_msg_size = 0.03
+motivational_msg_size = 0.04
 widget_text_size = 0.035
 steps_h_size = 0.4
 calories_h_size = 0.4
@@ -126,20 +126,28 @@ class WorkoutApp(ft.Column):
 
         #Friends widget
         self.friends_container = ft.Container(
-            bgcolor = ft.Colors.BLUE_300,
-            clip_behavior=ft.ClipBehavior.HARD_EDGE,
+            border_radius=15,
+            padding=20,
+            shadow=ft.BoxShadow(spread_radius=1, blur_radius=10, color=ft.Colors.BLACK12),
+            gradient=ft.LinearGradient(begin=ft.alignment.Alignment(-1, 0), end=ft.alignment.Alignment(1, 0), colors=["#8A2BE2", "#4C6EF5",]),
             content= ft.Column(
                 controls=friends_list,
                 scroll = ft.ScrollMode.ALWAYS,
-                spacing = 0
+                spacing = 0,
+                expand = 1
             )
         )
         if friends_list == []:
             self.friends_container = ft.Container(
-                bgcolor = ft.Colors.BLUE_300,
-                clip_behavior=ft.ClipBehavior.HARD_EDGE,
+                border_radius=15,
+                padding=20,
+                shadow=ft.BoxShadow(spread_radius=1, blur_radius=10, color=ft.Colors.BLACK12),
+                gradient=ft.LinearGradient(begin=ft.alignment.Alignment(-1, 0), end=ft.alignment.Alignment(1, 0),
+                                           colors=["#4C6EF5", "#8A2BE2"]),
+                expand = 1,
                 content= ft.Column(
-                    controls = [ft.Text("No Friends Have Posted An Activity")])
+                    controls = [ft.Text("Your feed is empty", weight=ft.FontWeight.BOLD, size=18, color=ft.Colors.WHITE70),
+                                ft.Text("Follow more friends to see their activity.", size=14, color=ft.Colors.WHITE70),])
             )
         #Streak widget
         self.streak_container = ft.Container(
@@ -172,40 +180,50 @@ class WorkoutApp(ft.Column):
         #Create NavBar element
         self.nav_bar = NavBar(page)
 
-        main_contnet = ft.Column(controls=[
-            #Row with text and pfp
-            ft.Row(
-                #Adds white space in-between text and profile pic
-                alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
-                controls=[
-                    ft.Column(
-                        expand=True,
-                        controls=[
-                            self.welcome_text,
-                            self.motivational_text
-                        ]
-                    ),
-                    self.userpfp
-                ],
-            ),
-            #Row with activities and calories
-            ft.Row(
-                spacing=8,
-                controls=[
-                    ft.Container(
-                        content=self.activity_container,
-                        expand=1,
-                    ),
-                    ft.Container(
-                        content=self.calories_container,
-                        expand=1,
-                    ),
-                ]
-            ),
+        main_contnet = ft.Column(
+            controls=[
+                #Row with text and pfp
+                ft.Row(
+                    alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                    controls=[
+                        ft.Column(
+                            expand=True,
+                            controls=[
+                                self.welcome_text,
+                                self.motivational_text
+                            ]
+                        ),
+                        self.userpfp
+                    ],
+                ),
+                #Row with activities and calories
+                ft.Row(
+                    spacing=8,
+                    controls=[
+                        ft.Container(content=self.activity_container, expand=1),
+                        ft.Container(content=self.calories_container, expand=1),
+                    ]
+                ),
 
-            self.friends_container,
-            self.streak_container,
-            self.un_link],expand=True,scroll=ft.ScrollMode.HIDDEN)
+                # friends/social widget
+                ft.Container(
+                    expand = 1,
+                    padding=ft.padding.only(top=20),
+                    content=ft.Container(
+                        expand=1,
+                        content=self.friends_container
+                    )
+                ),
+
+                # streak widget
+                self.streak_container,
+
+                # UN link
+                self.un_link
+            ],
+            expand=True,
+            scroll=ft.ScrollMode.HIDDEN
+        )
         self.controls = [main_contnet,self.nav_bar]
 
         #Expand, take all available space
@@ -238,6 +256,7 @@ class WorkoutApp(ft.Column):
         self.calories_container.height = self.r.w(calories_h_size)
         #Friends - Rectangle
         self.friends_container.height = self.r.h(friends_v_size)
+        self.friends_container.width = self.this_page.width * 0.95
         #Streak - Long rectange
         self.streak_container.width = full_width
         self.streak_container.height = self.r.h(streak_v_size)

@@ -181,9 +181,9 @@ class TestFriendsWidget:
     def test_empty_friends_shows_fallback_message(self):
         app, _ = make_app(friends=user_friends_empty)
         controls = app.friends_container.content.controls
-        assert len(controls) == 1
-        assert "No Friends" in controls[0].value
-
+        texts = [c for c in controls if isinstance(c, ft.Text)]
+        assert len(texts) >= 1
+        assert any("Your feed is empty" in t.value for t in texts)
 
 
 #tests widget change size with changing window size,
