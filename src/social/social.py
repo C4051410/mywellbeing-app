@@ -54,12 +54,23 @@ class SocialPage(ft.Column):
                 )
         self.userpfp = Userpfp(page)
 
-        self.rank_container = ft.Container(bgcolor=ft.Colors.ORANGE_200, border_radius=10, padding=20,
-                                                   content=ft.Row(
-                                                                  controls=[
-                                                                      ft.Text(f"Rank #{self.user_rank}", size=20,
-                                                                              weight=ft.FontWeight.BOLD),
-                                                                      ft.Text(f"{self.user_points} pts", size=18)]))
+        self.rank_container = ft.Container(
+            bgcolor=ft.Colors.ORANGE_200,
+            border_radius=10,
+            padding=20,
+            content=ft.Row(
+                # Keep the rank label and score spaced apart for a clearer summary card
+                alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                controls=[
+                    ft.Text(
+                        f"Rank #{self.user_rank}",
+                        size=20,
+                        weight=ft.FontWeight.BOLD
+                    ),
+                    ft.Text(f"{self.user_points} pts", size=18)
+                ]
+            )
+        )
         self.leaderboard_title = ft.Text(
             value="Leaderboard",
             size=self.r.w(page_desc_size),
@@ -127,18 +138,22 @@ class SocialPage(ft.Column):
         )
 
         self.nav_bar = NavBar(page)
-        main_content = ft.Column(controls = [
-            ft.Row(
-                controls=[
-                    ft.Column(
-                        controls=[
-                            self.page_title,
-                            self.page_desc
-                        ]
-                    ),
-                    self.userpfp
-                ]
-            ),
+        # Keep the main social page scrollable so all sections remain accessible on different size of screens
+        main_content = ft.Column(
+            controls=[
+                ft.Row(
+                    alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                    controls=[
+                        ft.Column(
+                            spacing=0,
+                            controls=[
+                                self.page_title,
+                                self.page_desc
+                            ]
+                        ),
+                        self.userpfp
+                    ]
+                ),
             self.rank_container,
             self.leaderboard_title,
             self.first_container,
@@ -149,7 +164,12 @@ class SocialPage(ft.Column):
             self.friends_title,
             self.friend_username_input,
             self.add_friend_button,
-            self.friends_container],expand=True, scroll=ft.ScrollMode.HIDDEN)
+            self.friends_container
+            ],
+            expand=True,
+            spacing=12,
+            scroll=ft.ScrollMode.AUTO
+        )
         self.controls =[main_content,self.nav_bar]
 
         self.expand = True
