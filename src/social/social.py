@@ -21,9 +21,10 @@ from social.social_service import (
 #Sizes of all elements on homepage (as a percent of screen)
 page_title_size = 0.1
 page_desc_size = 0.03
-leaderboard_v_size = 0.18
+leaderboard_v_size = 0.12
 standings_v_size = 0.08
-activity_v_size=0.18
+activity_v_size = 0.22
+container_width_size = 0.95
 
 class SocialPage(ft.Column):
     def __init__(self, page: ft.Page, user_id):
@@ -309,6 +310,7 @@ class SocialPage(ft.Column):
         self.activity_container.content = ft.Column(
             controls=activity_controls,
             spacing=5,
+            scroll=ft.ScrollMode.AUTO
         )
 
     # Load the current user's friends and render them into the friends container
@@ -355,6 +357,7 @@ class SocialPage(ft.Column):
         self.friends_container.content = ft.Column(
             controls=friend_controls,
             spacing=5,
+            scroll=ft.ScrollMode.AUTO
         )
 
     # Show a snackbar message at page level
@@ -542,6 +545,16 @@ class SocialPage(ft.Column):
         self.activity_container.height = self.r.h(activity_v_size)
         # Friends list widget
         self.friends_container.height = self.r.h(activity_v_size)
+
+        # Keep section widths consistent so cards line up cleanly
+        self.rank_container.width = self.r.w(container_width_size)
+        self.first_container.width = self.r.w(container_width_size)
+        self.second_container.width = self.r.w(container_width_size)
+        self.third_container.width = self.r.w(container_width_size)
+        self.activity_container.width = self.r.w(container_width_size)
+        self.friends_container.width = self.r.w(container_width_size)
+        self.friend_username_input.width = self.r.w(container_width_size)
+        self.add_friend_button.width = self.r.w(container_width_size)
 
     def resize(self, e):
         self.r = Responsive(self.this_page)
