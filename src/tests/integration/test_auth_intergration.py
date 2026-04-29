@@ -34,7 +34,7 @@ def test_full_registration_flow(mock_resend,mock_notification,db_cleanup):
     #call on register to create an account
     success, message = register_user(test_user, test_email, test_pass)
     #check that success is true
-    assert success is True
+    assert success is True,f"REGISTRATION FAILED! Message: {message}"
 
     #check that values are actually stored in db
     conn = connect()

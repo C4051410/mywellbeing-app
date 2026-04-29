@@ -60,7 +60,7 @@ jobs:
         env:
           PYTHONPATH: ${{ github.workspace }}/src
           DATABASE_URL: postgresql://test_admin:password123@localhost:5432/csc2033_test
-          EMAIL_KEY: "fake_key"
+          EMAIL_KEY: "re_123456789"
           DISPLAY: :99.0
         run: |
           pytest src/tests
