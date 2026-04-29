@@ -9,6 +9,13 @@ from database.connection import connect
 def db_cleanup():
     """Ensures the test user is removed even if the test fails."""
     test_user = "int_test_bob"
+    #clear db before
+    conn = connect()
+    cur = conn.cursor()
+    cur.execute("DELETE FROM users WHERE username = %s", (test_user,))
+    conn.commit()
+    cur.close()
+    conn.close()
     #used to return username for registration, wait to complete rest until function is returned
     yield test_user
     #cleans db if tests fails
