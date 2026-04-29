@@ -55,7 +55,7 @@ jobs:
         run: |
           sudo apt-get install -y postgresql-client
           psql -h localhost -U test_admin -d csc2033_test -f src/tests/integration/schema.sql
-
+          psql -h localhost -U test_admin -d csc2033_test -c "TRUNCATE users CASCADE;"
       - name: "Run Tests with pytest"
         env:
           PYTHONPATH: ${{ github.workspace }}/src

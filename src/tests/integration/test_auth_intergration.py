@@ -7,24 +7,22 @@ from database.connection import connect
 
 @pytest.fixture
 def db_cleanup():
-    """Ensures the test user is removed even if the test fails."""
+    """Ensures the test user AND test email are wiped before and after."""
     test_user = "int_test_bob"
-    #clear db before
-    conn = connect()
-    cur = conn.cursor()
-    cur.execute("DELETE FROM users WHERE username = %s", (test_user,))
-    conn.commit()
-    cur.close()
-    conn.close()
-    #used to return username for registration, wait to complete rest until function is returned
+    test_email = "bob@integration.com"  # The email used in the test
+
+    def cleanup():
+        conn = connect()
+        cur = conn.cursor()
+        # Delete by both username and email to clear all possible conflicts
+        cur.execute("DELETE FROM users WHERE username = %s OR email = %s", (test_user, test_email))
+        conn.commit()
+        cur.close()
+        conn.close()
+
+    cleanup()  # Clean before test
     yield test_user
-    #cleans db if tests fails
-    conn = connect()
-    cur = conn.cursor()
-    cur.execute("DELETE FROM users WHERE username = %s", (test_user,))
-    conn.commit()
-    cur.close()
-    conn.close()
+    cleanup()  # Clean after test
 
 def test_full_registration_flow(db_cleanup):
     """
