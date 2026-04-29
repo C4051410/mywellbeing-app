@@ -15,7 +15,7 @@ from nutrition.nutrition_services import retrieve_daily_stats,retrieve_user_goal
 #Sizes of all elements on homepage (as percent of screen)
 welcome_text_size = 0.1
 motivational_msg_size = 0.04
-widget_text_size = 0.035
+widget_text_size = 0.055
 steps_h_size = 0.4
 calories_h_size = 0.4
 friends_v_size = 0.15
@@ -66,11 +66,11 @@ class WorkoutApp(ft.Column):
 
         # activities progress display
         self.activities_text = ft.Text(value=f"{activities_completed} / {daily_goal}", size=self.r.w(widget_text_size), weight=ft.FontWeight.BOLD)
-        self.activities_bar = ft.ProgressBar(value=(activities_completed / daily_goal) if daily_goal else 0, width=150, height=10, color=ft.Colors.BLUE, border_radius=5)
+        self.activities_bar = ft.ProgressBar(value=(activities_completed / daily_goal) if daily_goal else 0, width=150, height=15, color=ft.Colors.BLUE, border_radius=10, bgcolor="F3F4F6")
 
         # calorie progress display
-        self.calories_text = ft.Text(f"{daily_calories} / {calories_goal} Kcal", size=self.r.w(widget_text_size), weight=ft.FontWeight.BOLD)
-        self.calories_bar = ft.ProgressBar(value=(daily_calories / calories_goal) if calories_goal else 0, width=150, height=10, color=ft.Colors.DEEP_ORANGE, border_radius=5, bgcolor="#FFDBBB")
+        self.calories_text = ft.Text(f"{daily_calories} / {calories_goal}", size=self.r.w(widget_text_size), weight=ft.FontWeight.BOLD)
+        self.calories_bar = ft.ProgressBar(value=(daily_calories / calories_goal) if calories_goal else 0, width=150, height=15, color=ft.Colors.DEEP_ORANGE, border_radius=10, bgcolor="#F3F4F6")
 
         self.salts_text = ft.Text(f"Salt: {daily_salts} / {salts_goal} g",size=self.r.w(widget_text_size))
         self.protein_text = ft.Text(f"Protein: {daily_proteins} / {protein_goal} g",size=self.r.w(widget_text_size))
@@ -87,8 +87,8 @@ class WorkoutApp(ft.Column):
                             trailing = ft.Text(f"Streak : {f_streak}🔥"))
             )
 
-        self.current_streak_text = ft.Text(f"Current Streak: {streak[0]}")
-        self.longest_streak_text = ft.Text(f"Longest Streak: {streak[1]}")
+        self.current_streak_text = ft.Text(f"{streak[0]}", size=25, color=ft.Colors.WHITE, weight=ft.FontWeight.BOLD)
+        self.longest_streak_text = ft.Text(f"{streak[1]}")
 
         # activities widget
         self.activity_container = ft.Container(
@@ -100,7 +100,7 @@ class WorkoutApp(ft.Column):
                 alignment=ft.MainAxisAlignment.CENTER,
                 horizontal_alignment=ft.CrossAxisAlignment.CENTER,
                 controls=[
-                    ft.Text("Activities Completed", weight=ft.FontWeight.BOLD, color=ft.Colors.GREY_500, size=15),
+                    ft.Text("Activities Completed", color=ft.Colors.GREY_500, size=15),
                     self.activities_text,
                     self.activities_bar,
                 ]
@@ -117,7 +117,7 @@ class WorkoutApp(ft.Column):
                 alignment=ft.MainAxisAlignment.CENTER,
                 horizontal_alignment=ft.CrossAxisAlignment.CENTER,
                 controls=[
-                    ft.Text("Calories Consumed", weight=ft.FontWeight.BOLD, color=ft.Colors.GREY_500, size=15),
+                    ft.Text("Calories Consumed", color=ft.Colors.GREY_500, size=15),
                     self.calories_text,
                     self.calories_bar
                 ]
@@ -151,12 +151,17 @@ class WorkoutApp(ft.Column):
             )
         #Streak widget
         self.streak_container = ft.Container(
-            border=ft.Border.all(width=2, color=ft.Colors.GREY_400),
-            clip_behavior=ft.ClipBehavior.HARD_EDGE,
+            border_radius=15,
+            padding=20,
+            shadow=ft.BoxShadow(spread_radius=1, blur_radius=10, color=ft.Colors.BLACK12),
+            gradient=ft.LinearGradient(begin=ft.alignment.Alignment(-1, 0), end=ft.alignment.Alignment(1, 0),
+                                       colors=["#FF69D2", "#E92020"]),
             content = ft.Column(
-                [
+                alignment=ft.MainAxisAlignment.CENTER,
+                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                controls=[
                     self.current_streak_text,
-                    self.longest_streak_text
+                    ft.Text("Current Streak", weight=ft.FontWeight.BOLD, color=ft.Colors.WHITE70, size=20),
                 ]
             )
         )
@@ -168,6 +173,7 @@ class WorkoutApp(ft.Column):
             mouse_cursor = ft.MouseCursor.CLICK,
             on_tap = open_url,
             content = ft.Image(
+                border_radius=15,
                 src = "unGoal.png",
                 height = 100,
                 width = 350,
