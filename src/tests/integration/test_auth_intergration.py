@@ -5,6 +5,11 @@ import pytest
 from auth.auth_services import register_user, login_user
 from database.connection import connect
 
+@pytest.fixture(autouse=True)
+def stop_all_mocks():
+    """Force-stops any leaked mocks from unit tests."""
+    patch.stopall() # This kills any 'MagicMock' leaked from other files
+    yield
 
 @pytest.fixture
 def db_cleanup():
