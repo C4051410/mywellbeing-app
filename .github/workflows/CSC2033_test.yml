@@ -16,6 +16,21 @@ jobs:
   test:
     #sets up tests on ubuntu on the latest version
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: test_admin
+          POSTGRES_PASSWORD: password123
+          POSTGRES_DB: csc2033_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       #check the repository is valid
       - name: "Checks Repository"
@@ -33,6 +48,13 @@ jobs:
           python -m pip install --upgrade pip
           pip install pytest
           pip install -r requirements.txt
+
+      - name: "Initialize Database Schema"
+        env:
+          PGPASSWORD: password123
+        run: |
+          sudo apt-get install -y postgresql-client
+          psql -h localhost -U test_admin -d csc2033_test -f src/tests/integration/schema.sql
 
       - name: "Run Tests with pytest"
         env:
