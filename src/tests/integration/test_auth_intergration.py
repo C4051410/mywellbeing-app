@@ -7,22 +7,28 @@ from database.connection import connect
 
 @pytest.fixture
 def db_cleanup():
-    """Ensures the test user AND test email are wiped before and after."""
+    """Wipes everything and PRINTS the DB URL for debugging."""
     test_user = "int_test_bob"
-    test_email = "bob@integration.com"  # The email used in the test
+    test_email = "bob@integration.com"
+
+    # DEBUG: This will show up in the GitHub logs
+    print(f"\n--- DEBUG: CONNECTING TO: {os.getenv('DATABASE_URL')} ---")
 
     def cleanup():
-        conn = connect()
-        cur = conn.cursor()
-        # Delete by both username and email to clear all possible conflicts
-        cur.execute("DELETE FROM users WHERE username = %s OR email = %s", (test_user, test_email))
-        conn.commit()
-        cur.close()
-        conn.close()
+        try:
+            conn = connect()
+            cur = conn.cursor()
+            # Wipe both to prevent the 'Already Exists' error
+            cur.execute("DELETE FROM users WHERE username = %s OR email = %s", (test_user, test_email))
+            conn.commit()
+            cur.close()
+            conn.close()
+        except Exception as e:
+            print(f"Cleanup failed: {e}")
 
-    cleanup()  # Clean before test
+    cleanup()
     yield test_user
-    cleanup()  # Clean after test
+    cleanup()
 
 def test_full_registration_flow(db_cleanup):
     """
