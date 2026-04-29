@@ -10,11 +10,10 @@ def stop_all_mocks():
     """Force-stops any leaked mocks from unit tests."""
     patch.stopall() # This kills any 'MagicMock' leaked from other files
     yield
-
 @pytest.fixture
 def db_cleanup():
     """Wipes everything and PRINTS the DB URL for debugging."""
-    test_user = "int_test_bob"
+    test_user = "int_test_jobs"
     test_email = "bob@integration.com"
 
     # DEBUG: This will show up in the GitHub logs
