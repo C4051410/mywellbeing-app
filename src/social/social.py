@@ -72,19 +72,19 @@ class SocialPage(ft.Column):
         self.first_container = ft.Container(
              border=ft.Border.all(width=2, color=ft.Colors.GREY_400),
              border_radius=8,
-             padding=10
+             padding=18
              )
 
         self.second_container = ft.Container(
              border=ft.Border.all(width=2, color=ft.Colors.GREY_400),
              border_radius=8,
-             padding=10
+             padding=18
              )
 
         self.third_container = ft.Container(
              border=ft.Border.all(width=2, color=ft.Colors.GREY_400),
              border_radius=8,
-             padding=10
+             padding=18
              )
 
         self.activity_title = ft.Text(
@@ -270,7 +270,7 @@ class SocialPage(ft.Column):
     # Load leaderboard data into the 3 containers
     def load_leaderboard(self):
         if not self.leaderboard_data:
-            self.first_container.content = ft.Text("No leaderboard data yet.")
+            self.first_container.content = ft.Text("1. ---")
             self.second_container.content = ft.Text("2. ---")
             self.third_container.content = ft.Text("3. ---")
             return
@@ -359,6 +359,7 @@ class SocialPage(ft.Column):
         if not friends:
             self.friends_container.content = ft.Container(
                 alignment=ft.Alignment.CENTER,
+                padding=20,
                 content=ft.Text("No friends added yet.")
             )
             return
@@ -572,15 +573,12 @@ class SocialPage(ft.Column):
 
     #Set width and height of all widgets on the screen
     def set_widget_size(self):
-        #leaderboard widget - rectangle
+        # Give list sections enough height
         self.rank_container.height = self.r.h(leaderboard_v_size)
-        #Standings widgets - rectangle
         self.first_container.height = self.r.h(standings_v_size)
         self.second_container.height = self.r.h(standings_v_size)
         self.third_container.height = self.r.h(standings_v_size)
-        #Friends activity widget - rectangle
         self.activity_container.height = self.r.h(activity_v_size)
-        # Friends list widget
         self.friends_container.height = self.r.h(activity_v_size)
 
         # Keep section widths consistent so cards line up cleanly
