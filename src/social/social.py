@@ -21,7 +21,7 @@ from social.social_service import (
 #Sizes of all elements on homepage (as a percent of screen)
 page_title_size = 0.1
 page_desc_size = 0.03
-leaderboard_v_size = 0.12
+leaderboard_v_size = 0.18
 standings_v_size = 0.08
 activity_v_size = 0.22
 container_width_size = 0.95
@@ -57,21 +57,11 @@ class SocialPage(ft.Column):
 
         self.rank_container = ft.Container(
             bgcolor=ft.Colors.ORANGE_200,
-            border_radius=10,
-            padding=20,
-            content=ft.Row(
-                # Keep the rank label and score spaced apart for a clearer summary card
-                alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
-                controls=[
-                    ft.Text(
-                        f"Rank #{self.user_rank}",
-                        size=20,
-                        weight=ft.FontWeight.BOLD
-                    ),
-                    ft.Text(f"{self.user_points} pts", size=18)
-                ]
-            )
+            border_radius=12,
+            padding=16
         )
+        self.render_rank_card()
+
         self.leaderboard_title = ft.Text(
             value="Leaderboard",
             size=self.r.w(page_desc_size),
@@ -215,20 +205,67 @@ class SocialPage(ft.Column):
         ]
 
         # Refresh the rank card after real data is loaded.
-        self.rank_container.content = ft.Row(
-            alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
-            controls=[
-                ft.Text(
-                    f"Rank #{self.user_rank}",
-                    size=20,
-                    weight=ft.FontWeight.BOLD
-                ),
-                ft.Text(f"{self.user_points} pts", size=18)
-            ]
-        )
+        self.render_rank_card()
 
         self.load_leaderboard()
         self.load_activity()
+
+    # Render the top rank card showing the user's current rank and points
+    def render_rank_card(self):
+        rank_value = f"#{self.user_rank}" if self.user_rank != "-" else "-"
+        points_value = f"{self.user_points} pts"
+
+        self.rank_container.content = ft.Column(
+            spacing=8,
+            controls=[
+                ft.Text(
+                    "Your Rank",
+                    size=16,
+                    weight=ft.FontWeight.W_500,
+                    color=ft.Colors.GREY_800
+                ),
+                ft.Row(
+                    alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                    vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                    controls=[
+                        ft.Column(
+                            spacing=0,
+                            controls=[
+                                ft.Text(
+                                    rank_value,
+                                    size=28,
+                                    weight=ft.FontWeight.BOLD,
+                                    color=ft.Colors.BLACK
+                                ),
+                            ]
+                        ),
+                        ft.Column(
+                            horizontal_alignment=ft.CrossAxisAlignment.END,
+                            spacing=0,
+                            controls=[
+                                ft.Text(
+                                    "Weekly Points",
+                                    size=12,
+                                    color=ft.Colors.GREY_700
+                                ),
+                                ft.Text(
+                                    points_value,
+                                    size=20,
+                                    weight=ft.FontWeight.BOLD,
+                                    color=ft.Colors.BLACK
+                                )
+                            ]
+                        )
+                    ]
+                ),
+                ft.Container(height=10),
+                ft.Text(
+                    "This week",
+                    size=11,
+                    color=ft.Colors.GREY_800
+                )
+            ]
+        )
 
     # Load leaderboard data into the 3 containers
     def load_leaderboard(self):
