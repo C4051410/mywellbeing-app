@@ -234,8 +234,8 @@ class SocialPage(ft.Column):
     def load_leaderboard(self):
         if not self.leaderboard_data:
             self.first_container.content = ft.Text("No leaderboard data yet.")
-            self.second_container.content = ft.Text("2. ___")
-            self.third_container.content = ft.Text("3. ___")
+            self.second_container.content = ft.Text("2. ---")
+            self.third_container.content = ft.Text("3. ---")
             return
 
         sorted_users = sorted(
@@ -261,7 +261,7 @@ class SocialPage(ft.Column):
         if not self.activity_data:
             self.activity_container.content = ft.Container(
                 alignment=ft.Alignment.CENTER,
-                content=ft.Text("No recent friend activity data yet.")
+                content=ft.Text("No recent friend activity yet.")
             )
             return
 
