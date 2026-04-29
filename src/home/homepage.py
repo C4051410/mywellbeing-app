@@ -101,13 +101,14 @@ class WorkoutApp(ft.Column):
         for name, activity, f_streak in friends_data:
             print(name + " " + activity)
             friends_list.append(
-                ft.ListTile(title=ft.Text(name),
-                            subtitle=ft.Text(activity),
+                ft.ListTile(title=ft.Text(name, size=18, weight=ft.FontWeight.BOLD, color=ft.Colors.WHITE),
+                            subtitle=ft.Text(activity, size=14, color=ft.Colors.WHITE70),
                             dense=True,
                             visual_density=ft.VisualDensity.COMPACT,
                             trailing = ft.Text(f"Streak : {f_streak}🔥"))
             )
 
+        # TODO: add strava activities to streak
         self.current_streak_text = ft.Text(f"{streak[0]}", size=25, color=ft.Colors.WHITE, weight=ft.FontWeight.BOLD)
         self.longest_streak_text = ft.Text(f"{streak[1]}")
 
@@ -224,13 +225,19 @@ class WorkoutApp(ft.Column):
             await self.this_page.launch_url("https://globalgoals.org/goals/3-good-health-and-well-being/")
 
         self.un_link = ft.GestureDetector( #used to allow users to click on the img and take them to UN website
-            mouse_cursor = ft.MouseCursor.CLICK,
-            on_tap = open_url,
-            content = ft.Image(
+            mouse_cursor=ft.MouseCursor.CLICK,
+            on_tap=open_url,
+            content=ft.Container(
                 border_radius=15,
-                src = "unGoal.png",
-                height = 100,
-                width = 350,
+                shadow=ft.BoxShadow(spread_radius=1, blur_radius=10, color=ft.Colors.BLACK12),
+                clip_behavior=ft.ClipBehavior.ANTI_ALIAS,
+                content=ft.Image(
+                    src="unGoal.png",
+                    width=350,
+                    height=60,
+                    fit=ft.BoxFit.COVER,
+                    border_radius=15,
+                )
             )
         )
 
