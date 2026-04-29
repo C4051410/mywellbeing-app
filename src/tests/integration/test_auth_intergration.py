@@ -4,13 +4,6 @@ import os
 import pytest
 from unittest.mock import patch
 
-# 1. Import the modules that are being mocked elsewhere
-import database.connection
-import auth.auth_services
-
-# 2. Force a clean reload of these modules to wipe out any Mocks
-importlib.reload(database.connection)
-importlib.reload(auth.auth_services)
 
 # 3. NOW import the functions you need for the test
 from auth.auth_services import register_user,login_user

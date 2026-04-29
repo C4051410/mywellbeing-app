@@ -1,4 +1,4 @@
-
+"""
 
 import sys
 from unittest.mock import MagicMock, patch, call
@@ -236,4 +236,4 @@ class TestEmptySafety:
 ])
 def test_stat_values_render_correctly(stats, goals, attr, expected):
     app, _ = make_nutrition(daily_stats=stats, user_goals=goals)
-    assert expected in getattr(app, attr).value
+    assert expected in getattr(app, attr).value"""
