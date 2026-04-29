@@ -14,9 +14,10 @@
 **Installation Tutorial**
 
 1. **Clone The Repository**: "https://github.com/newcastleuniversity-computing/CSC2033-Team-34-Project.git"
-2. **Create and Activate the Virtual Enviorment** - .\.venv\Scripts\activate
+2. **Create and Activate the Virtual Enviorment**:
    ```bash
    .\venv\Scripts\activate     # Windows
+   source venv/bin/activate    # macOS/Linux
    ```
 3. **Download the Requirements**:
    ```bash
@@ -29,18 +30,13 @@
    ```bash
    flet run
    ```
-* To run on device
-  * First download flet app on your phone
-    * Android: "https://play.google.com/store/apps/details?id=com.appveyor.flet&hl=en"
-    * IOS: "https://apps.apple.com/us/app/flet/id1624979699"
-  * Then run:
-  ```bash
-      flet run --andorid #for android
-      flet run --ios #for ios
-   ```
-  * <sub> This Only Works On Private Networks</sub>
-  
-   
+* To create an executable:
+
+| Target Platform | Requirements & Prerequisites | Build Command |
+|:---|:---|:---|
+| **Windows** | Enable **Developer Mode** in Settings. Install [Visual Studio](https://visualstudio.microsoft.com/downloads/) with "Desktop development with C++". | `flet build windows` |
+| **Android** | Install [Android Studio](https://developer.android.com/studio). Ensure **Android SDK** and **Java (JDK)** are in your system path. | `flet build apk` |
+| **iOS** | Requires **macOS** with [Xcode](https://developer.apple.com/xcode/) and **CocoaPods** installed. | `flet build ios` |
     
 
 <sub>* Some AI has been used in the development of this product *</sub>
