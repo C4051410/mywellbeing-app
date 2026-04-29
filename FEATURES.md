@@ -1,33 +1,26 @@
 # Features and Functionality
 
 ***
-## General Requirements
-| Requirement            | Implementation Details                                          |
-|:-----------------------|:----------------------------------------------------------------|
-| **Functional Product** | Produced a functional mobile application using the Flet Library |
-| **Feasibility**        | The project was completed within the set time frame             |
-| **Team Collaboration** | View CONTRIBUTION_MATRIX.md                                     |
-| **Version Control**    | View GIT_CONVENTIONS.md                                         |
+---
+
+## Intermediate Functionality
+| Feature                  | Description of Implementation                                                                                                                                                                                                                                                                | Reference File                                            |
+|:-------------------------|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------|
+| **Alert/Notifications**  | plyer.notifications are used to create notifications that occur outside of the application, being sent when users sign in or complete an activity. Resend is used to send email notifications when users register for an account, and when they dont log in for an extend duration           | auth_service.py, activities_service.py,nutrition_services |
+| **User Roles**           | There are multiple roles within the application including users, moderators and admins. Users are the basic role and cant control other users data. Moderators are allowed to view and delete other users posts. Admins are allowed to create new moderators and delete users and moderators | main.py, admin.py, moderator.py                           |                                                                                              |
+| **Dashboards**           | The application contains multiple dashboards which allow users to view a wide range of data, this includes being able to see details about exercises by clicking on them, while also being able to view other users activities on the social side                                            | activities.py,social.py, homepage.py                      |
+| **Game Mechanics**       | To encourage users to come back and continue using the app, we created multiple reasons to return, this includes having a streak which the user has to log an activity each day to keep similar to duolingo, and also have a leaderboard system to encourage them to reach the top           | activities.py, social.py                                  |
+| **Docker Usage**         | Rather then using docker to create a standalone executable, we use Flet's on application builder, using flet build can create standalone applications for android/ios/windows to allow for complete isolation from the project while still functioning up to standard                        | pyproject.toml                                            |
+| **Database Integration** | We have used an remote PostgreSQL database using Neon, allowing the data to be persistent across all users and devices, allowing for real time updates of leaderboards and activities                                                                                                        | database/                                                 |
 
 ---
 
-## 🚀 Intermediate Functionality
-| Feature                 | Description of Implementation                                                                    |
-|:------------------------|:-------------------------------------------------------------------------------------------------|
-| **Alert/Notifications** | Users are notified when they login/register and account, log a new activity or nutrition         |
-| **User Roles**          | multiple users are used including users, moderators and admins, all with their own functions     |                                                                                              |
-| **Dashboards**          | Multiple Dashboards on Homepage and Social Page showing a wide range of information to the users |
-| **Game Mechanics**      | Implemented a streak style system like Duolingo to encourage people to return to the application |
-| **Docker Usage**        | ?                                                                                                |
-
----
-
-## 🌟 Advanced Functionality
-| Feature               | Description of Implementation                                                            |
-|:----------------------|:-----------------------------------------------------------------------------------------|
-| **Location Features** | Location is used within the application when tracking when users go on runs/cycles/walks |
-| **User Roles (UX)**   | Admin and Moderators get to different pages so they can perform their specific tasks     |
-| **External APIs**     | Strava API is used to allow users to import strava runs to our application               |
-| **Data Science**      | ?                                                                                        |
+## Advanced Functionality
+| Feature               | Description of Implementation                                                                                                                                                                                                                                                                     | Reference File                 |
+|:----------------------|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------|
+| **Location Features** | We use Flet's own flet_geolocator to find and collect the location of the user, and then track them as they go on activities, allowing them to track their route on top of an actual map                                                                                                          | map.py                         |
+| **User Roles (UX)**   | Admin and Moderators have their own UI when the log into the application, allowing them to perform their tasks without having all the other unnecessary pages                                                                                                                                     | admin.py,moderator.py          |
+| **External APIs**     | We use Strava API, which is a tool provided by strava which allows the users to sign into their strava account and collect their runs and other activities to display on our app. We also use Resend as mentioned above which can create and store emails ready to send through a set time period | strava_api.py,auth_services.py |
+| **Data Science**      | We use data scene in our setup, using the collection of the users setup to create the correct calorie goal for a user to try and go from their current weight to their target weight                                                                                                              | setup.py                       |
 
 ---
