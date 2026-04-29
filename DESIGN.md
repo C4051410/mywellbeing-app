@@ -1,15 +1,16 @@
 # Design and Structure
 ***
 
-## Seperation of Functionality
+## Separation of Functionality
 
-* Classes are used in the creation of Flet pages
-* Functions are used to call upon these classes in other python files
-* Backend and Frontend tasks are seperated to avoid a conflict and adds
-a layer of protection and security. Backend functions include calling upon
-the database and other sensitive functions. Frontend includes displaying variables
-and flet objects.
-
+* The Project has been created with the Three-Tier Architecture in mind. The project
+has been seperated into the Presentation Tier (Flet UI Classes), 
+Logic Tier (Python service functions), and Data Tier ( Database queries in database/).
+* The Database and API calls have been encapsulated within the Logic Tier. This means that
+the Front-End never calls directly to either, as it communicates through service modules
+that validate the data and handle errors.
+* Common UI components like NavBar or UserPfp have been stored in components/ to stop
+common code being repeated for each page, and that they all have the same logic.
 ***
 
 ## Use of Directory and Packages
@@ -17,14 +18,14 @@ and flet objects.
 Python files and other files (.csv, .png. .TTF etc.), are stored in suitable folders to 
 allow for easy organization of files
 
-### Main Programs:
+### Root Directory:
 ```
-├── main.py               # Where Main Application is Launched
-├── .env                  # Used to store Enviorment Variables like DB keys
-├── .gitignore            # Define which files not to store on Git
-├── requirements.txt      # Python dependencies needed to run application
-├── CSC2033_test.yml      # Defines how CICD test are run
-├── pyproject.toml        # Blueprint of how application works
+├── main.py               # This is where the main application is run from, bringing all resources together
+├── .env                  # Used to store Enviorment Variables like DB and API Keys, to protect them from being stolen
+├── .gitignore            # Define which files should and should not be committed to git
+├── requirements.txt      # A list of all the python dependencies that need to be installed before running
+├── CSC2033_test.yml      # Defines how the CI/CD automated testing runs on Github Actions
+├── pyproject.toml        # Stores details like ruff programming style and how the application should be deployed
 ```
 ### File Structure:
 All Program Files are Located in src/
@@ -37,16 +38,20 @@ All .md Files and other non-program files are stored in the project.
 
 #### Within src:
 ```
-├── activities/     # Stores all files related to the activities page
-├── admin/          # Stores all files related to the admin page
-├── assets/         # Stores images/fonts used in program
-├── auth/           # Stores all files realted to login/registration
-├── components/     # Stores all files that are used throughout all pages
-├── database/       # Stores all files that are used to access the database
-├── home/           # Stores all files related to the homepage
-├── moderator/      # Stores all files related to the moderator page
-├── nutrition/      # Stores all files related to the nutrition page
-├── settings/       # Stores all files related to the settings page
-├── social/         # Stores all files related to the Social Page
-├── tests/          # Stores files used in testing
+├── activities/     # Manages the displayment and creation of activities, including Strava API
+├── admin/          # Manages how the admin page is displayed and their controls.
+├── assets/         # Stores images and other style choices needed by program
+├── auth/           # Manages the authentication of users, logging in and registration of users
+├── components/     # Contains UI widgets which are used across multiple pages to maintain consistency
+├── database/       # Centralises all database connections to help manage with security
+├── home/           # Manages how the homepage is displayed and retrieving information
+├── moderator/      # Manages how the moderator page is displayed and their controls
+├── nutrition/      # Manages the displayment and creation of nutrition logs.
+├── settings/       # Manages the displayment and how the user is able to update information about their account
+├── social/         # Manages the displayment of the comparision between users and their stats
+├── tests/          # A range of different testing methods including how to run them
 ```
+### Justification For Modularity
+The structure of our package is effective, as its successfully separates core features and pages,
+meaning that new features can be added with a reduced risk of causing bugs across the application.
+It also makes it easier for the developers to navigate and find bugs quicker.
