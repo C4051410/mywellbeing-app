@@ -38,7 +38,7 @@ def login_user(email, password):
             app_name="MyWellBeing",
         )
     except Exception as e:
-        print(e)
+        pass
     #return true with user data
     return True,user
 
@@ -93,7 +93,7 @@ def register_user(username,email, password):
         })
     #catches any issues
     except Exception as e:
-        print(e)
+        pass
     #return true with user data
     return True,user_id
 

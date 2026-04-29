@@ -59,6 +59,9 @@ jobs:
       - name: "Run Tests with pytest"
         env:
           PYTHONPATH: ${{ github.workspace }}/src
+          DATABASE_URL: postgresql://test_admin:password123@localhost:5432/csc2033_test
+          EMAIL_KEY: "fake_key"
+          DISPLAY: :99.0
         run: |
           pytest src/tests
           
