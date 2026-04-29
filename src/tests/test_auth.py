@@ -47,23 +47,24 @@ class TestLogin():
 @patch('auth.auth_services.register')
 @patch('auth.auth_services.notification')
 @patch('auth.auth_services.get_existing_user')
+@patch('auth.auth_services.resend.Emails.send')
 class TestRegister():
     username = "TestUser"
     email = 'testingemail@outlook.com'
     password = 'Password1!'
-    def test_valid_register(self,mock_get, mock_notification, mock_register):
+    def test_valid_register(self,mock_email,mock_get, mock_notification, mock_register):
         mock_get.return_value = (None,None)
         mock_register.return_value = 1
         success,message = register_user(self.username,self.email,self.password)
         assert success is True
         assert message == 1
-    def test_missing_fields(self,mock_get, mock_notification, mock_register):
+    def test_missing_fields(self,mock_email,mock_get, mock_notification, mock_register):
         mock_get.return_value = (None,None)
         mock_register.return_value = 1
         success,message = register_user(None,None,None)
         assert success is False
         assert message == 'Please Enter All Fields'
-    def test_invalid_email(self,mock_get, mock_notification, mock_register):
+    def test_invalid_email(self,mock_email,mock_get, mock_notification, mock_register):
         mock_get.return_value = (None,None)
         mock_register.return_value = 1
         success, message = login_user("emailgmail.com", self.password)
@@ -72,7 +73,7 @@ class TestRegister():
         success, message = login_user("email@gmail.c", self.password)
         assert success is False
         assert message == 'Invalid Email'
-    def test_invalid_password(self,mock_get, mock_notification, mock_register):
+    def test_invalid_password(self,mock_email,mock_get, mock_notification, mock_register):
         mock_get.return_value = (None,None)
         mock_register.return_value = 1
         success, message = register_user(self.username,self.email,"tooshrt")
@@ -90,13 +91,13 @@ class TestRegister():
         success, message = register_user(self.username,self.email,"NoSpecial1")
         assert success is False
         assert message == 'Password must at least one uppercase letter, one lowercase letter, one number and one special character'
-    def test_user_already_exists(self,mock_get, mock_notification, mock_register):
+    def test_user_already_exists(self,mock_email,mock_get, mock_notification, mock_register):
         mock_get.return_value = ("TestUser",None)
         mock_register.return_value = 1
         success,message = register_user(self.username, self.email,self.password)
         assert success is False
         assert message == 'User Already Exists'
-    def test_email_already_exists(self,mock_get, mock_notification, mock_register):
+    def test_email_already_exists(self,mock_email,mock_get, mock_notification, mock_register):
         mock_get.return_value = (None,"testingemail@outlook.com")
         mock_register.return_value = 1
         success,message = register_user(self.username, self.email,self.password)

@@ -9,3 +9,4 @@ pytest
 ruff
 plyer
 flet_permission_handler
+resend

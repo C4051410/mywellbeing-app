@@ -1,11 +1,16 @@
+import os
 import re
 
 import bcrypt
+import resend
 from plyer import notification
 
-from auth.login import login, get_user_setup
+from auth.login import login, get_user_setup,get_last_email,commit_last_email
 from auth.register import register, get_existing_user, commit_setup
-
+from database.connection import email_key
+current_dir = os.path.dirname(__file__)
+#gets API key
+resend.api_key = email_key()
 
 def login_user(email, password):
     #checks fields arent empty
@@ -72,6 +77,23 @@ def register_user(username,email, password):
         )
     except Exception as e:
         print(e)
+    #uses the test email, as we dont have the costs to buy domain
+    #on deployment, would remove this and use email
+    test_email = "m.austoni2@newcastle.ac.uk"
+    try:
+        #gets html to be used in email
+        template_path = os.path.join(current_dir, "welcome.html")
+        html_body = load_template(template_path, username)
+        #sends emails
+        resend.Emails.send({
+            "from": "MyWellBeing <reminder@resend.dev>",
+            "to": [test_email],
+            "subject": "Welcome to MyWellBeing",
+            "html": html_body,
+        })
+    #catches any issues
+    except Exception as e:
+        print(e)
     #return true with user data
     return True,user_id
 
@@ -116,3 +138,38 @@ def save_setup(user_id, age, gender, height_cm, current_weight_kg, weight_goal_k
         return False
     commit_setup(user_id, age, gender, height_cm, current_weight_kg, weight_goal_kg, calorie_goal,salts_goal,protein_goal,water_goal)
     return True
+
+def load_template(file_path, username):
+    with open(file_path, 'r') as file:
+        content = file.read()
+    # Replace the placeholder with the actual variable
+    return content.replace("{{username}}", username)
+
+
+def refresh_inactivity_timer(user_id,username):
+    #gets last email ready to be sent
+    old_email_id = get_last_email(user_id)
+    #if the email exists, try and cancel it being sent using its id
+    if old_email_id:
+        try:
+            resend.Emails.cancel(old_email_id)
+        except Exception:
+            pass
+
+    try:
+        template_path = os.path.join(current_dir, "reminder.html")
+        html_body = load_template(template_path, username)
+        test_email = "m.austoni2@newcastle.ac.uk"
+        #send to user in 20 hours time
+        sent_email = resend.Emails.send({
+            "from": "MyWellBeing <reminders@resend.dev>",
+            "to": test_email,
+            "subject": "We miss you!",
+            "html":html_body,
+            "scheduled_at": "in 20 hours",
+        })
+        #store the last email id in the db
+        commit_last_email(user_id, sent_email["id"])
+
+    except Exception as e:
+        print(f"Error scheduling email: {e}")
