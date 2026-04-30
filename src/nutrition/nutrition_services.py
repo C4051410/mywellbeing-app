@@ -48,7 +48,8 @@ def search_food_db(search_query,food_db):
 #saves entered foodlogs
 def save_foodlog(food, calories, salts, proteins,date,mealtype,user_id):
     #returns false and message if not all fields are entered
-    if not all([food,calories,salts,proteins,date,mealtype,user_id]):
+    fields = [food,calories,salts,proteins,date,mealtype,user_id]
+    if any(field is None for field in fields):
         return False, "All Fields Required"
     #tests for if user enters something not a number
     try:
