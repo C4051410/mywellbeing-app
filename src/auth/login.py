@@ -1,7 +1,7 @@
 import bcrypt
 from database.connection import connect
 from plyer import notification
-from pygments.filter import apply_filters
+
 
 
 def login(email,password):
