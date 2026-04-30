@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from unittest.mock import patch
 import pytest
 from activities.activities_services import save_activity,save_past_activity,retrieve_activities
@@ -6,14 +6,18 @@ from database.connection import connect
 
 @pytest.fixture
 def db_cleanup():
-    #used to clean db whether test fails or not
     test_duration = 60
-    yield test_duration
     conn = connect()
     cur = conn.cursor()
+    # deletes all record that could be remaining
+    cur.execute("TRUNCATE TABLE users RESTART IDENTITY CASCADE")
+    cur.execute("TRUNCATE TABLE workouts RESTART IDENTITY CASCADE")
+    conn.commit()
+    #used to clean db whether test fails or not
+    yield test_duration
     #deletes all record that could be remaining
-    cur.execute("DELETE FROM workouts WHERE duration_seconds =%s", (test_duration,))
-    cur.execute("DELETE FROM users WHERE id = %s", (2,))
+    cur.execute("TRUNCATE TABLE workouts RESTART IDENTITY CASCADE")
+    cur.execute("TRUNCATE TABLE workouts RESTART IDENTITY CASCADE")
     conn.commit()
     cur.close()
     conn.close()
@@ -26,6 +30,9 @@ def test_activities_integration(mock_notification,db_cleanup):
     """
     conn = connect()
     cur = conn.cursor()
+    cur.execute("TRUNCATE TABLE users RESTART IDENTITY CASCADE")
+    cur.execute("TRUNCATE TABLE workouts RESTART IDENTITY CASCADE")
+    conn.commit()
     #inserts a user to deal with foreign key issues
     cur.execute(
         "INSERT INTO users (id, username, email, password) "
@@ -37,8 +44,10 @@ def test_activities_integration(mock_notification,db_cleanup):
     type = "Run"
     distance_km = 1.5
     test_duration = db_cleanup
+    #fix issue with datetime and how long it takes to perform test
+    date = datetime.now() - timedelta(seconds=30)
     #try and save activity to database
-    success = save_activity(2,type,distance_km,test_duration,datetime.today())
+    success = save_activity(2,type,distance_km,test_duration,date)
     #check it returns successful
     assert success is True
     #try and retrieve the activity to check values are correct
@@ -54,7 +63,7 @@ def test_activities_integration(mock_notification,db_cleanup):
     calories = 200
     reps = 20
     #try and save the past activity, including empty values stored as 0
-    success = save_past_activity(2,title,calories,test_duration,reps,0,datetime.today())
+    success = save_past_activity(2,title,calories,test_duration,reps,0,date)
     #check that it returns successful
     assert success is True
     #try and retrieve the past activity to check values stored correctly
@@ -76,5 +85,8 @@ def test_activities_integration(mock_notification,db_cleanup):
     #deletes record to keep db clean
     cur.execute("DELETE FROM workouts WHERE user_id = %s", (2,))
     cur.execute("DELETE FROM users WHERE id = %s", (2,))
+    conn.commit()
+    cur.close()
+    conn.close()
 
 

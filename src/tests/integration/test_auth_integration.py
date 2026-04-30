@@ -21,7 +21,7 @@ def db_cleanup():
 
 @patch("auth.auth_services.notification")
 @patch("auth.auth_services.resend")
-def test_full_registration_flow(mock_resend,mock_notification,db_cleanup):
+def test_full_registration_integration(mock_resend,mock_notification,db_cleanup):
     """
     INTEGRATION TEST: Checks that the functions are properly integrated with the db
     Checks that a registration creates the user and that the user can log in with that account
