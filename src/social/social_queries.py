@@ -337,14 +337,16 @@ def get_social_feed(user_id):
         cur.execute(
             """
             SELECT 'workout' AS activity_type,
-                   u.username,
-                   w.title,
-                   w.calories,
-                   w.id,
-                   w.user_id
+                u.username,
+                w.title,
+                COALESCE(w.calories, 0) AS calories,
+                w.id,
+                w.user_id,
+                COALESCE(w.duration_seconds, 0) AS duration_seconds,
+                w.start_date
             FROM workouts w
             JOIN users u ON w.user_id = u.id
-            WHERE w.user_id = ANY (%s)
+            WHERE w.user_id = ANY(%s)
             ORDER BY w.start_date DESC NULLS LAST, w.id DESC
             LIMIT 6
             """,

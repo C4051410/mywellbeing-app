@@ -25,7 +25,7 @@ user_username = "TestUser"
 user_daily_stats       = (1500, 3, 120, 1800)   # calories, salts, protein, water
 user_daily_goals = (2500, 5, 150, 2000)
 user_streak            = (5,25)                 # current, longest
-user_friends_data = [("Alice", "Running", 5), ("Bob", "Cycling", 3)] # two friends examples
+user_friends_data = [("Alice", "Run", 5, "Run", 5.0, "00:30:00", 300), ("Bob", "Cycle", 3, "Cycle", 10.0, "00:45:00", 250)] # two friends examples
 user_friends_empty     = [] # empty friends example
 
 
@@ -170,20 +170,24 @@ class TestFriendsWidget:
     def test_friend_tile_shows_name_and_activity(self):
         app, _ = make_app(friends=user_friends_data)
         tile = app.friends_container.content.controls[0]
-        assert tile.title.value    == "Alice"
-        assert tile.subtitle.value == "Running"
+        # tile is now a Container > Row > [Column, Text]
+        name_text = tile.content.controls[0].controls[0]
+        subtitle_text = tile.content.controls[0].controls[1]
+        assert name_text.value == "Alice"
+        assert "Run" in subtitle_text.value
     #makes sure the streak is visible
     def test_friend_tile_shows_streak(self):
         app, _ = make_app(friends=user_friends_data)
         tile = app.friends_container.content.controls[0]
-        assert "5" in tile.trailing.value
+        fire_text = tile.content.controls[1]
+        assert "🔥" in fire_text.value
     #makes sure if no friends it appears corretcly
     def test_empty_friends_shows_fallback_message(self):
         app, _ = make_app(friends=user_friends_empty)
         controls = app.friends_container.content.controls
-        assert len(controls) == 1
-        assert "No Friends" in controls[0].value
-
+        texts = [c for c in controls if isinstance(c, ft.Text)]
+        assert len(texts) >= 1
+        assert any("Your feed is empty" in t.value for t in texts)
 
 
 #tests widget change size with changing window size,

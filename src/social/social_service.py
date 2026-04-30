@@ -198,6 +198,8 @@ def get_social_overview(user_id):
             "calories": row[3],
             "target_id": target_id,
             "owner_user_id": row[5],
+            "duration_seconds": row[6],
+            "start_date": row[7],
             "like_count": count_likes(activity_type, target_id),
             "liked_by_user": has_user_liked(user_id, activity_type, target_id),
             "comment_count": count_comments(activity_type, target_id)
