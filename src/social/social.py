@@ -21,7 +21,7 @@ from social.social_service import (
 
 #Sizes of all elements on homepage (as a percent of screen)
 page_title_size = 0.1
-page_desc_size = 0.03
+page_desc_size = 0.04
 leaderboard_v_size = 0.18
 standings_v_size = 0.08
 activity_v_size = 0.22
@@ -57,9 +57,11 @@ class SocialPage(ft.Column):
         self.userpfp = Userpfp(page)
 
         self.rank_container = ft.Container(
-            bgcolor=ft.Colors.ORANGE_200,
+            gradient=ft.LinearGradient(begin=ft.alignment.Alignment(-1, 0), end=ft.alignment.Alignment(1, 0),
+                                       colors=["#F0BE19", "#F3681D"]),
             border_radius=12,
-            padding=16
+            padding=16,
+            expand=True
         )
         self.render_rank_card()
 
@@ -135,9 +137,10 @@ class SocialPage(ft.Column):
             controls=[
                 ft.Row(
                     alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                    vertical_alignment=ft.CrossAxisAlignment.CENTER,
                     controls=[
                         ft.Column(
-                            spacing=0,
+                            expand=True,
                             controls=[
                                 self.page_title,
                                 self.page_desc
@@ -218,56 +221,51 @@ class SocialPage(ft.Column):
         rank_value = f"#{self.user_rank}" if self.user_rank != "-" else "-"
         points_value = f"{self.user_points} pts"
 
-        self.rank_container.content = ft.Column(
-            spacing=8,
-            controls=[
-                ft.Text(
-                    "Your Rank",
-                    size=16,
-                    weight=ft.FontWeight.W_500,
-                    color=ft.Colors.GREY_800
-                ),
-                ft.Row(
-                    alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
-                    vertical_alignment=ft.CrossAxisAlignment.CENTER,
-                    controls=[
-                        ft.Column(
-                            spacing=0,
-                            controls=[
-                                ft.Text(
-                                    rank_value,
-                                    size=28,
-                                    weight=ft.FontWeight.BOLD,
-                                    color=ft.Colors.BLACK
-                                ),
-                            ]
-                        ),
-                        ft.Column(
-                            horizontal_alignment=ft.CrossAxisAlignment.END,
-                            spacing=0,
-                            controls=[
-                                ft.Text(
-                                    "Weekly Points",
-                                    size=12,
-                                    color=ft.Colors.GREY_700
-                                ),
-                                ft.Text(
-                                    points_value,
-                                    size=20,
-                                    weight=ft.FontWeight.BOLD,
-                                    color=ft.Colors.BLACK
-                                )
-                            ]
-                        )
-                    ]
-                ),
-                ft.Container(height=10),
-                ft.Text(
-                    "This week",
-                    size=11,
-                    color=ft.Colors.GREY_800
-                )
-            ]
+        self.rank_container.content = ft.Container(
+            expand=True,
+            padding=10,
+            border_radius=12,
+            content=ft.Column(
+                spacing=8,
+                controls=[
+                    ft.Text(
+                        "Your Rank",
+                        size=20,
+                        weight=ft.FontWeight.W_500,
+                        color=ft.Colors.WHITE70
+                    ),
+                    ft.Row(
+                        alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                        vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                        controls=[
+                            ft.Column(
+                                spacing=0,
+                                controls=[
+                                    ft.Text(
+                                        rank_value,
+                                        size=35,
+                                        weight=ft.FontWeight.BOLD,
+                                        color=ft.Colors.WHITE70
+                                    ),
+                                ]
+                            ),
+                            ft.Column(
+                                spacing=0,
+                                alignment=ft.MainAxisAlignment.START,
+                                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                                controls=[
+                                    ft.Text(
+                                        points_value,
+                                        size=35,
+                                        weight=ft.FontWeight.BOLD,
+                                        color=ft.Colors.WHITE
+                                    ),
+                                ]
+                            ),
+                        ]
+                    ),
+                ]
+            )
         )
 
     # Build a consistent stat card for workout activity detail
