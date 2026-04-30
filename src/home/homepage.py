@@ -13,13 +13,21 @@ from home.home_services import retrieve_friends_activities, retrieve_current_str
 from nutrition.nutrition_services import retrieve_daily_stats,retrieve_user_goals
 
 #Sizes of all elements on homepage (as percent of screen)
-welcome_text_size = 0.1
+welcome_text_size = 0.09
 motivational_msg_size = 0.04
 widget_text_size = 0.055
 steps_h_size = 0.4
 calories_h_size = 0.4
 friends_v_size = 0.15
 streak_v_size = 0.40
+
+def build_activity_summary(act_type, title, distance, duration, calories):
+    if act_type in ("Run", "Cycle", "Walk"):
+        return f"{title}   •   {distance} km   •   {duration}"
+    elif act_type in ("Workout", "WeightLifting"):
+        return f"{title}   •   {calories} kcal   •   {duration}"
+    else:
+        return title
 
 class WorkoutApp(ft.Column):
     def __init__(self, page: ft.Page, user_id):
@@ -42,28 +50,15 @@ class WorkoutApp(ft.Column):
         #gets users current streak and best streak
         streak = retrieve_current_streaks(user_id)
 
-        # ignore other return values, only need activitiy count
         tot_dist, tot_time, activities_completed, activities_list = load_activity_data(page)
         activities_completed = int(activities_completed)
 
-        # Get last activity (if exists)
+        # get last activity
         if activities_list:
             last = activities_list[0]
-            act_type = last["type"]
-            act_title = last["title"]
-            act_time = last["time"]
-
-            # Build a readable summary depending on type
-            if act_type in ("Run", "Cycle"):
-                act_summary = f"{last['dist']} km • {act_time}"
-            elif act_type == "Walk":
-                act_summary = f"{last.get('steps', '—')} steps • {act_time}"
-            elif act_type in ("Workout", "WeightLifting"):
-                act_summary = f"{last['calories']} kcal • {act_time}"
-            else:
-                act_summary = act_time
-
-            last_activity_text = f"{act_title} • {act_summary}"
+            last_activity_text = build_activity_summary(
+                last["type"], last["title"], last.get("dist"), last["time"], last.get("calories")
+            )
         else:
             last_activity_text = "No recent activity"
 
@@ -97,15 +92,28 @@ class WorkoutApp(ft.Column):
         self.protein_text = ft.Text(f"Protein: {daily_proteins} / {protein_goal} g",size=self.r.w(widget_text_size))
         self.water_text = ft.Text(f"Water: {daily_water} / {water_goal} ml",size=self.r.w(widget_text_size))
 
+        for name, title, f_streak, act_type, distance, duration, calories in friends_data:
+            # build summary based on activity type
+            subtitle = build_activity_summary(act_type, title, distance, duration, calories)
 
-        for name, activity, f_streak in friends_data:
-            print(name + " " + activity)
             friends_list.append(
-                ft.ListTile(title=ft.Text(name, size=18, weight=ft.FontWeight.BOLD, color=ft.Colors.WHITE),
-                            subtitle=ft.Text(activity, size=14, color=ft.Colors.WHITE70),
-                            dense=True,
-                            visual_density=ft.VisualDensity.COMPACT,
-                            trailing = ft.Text(f"Streak : {f_streak}🔥"))
+                ft.Container(
+                    padding=ft.padding.symmetric(horizontal=15, vertical=10),
+                    content=ft.Row(
+                        alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                        vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                        controls=[
+                            ft.Column(
+                                spacing=2,
+                                controls=[
+                                    ft.Text(name, size=18, weight=ft.FontWeight.BOLD, color=ft.Colors.WHITE),
+                                    ft.Text(subtitle, size=14, color=ft.Colors.WHITE70),
+                                ]
+                            ),
+                            ft.Text("🔥", size=35),
+                        ]
+                    )
+                )
             )
 
         # TODO: add strava activities to streak
@@ -154,7 +162,7 @@ class WorkoutApp(ft.Column):
             gradient=ft.LinearGradient(begin=ft.alignment.Alignment(-1, 0), end=ft.alignment.Alignment(1, 0), colors=["#8A2BE2", "#4C6EF5",]),
             content= ft.Column(
                 controls=friends_list,
-                scroll = ft.ScrollMode.ALWAYS,
+                scroll = ft.ScrollMode.HIDDEN,
                 spacing = 0,
                 expand = 1
             )
@@ -174,6 +182,7 @@ class WorkoutApp(ft.Column):
 
         #Streak widget
         self.streak_container = ft.Container(
+            margin=ft.margin.only(top=10),
             border_radius=15,
             shadow=ft.BoxShadow(spread_radius=1, blur_radius=10, color=ft.Colors.BLACK12),
             padding=0,
@@ -228,6 +237,7 @@ class WorkoutApp(ft.Column):
             mouse_cursor=ft.MouseCursor.CLICK,
             on_tap=open_url,
             content=ft.Container(
+                margin=ft.margin.only(top=10),
                 border_radius=15,
                 shadow=ft.BoxShadow(spread_radius=1, blur_radius=10, color=ft.Colors.BLACK12),
                 clip_behavior=ft.ClipBehavior.ANTI_ALIAS,

@@ -22,14 +22,15 @@ def get_friends_activities(user_id,date):
         cur = conn.cursor()
         cur.execute("""
             SELECT DISTINCT ON (u.username)
-            u.username,w.title, us.current_streak
+                u.username, w.title, us.current_streak,
+                w.activity_type, w.distance_km, w.duration, w.calories
             FROM friends f
             JOIN users u ON f.friend_id = u.id
-            JOIN workouts w on u.id = w.user_id
+            JOIN workouts w ON u.id = w.user_id
             JOIN user_stats us ON us.user_id = u.id
             WHERE f.user_id = %s AND w.start_date::date = %s
             ORDER BY u.username, w.id DESC
-        """,(user_id,date,))
+        """, (user_id, date,))
         rows = cur.fetchall()
         cur.close()
         conn.close()
