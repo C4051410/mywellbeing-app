@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 DATABASE = os.getenv("DATABASE_URL")
+TEST_DATABASE = os.getenv("TEST_DATABASE_URL")
 EMAIL_KEY = os.getenv("EMAIL_KEY")
 #return connection to database
 def connect():

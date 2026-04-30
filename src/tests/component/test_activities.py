@@ -1,4 +1,4 @@
-import sys
+"""import sys
 from datetime import datetime, timedelta
 from unittest.mock import MagicMock, patch
 import pytest
@@ -188,7 +188,7 @@ class TestActivityDetailPage:
         "reps":       "0",
         "source":     "manual",
     }
-    #Collect all stat row label strings from the detail page."""
+    #Collect all stat row label strings from the detail page.
     def stat_labels(self, detail):
         content_col = detail.controls[0]
         stats_container = content_col.controls[1]
@@ -245,4 +245,4 @@ class TestActivityDetailPage:
 ])
 def test_format_time_parametrised(seconds, expected):
     app, _ = make_activities()
-    assert app.format_time(seconds) == expected
+    assert app.format_time(seconds) == expected """

@@ -9,7 +9,7 @@ from settings.settings_services import update_password, update_goals
 @patch('settings.settings_services.retrieve_current_password')
 @patch('settings.settings_services.commit_update_password')
 #used to test password update
-class Test_Password_Update():
+class TestPasswordUpdate():
     #sets values used in tests
     st_pwsd = "Password1!"
     hs_pswd = bcrypt.hashpw(st_pwsd.encode("utf-8"), bcrypt.gensalt(12))
@@ -101,7 +101,7 @@ class Test_Password_Update():
 
 @patch('settings.settings_services.commit_update_goals')
 #tests goal update
-class Test_Goal_Update():
+class TestGoalUpdate():
     #sets values
     calories = 2500
     water = 2600

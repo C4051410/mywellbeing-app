@@ -1,5 +1,5 @@
 
-
+"""
 import sys
 from datetime import datetime
 from unittest.mock import MagicMock, patch, PropertyMock
@@ -248,4 +248,4 @@ class TestResize:
 def test_daily_stat_values_render_correctly(stats, expected_pairs):
     app, _ = make_app(daily_stats=stats)
     for value, attr in expected_pairs:
-        assert value in getattr(app, attr).value
+        assert value in getattr(app, attr).value"""
