@@ -7,6 +7,7 @@ import flet as ft
 from components.userpfp import Userpfp
 from components.bottom_nav import NavBar
 from components.responsive import Responsive
+from datetime import date, timedelta
 from social.social_service import (
     add_friend_by_username,
     remove_friend_by_id,
@@ -193,10 +194,12 @@ class SocialPage(ft.Column):
         self.activity_data = [
             {
                 "name": item["username"],
-                "activity": f"{item['activity_type']}: {item['title']} ({item['calories']} cal)",
-                "time": "Recent",
                 "activity_type": item["activity_type"],
+                "title": item["title"],
+                "calories": item["calories"],
                 "target_id": item["target_id"],
+                "duration_seconds": item["duration_seconds"],
+                "start_date": item["start_date"],
                 "like_count": item["like_count"],
                 "liked_by_user": item["liked_by_user"],
                 "comment_count": item["comment_count"]
