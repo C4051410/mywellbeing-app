@@ -21,11 +21,12 @@ from social.social_service import (
 
 #Sizes of all elements on homepage (as a percent of screen)
 page_title_size = 0.1
+page_subtitle_size = 0.05
 page_desc_size = 0.04
 leaderboard_v_size = 0.18
 standings_v_size = 0.08
 activity_v_size = 0.22
-container_width_size = 0.95
+container_width_size = 0.92
 
 class SocialPage(ft.Column):
     def __init__(self, page: ft.Page, user_id):
@@ -67,32 +68,35 @@ class SocialPage(ft.Column):
 
         self.leaderboard_title = ft.Text(
             value="Leaderboard",
-            size=self.r.w(page_desc_size),
+            size=self.r.w(page_subtitle_size),
             weight=ft.FontWeight.BOLD,
             color=ft.Colors.BLACK
             )
 
         self.first_container = ft.Container(
-             border=ft.Border.all(width=2, color=ft.Colors.GREY_400),
-             border_radius=8,
-             padding=18
-             )
+            bgcolor=ft.Colors.WHITE,
+            border_radius=15,
+            padding=20,
+            shadow=ft.BoxShadow(spread_radius=1, blur_radius=5, color=ft.Colors.BLACK12),
+        )
 
         self.second_container = ft.Container(
-             border=ft.Border.all(width=2, color=ft.Colors.GREY_400),
-             border_radius=8,
-             padding=18
-             )
+            bgcolor=ft.Colors.WHITE,
+            border_radius=15,
+            padding=20,
+            shadow=ft.BoxShadow(spread_radius=1, blur_radius=5, color=ft.Colors.BLACK12),
+        )
 
         self.third_container = ft.Container(
-             border=ft.Border.all(width=2, color=ft.Colors.GREY_400),
-             border_radius=8,
-             padding=18
-             )
+            bgcolor=ft.Colors.WHITE,
+            border_radius=15,
+            padding=20,
+            shadow=ft.BoxShadow(spread_radius=1, blur_radius=5, color=ft.Colors.BLACK12),
+        )
 
         self.activity_title = ft.Text(
              value="Recent Activity",
-             size=self.r.w(page_desc_size),
+             size=self.r.w(page_subtitle_size),
              weight=ft.FontWeight.BOLD,
              color=ft.Colors.BLACK
             )
@@ -134,6 +138,7 @@ class SocialPage(ft.Column):
         self.nav_bar = NavBar(page)
         # Keep the main social page scrollable so all sections remain accessible on different size of screens
         main_content = ft.Column(
+            alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
             controls=[
                 ft.Row(
                     alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
@@ -142,6 +147,7 @@ class SocialPage(ft.Column):
                         ft.Column(
                             expand=True,
                             controls=[
+
                                 self.page_title,
                                 self.page_desc
                             ]
@@ -151,9 +157,15 @@ class SocialPage(ft.Column):
                 ),
             self.rank_container,
             self.leaderboard_title,
-            self.first_container,
-            self.second_container,
-            self.third_container,
+                ft.Row(
+                    alignment=ft.MainAxisAlignment.CENTER,
+                    controls=[self.first_container]),
+                ft.Row(
+                    alignment=ft.MainAxisAlignment.CENTER,
+                    controls=[self.second_container]),
+                ft.Row(
+                    alignment=ft.MainAxisAlignment.CENTER,
+                    controls=[self.third_container]),
             self.activity_title,
             self.activity_container,
             self.friends_title,
@@ -163,13 +175,12 @@ class SocialPage(ft.Column):
             ],
             expand=True,
             spacing=12,
-            scroll=ft.ScrollMode.AUTO
+            scroll=ft.ScrollMode.HIDDEN
         )
         self.controls =[main_content,self.nav_bar]
 
         self.expand = True
-        # Stretch controls horizontally so containers line up more naturally.
-        self.horizontal_alignment = ft.CrossAxisAlignment.STRETCH
+        self.horizontal_alignment = ft.CrossAxisAlignment.CENTER
         # Add consistent spacing between sections.
         self.spacing = 12
         # Allow the whole page to scroll.
@@ -334,21 +345,21 @@ class SocialPage(ft.Column):
             self.first_container.content = ft.Row(
                 alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
                 controls=[
-                    ft.Text("1. ---", size=16),
+                    ft.Text(" ---", size=16),
                     ft.Text("0 pts", size=14, color=ft.Colors.GREY_700)
                 ]
             )
             self.second_container.content = ft.Row(
                 alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
                 controls=[
-                    ft.Text("2. ---", size=16),
+                    ft.Text(" ---", size=16),
                     ft.Text("0 pts", size=14, color=ft.Colors.GREY_700)
                 ]
             )
             self.third_container.content = ft.Row(
                 alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
                 controls=[
-                    ft.Text("3. ---", size=16),
+                    ft.Text(" ---", size=16),
                     ft.Text("0 pts", size=14, color=ft.Colors.GREY_700)
                 ]
             )
@@ -360,14 +371,16 @@ class SocialPage(ft.Column):
             reverse=True
         )
         containers = [self.first_container, self.second_container, self.third_container]
+        medals = ["🥇", "🥈", "🥉"]
         for i in range(3):
             if i < len(sorted_users):
                 containers[i].content = ft.Row(
                     alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
                     vertical_alignment=ft.CrossAxisAlignment.CENTER,
                     controls=[
+                        ft.Text(medals[i], size=25),
                         ft.Text(
-                            f"{i + 1}. {sorted_users[i]['name']}",
+                            f"{sorted_users[i]['name']}",
                             size=16,
                             weight=ft.FontWeight.W_500
                         ),
@@ -713,9 +726,9 @@ class SocialPage(ft.Column):
     def set_widget_size(self):
         # Give list sections enough height
         self.rank_container.height = self.r.h(leaderboard_v_size)
-        self.first_container.height = self.r.h(standings_v_size)
-        self.second_container.height = self.r.h(standings_v_size)
-        self.third_container.height = self.r.h(standings_v_size)
+        self.first_container.height = self.r.h(0.10)
+        self.second_container.height = self.r.h(0.10)
+        self.third_container.height = self.r.h(0.10)
         self.activity_container.height = self.r.h(activity_v_size)
         self.friends_container.height = self.r.h(activity_v_size)
 
