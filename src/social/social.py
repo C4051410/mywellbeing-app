@@ -333,9 +333,27 @@ class SocialPage(ft.Column):
     # Load leaderboard data into the 3 containers
     def load_leaderboard(self):
         if not self.leaderboard_data:
-            self.first_container.content = ft.Text("1. ---")
-            self.second_container.content = ft.Text("2. ---")
-            self.third_container.content = ft.Text("3. ---")
+            self.first_container.content = ft.Row(
+                alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                controls=[
+                    ft.Text("1. ---", size=16),
+                    ft.Text("0 pts", size=14, color=ft.Colors.GREY_700)
+                ]
+            )
+            self.second_container.content = ft.Row(
+                alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                controls=[
+                    ft.Text("2. ---", size=16),
+                    ft.Text("0 pts", size=14, color=ft.Colors.GREY_700)
+                ]
+            )
+            self.third_container.content = ft.Row(
+                alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                controls=[
+                    ft.Text("3. ---", size=16),
+                    ft.Text("0 pts", size=14, color=ft.Colors.GREY_700)
+                ]
+            )
             return
 
         sorted_users = sorted(
@@ -346,11 +364,38 @@ class SocialPage(ft.Column):
         containers = [self.first_container, self.second_container, self.third_container]
         for i in range(3):
             if i < len(sorted_users):
-                containers[i].content = ft.Text(
-                    f"{i + 1}. {sorted_users[i]['name']} - {sorted_users[i]['points']} pts"
+                containers[i].content = ft.Row(
+                    alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                    vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                    controls=[
+                        ft.Text(
+                            f"{i + 1}. {sorted_users[i]['name']}",
+                            size=16,
+                            weight=ft.FontWeight.W_500
+                        ),
+                        ft.Text(
+                            f"{sorted_users[i]['points']} pts",
+                            size=14,
+                            color=ft.Colors.GREY_700
+                        )
+                    ]
                 )
             else:
-                containers[i].content = ft.Text(f"{i + 1}. ---")
+                containers[i].content = ft.Row(
+                    alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                    vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                    controls=[
+                        ft.Text(
+                            f"{i + 1}. ---",
+                            size=16
+                        ),
+                        ft.Text(
+                            "0 pts",
+                            size=14,
+                            color=ft.Colors.GREY_700
+                        )
+                    ]
+                )
 
 
 
