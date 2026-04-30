@@ -270,6 +270,66 @@ class SocialPage(ft.Column):
             ]
         )
 
+    # Build a consistent stat card for workout activity detail
+    def build_activity_stat_box(self, label, value, bg_color):
+        return ft.Container(
+            width=self.r.w(0.26),
+            height=self.r.h(0.08),
+            bgcolor=bg_color,
+            border_radius=14,
+            padding=ft.padding.symmetric(horizontal=10, vertical=8),
+            alignment=ft.Alignment.CENTER,
+            content=ft.Column(
+                alignment=ft.MainAxisAlignment.CENTER,
+                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                spacing=4,
+                controls=[
+                    ft.Text(
+                        label,
+                        size=8,
+                        color=ft.Colors.GREY_700,
+                        text_align=ft.TextAlign.CENTER
+                    ),
+                    ft.Text(
+                        value,
+                        size=12,
+                        weight=ft.FontWeight.W_600,
+                        text_align=ft.TextAlign.CENTER,
+                        max_lines=2,
+                        overflow=ft.TextOverflow.ELLIPSIS
+                    )
+                ]
+            )
+        )
+
+    # Convert duration in seconds into a simple human-readable string
+    def format_duration(self, total_seconds):
+        if not total_seconds:
+            return "0m"
+        total_seconds = int(total_seconds)
+        hours = total_seconds // 3600
+        minutes = (total_seconds % 3600) // 60
+        if hours > 0:
+            return f"{hours}h {minutes}m"
+        return f"{minutes}m"
+
+    # Format workout date as today, yesterday, or a short date
+    def format_activity_date(self, start_date):
+        if not start_date:
+            return "Recent"
+
+        try:
+            activity_day = start_date.date() if hasattr(start_date, "date") else start_date
+        except Exception:
+            return "Recent"
+
+        today = date.today()
+        if activity_day == today:
+            return "Today"
+        if activity_day == today - timedelta(days=1):
+            return "Yesterday"
+        return activity_day.strftime("%d %b")
+
     # Load leaderboard data into the 3 containers
     def load_leaderboard(self):
         if not self.leaderboard_data:
@@ -311,23 +371,55 @@ class SocialPage(ft.Column):
             activity_controls.append(
                 ft.Container(
                     border=ft.Border(bottom=ft.BorderSide(1, ft.Colors.GREY_300)),
-                    padding=ft.padding.symmetric(vertical=6),
+                    padding=ft.padding.symmetric(vertical=10),
                     content=ft.Column(
-                        spacing=4,
+                        spacing=10,
                         controls=[
-                            ft.ListTile(
-                                title=ft.Text(item["name"]),
-                                subtitle=ft.Text(item["activity"]),
-                                trailing=ft.Text(item["time"])
+                            ft.Row(
+                                alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                                controls=[
+                                    ft.Text(
+                                        item["name"],
+                                        size=18,
+                                        weight=ft.FontWeight.BOLD
+                                    ),
+                                    ft.Text(
+                                        self.format_activity_date(item["start_date"]),
+                                        size=12,
+                                        color=ft.Colors.GREY_700
+                                    )
+                                ]
+                            ),
+                            ft.Row(
+                                alignment=ft.MainAxisAlignment.CENTER,
+                                spacing=16,
+                                controls=[
+                                    self.build_activity_stat_box(
+                                        "Workout",
+                                        item["title"],
+                                        "#F7EEE9"
+                                    ),
+                                    self.build_activity_stat_box(
+                                        "Duration",
+                                        self.format_duration(item["duration_seconds"]),
+                                        "#F7EEE9"
+                                    ),
+                                    self.build_activity_stat_box(
+                                        "Calories",
+                                        str(item["calories"]),
+                                        "#F7EEE9"
+                                    )
+                                ]
                             ),
                             ft.Row(
                                 alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
                                 controls=[
                                     ft.Text(
-                                        f"{item['like_count']} likes • {item['comment_count']} comments"
+                                        f"{item['like_count']} likes • {item['comment_count']} comments",
+                                        size=12
                                     ),
                                     ft.Row(
-                                        spacing=6,
+                                        spacing=10,
                                         controls=[
                                             ft.TextButton(
                                                 like_label,
