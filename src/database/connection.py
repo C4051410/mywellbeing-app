@@ -16,6 +16,7 @@ def connect():
     is_local = url.hostname in ("localhost", "127.0.0.1")
 
     ssl_code = None
+    #if it's not a local hostname, create a ssl to allow connection to remote db
     if not is_local:
         ssl_code = ssl.create_default_context()
     #returns connection, using urlparse to split the connection string correctly
