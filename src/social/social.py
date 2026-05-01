@@ -101,11 +101,7 @@ class SocialPage(ft.Column):
              color=ft.Colors.BLACK
             )
 
-        self.activity_container = ft.Container(
-             border=ft.Border.all(width=2, color=ft.Colors.GREY_400),
-             border_radius=8,
-             padding=10
-            )
+        self.activity_column = ft.Column(spacing=12, expand=True)
 
         # Input used to add a friend by username.
         self.friend_username_input = ft.TextField(
@@ -167,7 +163,7 @@ class SocialPage(ft.Column):
                     alignment=ft.MainAxisAlignment.CENTER,
                     controls=[self.third_container]),
             self.activity_title,
-            self.activity_container,
+            self.activity_column,
             self.friends_title,
             self.friend_username_input,
             self.add_friend_button,
@@ -408,98 +404,134 @@ class SocialPage(ft.Column):
                     ]
                 )
 
-
-
-    # Load activity feed into activity container
+    # Load activity feed
     def load_activity(self):
-        activity_controls = []
+        self.activity_column.controls.clear()
 
+        # if there is no activity data
         if not self.activity_data:
-            self.activity_container.content = ft.Container(
-                alignment=ft.Alignment.CENTER,
-                content=ft.Text("No recent friend activity yet.")
+            self.activity_column.controls.append(
+                ft.Container(
+                    width=self.r.w(container_width_size),
+                    border_radius=15,
+                    shadow=ft.BoxShadow(spread_radius=1, blur_radius=10, color=ft.Colors.BLACK12),
+                    padding=20,
+                    clip_behavior=ft.ClipBehavior.ANTI_ALIAS,
+                    gradient=ft.LinearGradient(
+                        begin=ft.alignment.Alignment(-1, 0),
+                        end=ft.alignment.Alignment(1, 0),
+                        colors=["#8A2BE2", "#4C6EF5"]
+                    ),
+                    content=ft.Column(
+                        spacing=4,
+                        controls=[
+                            ft.Text("No activity yet", size=18, weight=ft.FontWeight.BOLD, color=ft.Colors.WHITE),
+                            ft.Text("Your friends haven't posted anything yet.", size=13, color=ft.Colors.WHITE70),
+                        ]
+                    )
+                )
             )
             return
 
         for item in self.activity_data:
             like_label = "Unlike" if item["liked_by_user"] else "Like"
 
-            activity_controls.append(
-                ft.Container(
-                    border=ft.Border(bottom=ft.BorderSide(1, ft.Colors.GREY_300)),
-                    padding=ft.padding.symmetric(vertical=10),
-                    content=ft.Column(
-                        spacing=10,
-                        controls=[
-                            ft.Row(
-                                alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
-                                controls=[
-                                    ft.Text(
-                                        item["name"],
-                                        size=18,
-                                        weight=ft.FontWeight.BOLD
-                                    ),
-                                    ft.Text(
-                                        self.format_activity_date(item["start_date"]),
-                                        size=12,
-                                        color=ft.Colors.GREY_700
-                                    )
-                                ]
-                            ),
-                            ft.Row(
-                                alignment=ft.MainAxisAlignment.CENTER,
-                                spacing=16,
-                                controls=[
-                                    self.build_activity_stat_box(
-                                        "Workout",
-                                        item["title"],
-                                        "#F7EEE9"
-                                    ),
-                                    self.build_activity_stat_box(
-                                        "Duration",
-                                        self.format_duration(item["duration_seconds"]),
-                                        "#F7EEE9"
-                                    ),
-                                    self.build_activity_stat_box(
-                                        "Calories",
-                                        str(item["calories"]),
-                                        "#F7EEE9"
-                                    )
-                                ]
-                            ),
-                            ft.Row(
-                                alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
-                                controls=[
-                                    ft.Text(
-                                        f"{item['like_count']} likes • {item['comment_count']} comments",
-                                        size=12
-                                    ),
-                                    ft.Row(
-                                        spacing=10,
-                                        controls=[
-                                            ft.TextButton(
-                                                like_label,
-                                                on_click=lambda e, activity=item: self.handle_like_action(activity)
-                                            ),
-                                            ft.TextButton(
-                                                "Comments",
-                                                on_click=lambda e, activity=item: self.open_comments_dialog(activity)
-                                            )
-                                        ]
-                                    )
-                                ]
-                            )
-                        ]
-                    )
+            gradient_top = ft.Container(
+                padding=20,
+                gradient=ft.LinearGradient(
+                    begin=ft.alignment.Alignment(-1, 0),
+                    end=ft.alignment.Alignment(1, 0),
+                    colors=["#8A2BE2", "#4C6EF5"]
+                ),
+                content=ft.Row(
+                    alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                    vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                    controls=[
+                        ft.Column(
+                            spacing=2,
+                            controls=[
+                                ft.Text(
+                                    item["name"],
+                                    size=18,
+                                    weight=ft.FontWeight.BOLD,
+                                    color=ft.Colors.WHITE
+                                ),
+                            ]
+                        ),
+                        ft.Text(
+                            self.format_activity_date(item["start_date"]),
+                            size=12,
+                            color=ft.Colors.WHITE70
+                        )
+                    ]
                 )
             )
 
-        # Keep the activity list scrollable inside its container.
-        self.activity_container.content = ft.Column(
-            controls=activity_controls,
-            spacing=5,
-            scroll=ft.ScrollMode.AUTO
-        )
+            white_bottom = ft.Container(
+                padding=ft.padding.symmetric(horizontal=16, vertical=12),
+                bgcolor=ft.Colors.WHITE,
+                content=ft.Column(
+                    spacing=10,
+                    controls=[
+                        ft.Row(
+                            alignment=ft.MainAxisAlignment.CENTER,
+                            spacing=16,
+                            controls=[
+                                self.build_activity_stat_box(
+                                    "Workout",
+                                    item["title"],
+                                    "#F3F4F6"
+                                ),
+                                self.build_activity_stat_box(
+                                    "Duration",
+                                    self.format_duration(item["duration_seconds"]),
+                                    "#F3F4F6"
+                                ),
+                                self.build_activity_stat_box(
+                                    "Calories",
+                                    str(item["calories"]),
+                                    "#F3F4F6"
+                                ),
+                            ]
+                        ),
+                        ft.Row(
+                            alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                            controls=[
+                                ft.Text(
+                                    f"{item['like_count']} likes • {item['comment_count']} comments",
+                                    size=12, color=ft.Colors.GREY_600
+                                ),
+                                ft.Row(
+                                    spacing=10,
+                                    controls=[
+                                        ft.TextButton(
+                                            like_label,
+                                            on_click=lambda e, activity=item: self.handle_like_action(activity)
+                                        ),
+                                        ft.TextButton(
+                                            "Comments",
+                                            on_click=lambda e, activity=item: self.open_comments_dialog(activity)
+                                        )
+                                    ]
+                                )
+                            ]
+                        )
+                    ]
+                )
+            )
+
+            # combine top and white bottom
+            self.activity_column.controls.append(
+                ft.Container(
+                    width=self.r.w(container_width_size),
+                    border_radius=15,
+                    shadow=ft.BoxShadow(spread_radius=1, blur_radius=10, color=ft.Colors.BLACK12),
+                    padding=0,
+                    clip_behavior=ft.ClipBehavior.ANTI_ALIAS,
+                    content=ft.Column(spacing=0,controls=[gradient_top, white_bottom]
+                    )
+                )
+            )
 
     # Load the current user's friends and render them into the friends container
     def load_friends(self):
@@ -729,7 +761,6 @@ class SocialPage(ft.Column):
         self.first_container.height = self.r.h(0.10)
         self.second_container.height = self.r.h(0.10)
         self.third_container.height = self.r.h(0.10)
-        self.activity_container.height = self.r.h(activity_v_size)
         self.friends_container.height = self.r.h(activity_v_size)
 
         # Keep section widths consistent so cards line up cleanly
@@ -737,7 +768,6 @@ class SocialPage(ft.Column):
         self.first_container.width = self.r.w(container_width_size)
         self.second_container.width = self.r.w(container_width_size)
         self.third_container.width = self.r.w(container_width_size)
-        self.activity_container.width = self.r.w(container_width_size)
         self.friends_container.width = self.r.w(container_width_size)
         self.friend_username_input.width = self.r.w(container_width_size)
         self.add_friend_button.width = self.r.w(container_width_size)
