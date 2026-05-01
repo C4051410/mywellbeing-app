@@ -93,9 +93,6 @@ def format_time(seconds):
 def format_strava_activities(strava_activities):
     formatted = []
 
-    for act in strava_activities:
-        if act.get("type") == "WeightTraining":
-            print(act)
     # loop through each activity
     for act in strava_activities:
         activity_type = act.get("type", "Activity")
