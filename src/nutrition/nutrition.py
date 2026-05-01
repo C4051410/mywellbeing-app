@@ -100,14 +100,52 @@ class NutritionPage(ft.Column):
         total_calories, total_salts, total_proteins, total_water = retrieve_daily_stats(user_id, date.today())
         goal_calories, goal_salts, goal_proteins, goal_water = retrieve_user_goals(user_id)
         #creates texts and progress bars of above
-        self.calories_text = ft.Text(f"{total_calories:.0f} / {goal_calories:.0f}",size=12,weight=ft.FontWeight.BOLD,color=ft.Colors.GREY_400)
-        self.calories_bar = ft.ProgressBar(width=100, height=20,color=ft.Colors.ORANGE_400,value=total_calories / goal_calories)
+        self.calories_text = ft.Text(f"{total_calories:.0f} / {goal_calories:.0f}",size=15,weight=ft.FontWeight.BOLD,color=ft.Colors.WHITE70)
+        self.calories_bar = ft.ProgressBar(width=150, height=15, color=ft.Colors.WHITE, border_radius=10, bgcolor="#EFD8B3",value=total_calories / goal_calories)
         self.protein_text = ft.Text(f"{total_proteins:.2f} / {goal_proteins:.2f}",size=12, weight=ft.FontWeight.BOLD,color=ft.Colors.GREY_400)
         self.protein_bar = ft.ProgressBar(width=100, height=20,color=ft.Colors.RED_400,value=total_proteins / goal_proteins)
         self.salts_text = ft.Text(f"{total_salts:.2f} / {goal_salts:.2f}",size=12,weight=ft.FontWeight.BOLD,color=ft.Colors.GREY_400)
         self.salts_bar = ft.ProgressBar(width=100, height=20,color=ft.Colors.LIGHT_GREEN_400,value=total_salts / goal_salts)
-        self.water_text = ft.Text(f"{total_water:.0f} / {goal_water:.0f}", size=12, weight=ft.FontWeight.BOLD, color=ft.Colors.GREY_400)
-        self.water_bar = ft.ProgressBar(width=100, height=20, color=ft.Colors.LIGHT_BLUE_400,value=total_water / goal_water)
+        self.water_text = ft.Text(f"{total_water:.0f} / {goal_water:.0f}", size=15, weight=ft.FontWeight.BOLD, color=ft.Colors.WHITE70)
+        self.water_bar = ft.ProgressBar(width=150, height=15, color=ft.Colors.WHITE, border_radius=10, bgcolor="#EFD8B3", value=total_water / goal_water)
+
+        self.calories_card = ft.Container(
+            bgcolor=ft.Colors.WHITE,
+            border_radius=15,
+            padding=20,
+            shadow=ft.BoxShadow(spread_radius=1, blur_radius=10, color=ft.Colors.BLACK12),
+            gradient=ft.LinearGradient(begin=ft.alignment.Alignment(-1, 0), end=ft.alignment.Alignment(1, 0),
+                                       colors=["#F46214", "#F46214", ]),
+            content=ft.Column(
+                alignment=ft.MainAxisAlignment.CENTER,
+                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                controls=[
+                    ft.Text("Calories Today", color=ft.Colors.WHITE, size=15),
+                    self.calories_text,
+                    self.calories_bar
+                ]
+            )
+
+        )
+
+        self.water_card = ft.Container(
+            bgcolor=ft.Colors.WHITE,
+            border_radius=15,
+            padding=20,
+            shadow=ft.BoxShadow(spread_radius=1, blur_radius=10, color=ft.Colors.BLACK12),
+            gradient=ft.LinearGradient(begin=ft.alignment.Alignment(-1, 0), end=ft.alignment.Alignment(1, 0),
+                                       colors=["#2178FB", "#0E16AD", ]),
+            content=ft.Column(
+                alignment=ft.MainAxisAlignment.CENTER,
+                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                controls=[
+                    ft.Text("Water Intake", color=ft.Colors.WHITE, size=15),
+                    self.water_text,
+                    self.water_bar,
+                ]
+            )
+
+        )
         #creates container used to display the users totals from the day compared to their goals
         self.stats_card = ft.Container(bgcolor=ft.Colors.WHITE,border_radius=10,padding=10,
                                   shadow = ft.BoxShadow(spread_radius=1, blur_radius=10, color=ft.Colors.BLACK12),
@@ -178,7 +216,15 @@ class NutritionPage(ft.Column):
         #specifies the content which should be allowed to be scrolled
         scrollable = ft.Column([
             self.header,
-            self.stats_card,
+            ft.Row(
+                spacing=8,
+                controls=[
+                    ft.Container(content=self.calories_card, expand=1),
+                    ft.Container(content=self.water_card, expand=1),
+                ]
+            ),
+
+            #self.stats_card,
             self.enter_food_btn,
             self.enter_water_btn,
             self.foodlog_list,
