@@ -19,12 +19,14 @@ dependencies = [
     "flet",
     "flet-map",
     "flet-geolocator",
-    "psycopg2",
+    "pg8000",
+    "certifi",
     "python-dotenv",
     "bcrypt",
     "requests",
     "plyer",
-    "flet-permission-handler"
+    "flet-permission-handler",
+    "resend"
 ]
 
 [tool.flet]
@@ -39,6 +41,9 @@ module_name = "main"
 "android.permission.POST_NOTIFICATIONS" = true
 "android.permission.ACCESS_FINE_LOCATION" = true
 "android.permission.ACCESS_COARSE_LOCATION" = true
-
+"android.permission.ACCESS_BACKGROUND_LOCATION" = true
 [tool.flet.permissions]
 location = true
+
+[tool.flet.android]
+dependencies = ["flet_geolocator", "flet_permission_handler", "flet_map"]

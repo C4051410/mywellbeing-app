@@ -93,15 +93,11 @@ def main_map(page: ft.Page):
             if len(path_points) > 1:
                 polyline_layer.polylines[0].coordinates = list(path_points)
         page.update()
-
-    gl = None
-    if page.platform in [ft.PagePlatform.ANDROID, ft.PagePlatform.IOS] or page.web:
-        if not any(isinstance(c, Geolocator) for c in page.overlay):
-            gl = Geolocator(on_position_change=on_position_change)
-            page.overlay.append(gl)
-        else:
-            gl = next(c for c in page.overlay if isinstance(c, Geolocator))
-            gl.on_position_change = on_position_change
+    #create geolocator to update position
+    gl = Geolocator(
+        on_position_change=on_position_change,
+        on_error=lambda e: print(f"GPS Error: {e.data}")
+    )
 
     # Background task to tick the stopwatch every second!
     async def run_stopwatch():
