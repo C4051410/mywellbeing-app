@@ -134,7 +134,7 @@ class SocialPage(ft.Column):
         )
 
         self.friends_list_title = ft.Text(
-            value="Friends List:",
+            value="Friends List",
             size=self.r.w(page_subtitle_size),
             weight=ft.FontWeight.BOLD,
             color=ft.Colors.BLACK
@@ -152,7 +152,6 @@ class SocialPage(ft.Column):
         )
 
         self.nav_bar = NavBar(page)
-        # Keep the main social page scrollable so all sections remain accessible on different size of screens
         main_content = ft.Column(
             alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
             controls=[
@@ -794,15 +793,14 @@ class SocialPage(ft.Column):
         self.third_container.width = self.r.w(container_width_size)
         self.friends_container.width = self.r.w(container_width_size)
         self.friend_username_input.width = self.r.w(container_width_size)
-        #self.add_friend_button.width = self.r.w(container_width_size)
-
+        self.add_friend_card.width = self.r.w(container_width_size)
     def resize(self, e):
         self.r = Responsive(self.this_page)
 
         #Resize all text on the page
         self.set_text_size()
         self.set_widget_size()
-
+        self.load_activity()
         self.userpfp.resize()
         self.nav_bar.resize()
 
