@@ -70,7 +70,8 @@ class WorkoutApp(ft.Column):
         self.welcome_text = ft.Text(
             value=f"Welcome {user}!",
             size=self.r.w(welcome_text_size),
-            color=ft.Colors.BLACK
+            color=ft.Colors.BLACK,
+            weight=ft.FontWeight.BOLD
         )
 
         #Motivational text to be shown to the user

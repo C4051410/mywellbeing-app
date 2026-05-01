@@ -21,11 +21,12 @@ from social.social_service import (
 
 #Sizes of all elements on homepage (as a percent of screen)
 page_title_size = 0.1
-page_desc_size = 0.03
+page_subtitle_size = 0.05
+page_desc_size = 0.04
 leaderboard_v_size = 0.18
 standings_v_size = 0.08
 activity_v_size = 0.22
-container_width_size = 0.95
+container_width_size = 0.92
 
 class SocialPage(ft.Column):
     def __init__(self, page: ft.Page, user_id):
@@ -57,88 +58,111 @@ class SocialPage(ft.Column):
         self.userpfp = Userpfp(page)
 
         self.rank_container = ft.Container(
-            bgcolor=ft.Colors.ORANGE_200,
+            gradient=ft.LinearGradient(begin=ft.alignment.Alignment(-1, 0), end=ft.alignment.Alignment(1, 0),
+                                       colors=["#F0BE19", "#F3681D"]),
             border_radius=12,
-            padding=16
+            padding=16,
+            expand=True
         )
         self.render_rank_card()
 
         self.leaderboard_title = ft.Text(
             value="Leaderboard",
-            size=self.r.w(page_desc_size),
+            size=self.r.w(page_subtitle_size),
             weight=ft.FontWeight.BOLD,
             color=ft.Colors.BLACK
             )
 
         self.first_container = ft.Container(
-             border=ft.Border.all(width=2, color=ft.Colors.GREY_400),
-             border_radius=8,
-             padding=18
-             )
+            bgcolor=ft.Colors.WHITE,
+            border_radius=15,
+            padding=20,
+            shadow=ft.BoxShadow(spread_radius=1, blur_radius=5, color=ft.Colors.BLACK12),
+        )
 
         self.second_container = ft.Container(
-             border=ft.Border.all(width=2, color=ft.Colors.GREY_400),
-             border_radius=8,
-             padding=18
-             )
+            bgcolor=ft.Colors.WHITE,
+            border_radius=15,
+            padding=20,
+            shadow=ft.BoxShadow(spread_radius=1, blur_radius=5, color=ft.Colors.BLACK12),
+        )
 
         self.third_container = ft.Container(
-             border=ft.Border.all(width=2, color=ft.Colors.GREY_400),
-             border_radius=8,
-             padding=18
-             )
+            bgcolor=ft.Colors.WHITE,
+            border_radius=15,
+            padding=20,
+            shadow=ft.BoxShadow(spread_radius=1, blur_radius=5, color=ft.Colors.BLACK12),
+        )
 
         self.activity_title = ft.Text(
              value="Recent Activity",
-             size=self.r.w(page_desc_size),
+             size=self.r.w(page_subtitle_size),
              weight=ft.FontWeight.BOLD,
              color=ft.Colors.BLACK
             )
 
-        self.activity_container = ft.Container(
-             border=ft.Border.all(width=2, color=ft.Colors.GREY_400),
-             border_radius=8,
-             padding=10
-            )
+        self.activity_column = ft.Column(spacing=12, expand=True)
 
         # Input used to add a friend by username.
         self.friend_username_input = ft.TextField(
-            label="Friend username",
             hint_text="Enter a username",
-            border_radius=8
+            border_radius=8,
+            on_submit=self.handle_add_friend
         )
 
         # Button for adding a friend.
-        self.add_friend_button = ft.ElevatedButton(
-            content = ft.Text("Add Friend"),
-            on_click = self.handle_add_friend
+        self.add_friend_card = ft.Container(
+            width=self.r.w(container_width_size),
+            padding=20,
+            border_radius=15,
+            bgcolor=ft.Colors.WHITE,
+            shadow=ft.BoxShadow(spread_radius=1, blur_radius=10, color=ft.Colors.BLACK12),
+            content=ft.Column(
+                spacing=12,
+                controls=[
+                    ft.Text("Add a Friend", size=self.r.w(page_desc_size), weight=ft.FontWeight.BOLD),
+                    self.friend_username_input,
+                ]
+            )
         )
 
         self.friends_title = ft.Text(
             value="Friends",
-            size=self.r.w(page_desc_size),
+            size=self.r.w(page_subtitle_size),
+            weight=ft.FontWeight.BOLD,
+            color=ft.Colors.BLACK
+        )
+
+        self.friends_list_title = ft.Text(
+            value="Friends List",
+            size=self.r.w(page_subtitle_size),
             weight=ft.FontWeight.BOLD,
             color=ft.Colors.BLACK
         )
 
         # Container that will display the friend list.
         self.friends_container = ft.Container(
-            border=ft.Border.all(width=2, color=ft.Colors.GREY_400),
-            border_radius=8,
-            padding=10,
+            bgcolor=ft.Colors.WHITE,
+            width=self.r.w(container_width_size),
+            border_radius=15,
+            shadow=ft.BoxShadow(spread_radius=1, blur_radius=10, color=ft.Colors.BLACK12),
+            padding=20,
+            clip_behavior=ft.ClipBehavior.ANTI_ALIAS,
             content=ft.Text("No friends loaded yet.")
         )
 
         self.nav_bar = NavBar(page)
-        # Keep the main social page scrollable so all sections remain accessible on different size of screens
         main_content = ft.Column(
+            alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
             controls=[
                 ft.Row(
                     alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                    vertical_alignment=ft.CrossAxisAlignment.CENTER,
                     controls=[
                         ft.Column(
-                            spacing=0,
+                            expand=True,
                             controls=[
+
                                 self.page_title,
                                 self.page_desc
                             ]
@@ -148,25 +172,30 @@ class SocialPage(ft.Column):
                 ),
             self.rank_container,
             self.leaderboard_title,
-            self.first_container,
-            self.second_container,
-            self.third_container,
+                ft.Row(
+                    alignment=ft.MainAxisAlignment.CENTER,
+                    controls=[self.first_container]),
+                ft.Row(
+                    alignment=ft.MainAxisAlignment.CENTER,
+                    controls=[self.second_container]),
+                ft.Row(
+                    alignment=ft.MainAxisAlignment.CENTER,
+                    controls=[self.third_container]),
             self.activity_title,
-            self.activity_container,
+            self.activity_column,
             self.friends_title,
-            self.friend_username_input,
-            self.add_friend_button,
+            self.add_friend_card,
+            self.friends_list_title,
             self.friends_container
             ],
             expand=True,
             spacing=12,
-            scroll=ft.ScrollMode.AUTO
+            scroll=ft.ScrollMode.HIDDEN
         )
         self.controls =[main_content,self.nav_bar]
 
         self.expand = True
-        # Stretch controls horizontally so containers line up more naturally.
-        self.horizontal_alignment = ft.CrossAxisAlignment.STRETCH
+        self.horizontal_alignment = ft.CrossAxisAlignment.CENTER
         # Add consistent spacing between sections.
         self.spacing = 12
         # Allow the whole page to scroll.
@@ -218,56 +247,51 @@ class SocialPage(ft.Column):
         rank_value = f"#{self.user_rank}" if self.user_rank != "-" else "-"
         points_value = f"{self.user_points} pts"
 
-        self.rank_container.content = ft.Column(
-            spacing=8,
-            controls=[
-                ft.Text(
-                    "Your Rank",
-                    size=16,
-                    weight=ft.FontWeight.W_500,
-                    color=ft.Colors.GREY_800
-                ),
-                ft.Row(
-                    alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
-                    vertical_alignment=ft.CrossAxisAlignment.CENTER,
-                    controls=[
-                        ft.Column(
-                            spacing=0,
-                            controls=[
-                                ft.Text(
-                                    rank_value,
-                                    size=28,
-                                    weight=ft.FontWeight.BOLD,
-                                    color=ft.Colors.BLACK
-                                ),
-                            ]
-                        ),
-                        ft.Column(
-                            horizontal_alignment=ft.CrossAxisAlignment.END,
-                            spacing=0,
-                            controls=[
-                                ft.Text(
-                                    "Weekly Points",
-                                    size=12,
-                                    color=ft.Colors.GREY_700
-                                ),
-                                ft.Text(
-                                    points_value,
-                                    size=20,
-                                    weight=ft.FontWeight.BOLD,
-                                    color=ft.Colors.BLACK
-                                )
-                            ]
-                        )
-                    ]
-                ),
-                ft.Container(height=10),
-                ft.Text(
-                    "This week",
-                    size=11,
-                    color=ft.Colors.GREY_800
-                )
-            ]
+        self.rank_container.content = ft.Container(
+            expand=True,
+            padding=10,
+            border_radius=12,
+            content=ft.Column(
+                spacing=8,
+                controls=[
+                    ft.Text(
+                        "Your Rank",
+                        size=20,
+                        weight=ft.FontWeight.W_500,
+                        color=ft.Colors.WHITE70
+                    ),
+                    ft.Row(
+                        alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                        vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                        controls=[
+                            ft.Column(
+                                spacing=0,
+                                controls=[
+                                    ft.Text(
+                                        rank_value,
+                                        size=35,
+                                        weight=ft.FontWeight.BOLD,
+                                        color=ft.Colors.WHITE70
+                                    ),
+                                ]
+                            ),
+                            ft.Column(
+                                spacing=0,
+                                alignment=ft.MainAxisAlignment.START,
+                                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                                controls=[
+                                    ft.Text(
+                                        points_value,
+                                        size=35,
+                                        weight=ft.FontWeight.BOLD,
+                                        color=ft.Colors.WHITE
+                                    ),
+                                ]
+                            ),
+                        ]
+                    ),
+                ]
+            )
         )
 
     # Build a consistent stat card for workout activity detail
@@ -336,21 +360,21 @@ class SocialPage(ft.Column):
             self.first_container.content = ft.Row(
                 alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
                 controls=[
-                    ft.Text("1. ---", size=16),
+                    ft.Text(" ---", size=16),
                     ft.Text("0 pts", size=14, color=ft.Colors.GREY_700)
                 ]
             )
             self.second_container.content = ft.Row(
                 alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
                 controls=[
-                    ft.Text("2. ---", size=16),
+                    ft.Text(" ---", size=16),
                     ft.Text("0 pts", size=14, color=ft.Colors.GREY_700)
                 ]
             )
             self.third_container.content = ft.Row(
                 alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
                 controls=[
-                    ft.Text("3. ---", size=16),
+                    ft.Text(" ---", size=16),
                     ft.Text("0 pts", size=14, color=ft.Colors.GREY_700)
                 ]
             )
@@ -362,14 +386,16 @@ class SocialPage(ft.Column):
             reverse=True
         )
         containers = [self.first_container, self.second_container, self.third_container]
+        medals = ["🥇", "🥈", "🥉"]
         for i in range(3):
             if i < len(sorted_users):
                 containers[i].content = ft.Row(
                     alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
                     vertical_alignment=ft.CrossAxisAlignment.CENTER,
                     controls=[
+                        ft.Text(medals[i], size=25),
                         ft.Text(
-                            f"{i + 1}. {sorted_users[i]['name']}",
+                            f"{sorted_users[i]['name']}",
                             size=16,
                             weight=ft.FontWeight.W_500
                         ),
@@ -397,98 +423,135 @@ class SocialPage(ft.Column):
                     ]
                 )
 
-
-
-    # Load activity feed into activity container
+    # Load activity feed
     def load_activity(self):
-        activity_controls = []
+        self.activity_column.controls.clear()
 
+        # if there is no activity data
         if not self.activity_data:
-            self.activity_container.content = ft.Container(
-                alignment=ft.Alignment.CENTER,
-                content=ft.Text("No recent friend activity yet.")
+            self.activity_column.controls.append(
+                ft.Container(
+                    width=self.r.w(container_width_size),
+                    border_radius=15,
+                    bgcolor=ft.Colors.WHITE,
+                    shadow=ft.BoxShadow(spread_radius=1, blur_radius=10, color=ft.Colors.BLACK12),
+                    padding=20,
+                    clip_behavior=ft.ClipBehavior.ANTI_ALIAS,
+                    gradient=ft.LinearGradient(
+                        begin=ft.alignment.Alignment(-1, 0),
+                        end=ft.alignment.Alignment(1, 0),
+                        colors=["#8A2BE2", "#4C6EF5"]
+                    ),
+                    content=ft.Column(
+                        spacing=4,
+                        controls=[
+                            ft.Text("No activity yet", size=18, weight=ft.FontWeight.BOLD, color=ft.Colors.WHITE),
+                            ft.Text("Your friends haven't posted anything yet.", size=13, color=ft.Colors.WHITE70),
+                        ]
+                    )
+                )
             )
             return
 
         for item in self.activity_data:
             like_label = "Unlike" if item["liked_by_user"] else "Like"
 
-            activity_controls.append(
-                ft.Container(
-                    border=ft.Border(bottom=ft.BorderSide(1, ft.Colors.GREY_300)),
-                    padding=ft.padding.symmetric(vertical=10),
-                    content=ft.Column(
-                        spacing=10,
-                        controls=[
-                            ft.Row(
-                                alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
-                                controls=[
-                                    ft.Text(
-                                        item["name"],
-                                        size=18,
-                                        weight=ft.FontWeight.BOLD
-                                    ),
-                                    ft.Text(
-                                        self.format_activity_date(item["start_date"]),
-                                        size=12,
-                                        color=ft.Colors.GREY_700
-                                    )
-                                ]
-                            ),
-                            ft.Row(
-                                alignment=ft.MainAxisAlignment.CENTER,
-                                spacing=16,
-                                controls=[
-                                    self.build_activity_stat_box(
-                                        "Workout",
-                                        item["title"],
-                                        "#F7EEE9"
-                                    ),
-                                    self.build_activity_stat_box(
-                                        "Duration",
-                                        self.format_duration(item["duration_seconds"]),
-                                        "#F7EEE9"
-                                    ),
-                                    self.build_activity_stat_box(
-                                        "Calories",
-                                        str(item["calories"]),
-                                        "#F7EEE9"
-                                    )
-                                ]
-                            ),
-                            ft.Row(
-                                alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
-                                controls=[
-                                    ft.Text(
-                                        f"{item['like_count']} likes • {item['comment_count']} comments",
-                                        size=12
-                                    ),
-                                    ft.Row(
-                                        spacing=10,
-                                        controls=[
-                                            ft.TextButton(
-                                                like_label,
-                                                on_click=lambda e, activity=item: self.handle_like_action(activity)
-                                            ),
-                                            ft.TextButton(
-                                                "Comments",
-                                                on_click=lambda e, activity=item: self.open_comments_dialog(activity)
-                                            )
-                                        ]
-                                    )
-                                ]
-                            )
-                        ]
-                    )
+            gradient_top = ft.Container(
+                padding=20,
+                gradient=ft.LinearGradient(
+                    begin=ft.alignment.Alignment(-1, 0),
+                    end=ft.alignment.Alignment(1, 0),
+                    colors=["#8A2BE2", "#4C6EF5"]
+                ),
+                content=ft.Row(
+                    alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                    vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                    controls=[
+                        ft.Column(
+                            spacing=2,
+                            controls=[
+                                ft.Text(
+                                    item["name"],
+                                    size=18,
+                                    weight=ft.FontWeight.BOLD,
+                                    color=ft.Colors.WHITE
+                                ),
+                            ]
+                        ),
+                        ft.Text(
+                            self.format_activity_date(item["start_date"]),
+                            size=12,
+                            color=ft.Colors.WHITE70
+                        )
+                    ]
                 )
             )
 
-        # Keep the activity list scrollable inside its container.
-        self.activity_container.content = ft.Column(
-            controls=activity_controls,
-            spacing=5,
-            scroll=ft.ScrollMode.AUTO
-        )
+            white_bottom = ft.Container(
+                padding=ft.padding.symmetric(horizontal=16, vertical=12),
+                bgcolor=ft.Colors.WHITE,
+                content=ft.Column(
+                    spacing=10,
+                    controls=[
+                        ft.Row(
+                            alignment=ft.MainAxisAlignment.CENTER,
+                            spacing=16,
+                            controls=[
+                                self.build_activity_stat_box(
+                                    "Workout",
+                                    item["title"],
+                                    "#F3F4F6"
+                                ),
+                                self.build_activity_stat_box(
+                                    "Duration",
+                                    self.format_duration(item["duration_seconds"]),
+                                    "#F3F4F6"
+                                ),
+                                self.build_activity_stat_box(
+                                    "Calories",
+                                    str(item["calories"]),
+                                    "#F3F4F6"
+                                ),
+                            ]
+                        ),
+                        ft.Row(
+                            alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                            controls=[
+                                ft.Text(
+                                    f"{item['like_count']} likes • {item['comment_count']} comments",
+                                    size=12, color=ft.Colors.GREY_600
+                                ),
+                                ft.Row(
+                                    spacing=10,
+                                    controls=[
+                                        ft.TextButton(
+                                            like_label,
+                                            on_click=lambda e, activity=item: self.handle_like_action(activity)
+                                        ),
+                                        ft.TextButton(
+                                            "Comments",
+                                            on_click=lambda e, activity=item: self.open_comments_dialog(activity)
+                                        )
+                                    ]
+                                )
+                            ]
+                        )
+                    ]
+                )
+            )
+
+            # combine top and white bottom
+            self.activity_column.controls.append(
+                ft.Container(
+                    width=self.r.w(container_width_size),
+                    border_radius=15,
+                    shadow=ft.BoxShadow(spread_radius=1, blur_radius=10, color=ft.Colors.BLACK12),
+                    padding=0,
+                    clip_behavior=ft.ClipBehavior.ANTI_ALIAS,
+                    content=ft.Column(spacing=0,controls=[gradient_top, white_bottom]
+                    )
+                )
+            )
 
     # Load the current user's friends and render them into the friends container
     def load_friends(self):
@@ -498,8 +561,12 @@ class SocialPage(ft.Column):
         # Show an empty state when the user has no friends.
         if not friends:
             self.friends_container.content = ft.Container(
-                alignment=ft.Alignment.CENTER,
+                width=self.r.w(container_width_size),
+                border_radius=15,
+                shadow=ft.BoxShadow(spread_radius=1, blur_radius=10, color=ft.Colors.BLACK12),
                 padding=20,
+                bgcolor=ft.Colors.WHITE,
+                clip_behavior=ft.ClipBehavior.ANTI_ALIAS,
                 content=ft.Text("No friends added yet.")
             )
             return
@@ -534,8 +601,7 @@ class SocialPage(ft.Column):
 
         self.friends_container.content = ft.Column(
             controls=friend_controls,
-            spacing=5,
-            scroll=ft.ScrollMode.AUTO
+            spacing=5
         )
 
     # Show a snackbar message at page level
@@ -715,29 +781,26 @@ class SocialPage(ft.Column):
     def set_widget_size(self):
         # Give list sections enough height
         self.rank_container.height = self.r.h(leaderboard_v_size)
-        self.first_container.height = self.r.h(standings_v_size)
-        self.second_container.height = self.r.h(standings_v_size)
-        self.third_container.height = self.r.h(standings_v_size)
-        self.activity_container.height = self.r.h(activity_v_size)
-        self.friends_container.height = self.r.h(activity_v_size)
+        self.first_container.height = self.r.h(0.10)
+        self.second_container.height = self.r.h(0.10)
+        self.third_container.height = self.r.h(0.10)
+        #self.friends_container.height = self.r.h(activity_v_size)
 
         # Keep section widths consistent so cards line up cleanly
         self.rank_container.width = self.r.w(container_width_size)
         self.first_container.width = self.r.w(container_width_size)
         self.second_container.width = self.r.w(container_width_size)
         self.third_container.width = self.r.w(container_width_size)
-        self.activity_container.width = self.r.w(container_width_size)
         self.friends_container.width = self.r.w(container_width_size)
         self.friend_username_input.width = self.r.w(container_width_size)
-        self.add_friend_button.width = self.r.w(container_width_size)
-
+        self.add_friend_card.width = self.r.w(container_width_size)
     def resize(self, e):
         self.r = Responsive(self.this_page)
 
         #Resize all text on the page
         self.set_text_size()
         self.set_widget_size()
-
+        self.load_activity()
         self.userpfp.resize()
         self.nav_bar.resize()
 
