@@ -105,29 +105,49 @@ class SocialPage(ft.Column):
 
         # Input used to add a friend by username.
         self.friend_username_input = ft.TextField(
-            label="Friend username",
             hint_text="Enter a username",
-            border_radius=8
+            border_radius=8,
+            on_submit=self.handle_add_friend
         )
 
         # Button for adding a friend.
-        self.add_friend_button = ft.ElevatedButton(
-            content = ft.Text("Add Friend"),
-            on_click = self.handle_add_friend
+        self.add_friend_card = ft.Container(
+            width=self.r.w(container_width_size),
+            padding=20,
+            border_radius=15,
+            bgcolor=ft.Colors.WHITE,
+            shadow=ft.BoxShadow(spread_radius=1, blur_radius=10, color=ft.Colors.BLACK12),
+            content=ft.Column(
+                spacing=12,
+                controls=[
+                    ft.Text("Add a Friend", size=self.r.w(page_desc_size), weight=ft.FontWeight.BOLD),
+                    self.friend_username_input,
+                ]
+            )
         )
 
         self.friends_title = ft.Text(
             value="Friends",
-            size=self.r.w(page_desc_size),
+            size=self.r.w(page_subtitle_size),
+            weight=ft.FontWeight.BOLD,
+            color=ft.Colors.BLACK
+        )
+
+        self.friends_list_title = ft.Text(
+            value="Friends List:",
+            size=self.r.w(page_subtitle_size),
             weight=ft.FontWeight.BOLD,
             color=ft.Colors.BLACK
         )
 
         # Container that will display the friend list.
         self.friends_container = ft.Container(
-            border=ft.Border.all(width=2, color=ft.Colors.GREY_400),
-            border_radius=8,
-            padding=10,
+            bgcolor=ft.Colors.WHITE,
+            width=self.r.w(container_width_size),
+            border_radius=15,
+            shadow=ft.BoxShadow(spread_radius=1, blur_radius=10, color=ft.Colors.BLACK12),
+            padding=20,
+            clip_behavior=ft.ClipBehavior.ANTI_ALIAS,
             content=ft.Text("No friends loaded yet.")
         )
 
@@ -165,8 +185,8 @@ class SocialPage(ft.Column):
             self.activity_title,
             self.activity_column,
             self.friends_title,
-            self.friend_username_input,
-            self.add_friend_button,
+            self.add_friend_card,
+            self.friends_list_title,
             self.friends_container
             ],
             expand=True,
@@ -414,6 +434,7 @@ class SocialPage(ft.Column):
                 ft.Container(
                     width=self.r.w(container_width_size),
                     border_radius=15,
+                    bgcolor=ft.Colors.WHITE,
                     shadow=ft.BoxShadow(spread_radius=1, blur_radius=10, color=ft.Colors.BLACK12),
                     padding=20,
                     clip_behavior=ft.ClipBehavior.ANTI_ALIAS,
@@ -541,8 +562,12 @@ class SocialPage(ft.Column):
         # Show an empty state when the user has no friends.
         if not friends:
             self.friends_container.content = ft.Container(
-                alignment=ft.Alignment.CENTER,
+                width=self.r.w(container_width_size),
+                border_radius=15,
+                shadow=ft.BoxShadow(spread_radius=1, blur_radius=10, color=ft.Colors.BLACK12),
                 padding=20,
+                bgcolor=ft.Colors.WHITE,
+                clip_behavior=ft.ClipBehavior.ANTI_ALIAS,
                 content=ft.Text("No friends added yet.")
             )
             return
@@ -577,8 +602,7 @@ class SocialPage(ft.Column):
 
         self.friends_container.content = ft.Column(
             controls=friend_controls,
-            spacing=5,
-            scroll=ft.ScrollMode.AUTO
+            spacing=5
         )
 
     # Show a snackbar message at page level
@@ -761,7 +785,7 @@ class SocialPage(ft.Column):
         self.first_container.height = self.r.h(0.10)
         self.second_container.height = self.r.h(0.10)
         self.third_container.height = self.r.h(0.10)
-        self.friends_container.height = self.r.h(activity_v_size)
+        #self.friends_container.height = self.r.h(activity_v_size)
 
         # Keep section widths consistent so cards line up cleanly
         self.rank_container.width = self.r.w(container_width_size)
@@ -770,7 +794,7 @@ class SocialPage(ft.Column):
         self.third_container.width = self.r.w(container_width_size)
         self.friends_container.width = self.r.w(container_width_size)
         self.friend_username_input.width = self.r.w(container_width_size)
-        self.add_friend_button.width = self.r.w(container_width_size)
+        #self.add_friend_button.width = self.r.w(container_width_size)
 
     def resize(self, e):
         self.r = Responsive(self.this_page)
