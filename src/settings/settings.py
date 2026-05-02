@@ -7,6 +7,7 @@ import flet as ft
 from components.userpfp import Userpfp
 from components.bottom_nav import NavBar
 from components.responsive import Responsive
+from settings.settings_services import retrieve_notification_status, update_notification_status
 
 #Sizes of all elements on homepage (as a percent of screen)
 page_title_size = 0.1
@@ -16,11 +17,11 @@ account_v_size = 0.25
 target_v_size = 0.25
 
 class SettingsPage(ft.Column):
-    def __init__(self, page: ft.Page):
+    def __init__(self, page: ft.Page,user_id):
         super().__init__()
 
         self.r = Responsive(page)
-
+        self.is_enabled = retrieve_notification_status(user_id)
         self.page_title = ft.Text(
             value="Social",
             size=self.r.w(page_title_size),
@@ -47,10 +48,39 @@ class SettingsPage(ft.Column):
             ),
             padding=10
         )
+        self.ntf_btn = ft.ElevatedButton(
+            "Toggle Notifications ",
+            icon=ft.Icons.NOTIFICATIONS_OFF if self.is_enabled else ft.Icons.NOTIFICATIONS_ACTIVE,
+            color=ft.Colors.RED if self.is_enabled else ft.Colors.GREEN)
+        def toggle_notification(e):
+            update_notification_status(user_id,self.is_enabled)
+            self.is_enabled = not self.is_enabled
+            if self.is_enabled:
+                self.ntf_btn.icon = ft.Icons.NOTIFICATIONS_OFF
+                self.ntf_btn.color = ft.Colors.RED
+                self.page.overlay.append(ft.SnackBar(
+                    content=ft.Text("Notification Turned On"),
+                    bgcolor=ft.Colors.GREEN_400,
+                    open=True
+                ))
+            else:
+                self.ntf_btn.icon = ft.Icons.NOTIFICATIONS_ON
+                self.ntf_btn.color = ft.Colors.GREEN
+                self.page.overlay.append(ft.SnackBar(
+                    content=ft.Text("Notification Turned Off"),
+                    bgcolor=ft.Colors.RED_400,
+                    open=True
+                ))
+            self.page.update()
+            self.ntf_btn.update()
 
-        self.targets_conatiner = ft.Container(
+        self.ntf_btn.on_click=toggle_notification
+
+        self.notification_container = ft.Container(
             border=ft.Border.all(width=2, color=ft.Colors.GREY_400),
-        )
+            alignment=ft.Alignment.CENTER,
+            content=self.ntf_btn,
+            )
 
         self.userpfp = Userpfp(page)
 
@@ -72,7 +102,7 @@ class SettingsPage(ft.Column):
             ),
             self.user_info_container,
             self.account_container,
-            self.targets_conatiner,
+            self.notification_container,
             self.nav_bar
         ]
 
@@ -92,7 +122,7 @@ class SettingsPage(ft.Column):
     def set_widget_size(self):
         self.user_info_container.height = self.r.h(user_info_v_size)
         self.account_container.height = self.r.h(account_v_size)
-        self.targets_conatiner.height = self.r.h(target_v_size)
+        self.notification_container.height = self.r.h(target_v_size)
 
     def resize(self,e ):
         self.r = Responsive(self.this_page)
@@ -105,7 +135,7 @@ class SettingsPage(ft.Column):
 
         self.update()
 
-def main_settings(page: ft.Page):
-    settings_page = SettingsPage(page)
+def main_settings(page: ft.Page,user_id):
+    settings_page = SettingsPage(page,user_id)
 
     return settings_page

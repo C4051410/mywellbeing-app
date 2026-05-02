@@ -52,3 +52,30 @@ def commit_update_goals(user_id, calorie_goal,water_goal):
         conn.rollback()
         print(e)
         conn.close()
+
+def get_notification_status(user_id):
+    conn = connect()
+    cur = conn.cursor()
+    try:
+        cur.execute("SELECT notification_status FROM users WHERE id = %s", (user_id,))
+        row = cur.fetchone()
+        cur.close()
+        conn.close()
+        return row[0]
+    except Exception as e:
+        print(e)
+        conn.close()
+        return True
+
+def commit_notification_status(user_id, notification_status):
+    conn = connect()
+    cur = conn.cursor()
+    try:
+        cur.execute("UPDATE users SET notification_status = %s WHERE id = %s", (notification_status,user_id))
+        conn.commit()
+        cur.close()
+        conn.close()
+    except Exception as e:
+        conn.rollback()
+        print(e)
+        conn.close()

@@ -40,7 +40,7 @@ def main(page: ft.Page):
             if page.route == "/social":
                 page.add(main_social(page,uid))
             if page.route == "/settings":
-                page.add(main_settings(page))
+                page.add(main_settings(page,uid))
             if page.route == "/map":
                page.add(main_map(page))
             if page.route == "/past_activities":

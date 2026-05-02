@@ -2,7 +2,8 @@ import re
 
 import bcrypt
 
-from settings.settings_queries import commit_update_password, retrieve_current_password, commit_update_goals
+from settings.settings_queries import commit_update_password, retrieve_current_password, commit_update_goals, \
+    get_notification_status, commit_notification_status
 
 
 #used to check password is okay to update
@@ -47,3 +48,25 @@ def update_goals(user_id, calorie_goal,water_goal):
     commit_update_goals(user_id,calorie_goal,water_goal)
     #return true
     return True, "Goals Updated"
+
+def retrieve_notification_status(user_id):
+    if not user_id:
+        return False
+    try:
+        if int(user_id) < 0:
+            return False
+    except ValueError:
+        return False
+    status = get_notification_status(user_id)
+    return status
+
+def update_notification_status(user_id, notification_status):
+    if user_id is None or notification_status is None:
+        return False
+    try:
+        if int(user_id) < 0:
+            return False
+    except ValueError:
+        return False
+    commit_notification_status(user_id, not notification_status)
+    return True
