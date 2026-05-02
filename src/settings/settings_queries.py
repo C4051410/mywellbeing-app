@@ -54,7 +54,7 @@ def commit_update_goals(user_id, calorie_goal,water_goal):
         conn.close()
 
 
-def delete_user_accoount_db(user_id):
+def delete_user_account_db(user_id):
     conn = connect()
     cur = conn.cursor()
     try:
@@ -67,4 +67,5 @@ def delete_user_accoount_db(user_id):
         return str(e)
     finally:
         cur.close()
+        conn.close()
 
