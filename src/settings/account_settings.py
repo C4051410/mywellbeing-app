@@ -12,9 +12,12 @@ class AccountSettingsPage(ft.Column):
         self.r = Responsive(page)
 
         # 1. Reset Password Fields.
-        self.current_pw = ft.TextField(label="Current Password",password=True,can_reveal_password=True)
-        self.new_pw = ft.TextField(label="New Password", password=True, can_reveal_password=True)
-        self.confirm_pw = ft.TextField(label="Confirm Password", password=True)
+        self.current_pw = ft.TextField(label="Current Password",password=True,can_reveal_password=True,
+                                       input_filter=ft.InputFilter(allow=True,regex_string="^[^\s]*$",replacement_string=""))
+        self.new_pw = ft.TextField(label="New Password", password=True, can_reveal_password=True,
+                                   input_filter=ft.InputFilter(allow=True,regex_string="^[^\s]*$",replacement_string=""))
+        self.confirm_pw = ft.TextField(label="Confirm Password", password=True,
+                                       input_filter=ft.InputFilter(allow=True,regex_string="^[^\s]*$",replacement_string=""))
 
         # 2. Reset Goals Fields (Using input_filter for numeric performance - PDF 1)
         self.cal_goal = ft.TextField(
