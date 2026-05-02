@@ -7,9 +7,9 @@ from auth.auth_services import login_user, register_user, refresh_inactivity_tim
 def authPage(on_login_success, on_register_success):
     message = ft.Text(color=ft.Colors.RED)
     # signup fields
-    username = ft.TextField(label="Username")
-    email = ft.TextField(label="Email")
-    password = ft.TextField(label="Password", password=True)
+    username = ft.TextField(label="Username",input_filter=ft.InputFilter(allow=True,regex_string="^[^\s]*$",replacement_string=""))
+    email = ft.TextField(label="Email",input_filter=ft.InputFilter(allow=True,regex_string="^[^\s]*$",replacement_string=""))
+    password = ft.TextField(label="Password", password=True,input_filter=ft.InputFilter(allow=True,regex_string="^[^\s]*$",replacement_string=""))
 
     # fields only show on the signup page
     signup = [username]
