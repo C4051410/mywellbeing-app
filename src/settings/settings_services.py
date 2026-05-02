@@ -2,7 +2,7 @@ import re
 
 import bcrypt
 
-from settings.settings_queries import commit_update_password, retrieve_current_password, commit_update_goals
+from settings.settings_queries import commit_update_password, retrieve_current_password, commit_update_goals, delete_user_account_db
 
 
 #used to check password is okay to update
