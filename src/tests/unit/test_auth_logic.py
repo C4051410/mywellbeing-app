@@ -76,6 +76,12 @@ class TestRegister():
         success,message = register_user(None,None,None)
         assert success is False
         assert message == 'Please Enter All Fields'
+    def test_invalid_username(self,mock_email,mock_get, mock_notification, mock_register):
+        mock_get.return_value = (None,None)
+        mock_register.return_value = 1
+        success,message = register_user("Test User",self.email,self.password)
+        assert success is False
+        assert message == 'Username must not contain space'
     def test_invalid_email(self,mock_email,mock_get, mock_notification, mock_register):
         #used to check when email is incorrect format and returns false
         mock_get.return_value = (None,None)
