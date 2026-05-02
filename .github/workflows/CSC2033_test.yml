@@ -13,11 +13,42 @@ on:
       - main
 # the jobs that will be tested
 jobs:
-  test:
+  ##Unit Tests##
+  unit-test:
     #sets up tests on ubuntu on the latest version
     runs-on: ubuntu-latest
+    steps:
+      #check the repository is valid
+      - name: "Checks Repository"
+        uses: actions/checkout@v4
+      #makes sure src is set up properly
+      - name: "Set Up Python"
+        uses: actions/setup-python@v5
+        with:
+          #specifies src version
+          python-version: "3.11"
+      #install dependencies code needs to run
+      - name: "Install Dependencies"
+        #uses src to make sure pip is up to date and install requirements.txt
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest
+          pip install -r requirements.txt
+      #runs the units tests
+      - name: "Run Unit Tests"
+        env:
+          PYTHONPATH: ${{ github.workspace }}/src
+        run: |
+          pytest src/tests/unit
+  ##Integration Tests##
+  integration-test:
+    #Checks that Unit Test completed
+    needs: unit-test
+    runs-on: ubuntu-latest
+    #Creates the DB for the integration tests in Github
     services:
       postgres:
+        #provides details about DB connections
         image: postgres:15
         env:
           POSTGRES_USER: test_admin
@@ -48,20 +79,102 @@ jobs:
           python -m pip install --upgrade pip
           pip install pytest
           pip install -r requirements.txt
-
+      #used to set up the database
       - name: "Initialize Database Schema"
         env:
           PGPASSWORD: password123
+        #creates the database using the schema and removes any data if it remains
         run: |
           sudo apt-get install -y postgresql-client
           psql -h localhost -U test_admin -d csc2033_test -f src/tests/integration/schema.sql
           psql -h localhost -U test_admin -d csc2033_test -c "TRUNCATE users CASCADE;"
-      - name: "Run Tests with pytest"
+      ##runs the integration tests with env provided
+      - name: "Run Integration Tests"
         env:
           PYTHONPATH: ${{ github.workspace }}/src
           DATABASE_URL: postgresql://test_admin:password123@localhost:5432/csc2033_test
           EMAIL_KEY: "re_123456789"
           DISPLAY: :99.0
         run: |
-          pytest src/tests
+          pytest src/tests/integration
+  e2e-test:
+    #This stops the e2e test running, as it takes too long and isn't practical
+    #This is due to the fact the test has to download the apk, along with flutter
+    #appium etc. which results in 15+ minute tests, which is unpractical for GitHub Actions
+    if: false
+    needs: integration-test
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: test_admin
+          POSTGRES_PASSWORD: password123
+          POSTGRES_DB: csc2033_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U test_admin -d csc2033_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - name: "Checks Repository"
+        uses: actions/checkout@v4
+      #makes sure src is set up properly
+      - name: "Set Up Python"
+        uses: actions/setup-python@v5
+        with:
+          #specifies src version
+          python-version: "3.11"
+      #install dependencies code needs to run
+      - name: "Install Dependencies"
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest selenium appium-python-client
+          pip install -r requirements.txt
+      #sets up Node.js
+      - name: "Set up Node.js"
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      #install appium and uiautomator2
+      - name: "Install Appium"
+        run: |
+          npm install -g appium
+          appium driver install uiautomator2
+      #install Flutter SDK
+      - name: "Install Flutter SDK"
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.22.x' # Use the version Flet requires
+          channel: 'stable'
+
+      #builds the APK for the test
+      - name: "Build APK"
+        run: flet build apk --yes
+
+      - name: "Run e2e Tests"
+        uses: reactivecircus/android-emulator-runner@v2
+        #creates the env file for the test
+        env:
+          PYTHONPATH: ${{ github.workspace }}/src
+          DATABASE_URL: postgresql://test_admin:password123@localhost:5432/csc2033_test
+          EMAIL_KEY: "re_123456789"
+          RUNNING_IN_EMULATOR: "true"
+        #runs it with appium and tests that it works
+        with:
+          api-level: 33
+          target: google_apis
+          arch: x86_64
+          script: |
+            sudo apt-get install -y postgresql-client
+            psql -h localhost -U test_admin -d csc2033_test -f src/tests/integration/schema.sql
+            psql -h localhost -U test_admin -d csc2033_test -c "TRUNCATE users CASCADE;"
+            
+            # Start Appium Server in background
+            appium --address 127.0.0.1 --port 4723 &
+            
+            # Run the E2E tests
+            pytest src/tests/e2e/test_e2e_appium.py
           

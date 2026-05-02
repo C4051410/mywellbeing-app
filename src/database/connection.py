@@ -1,3 +1,4 @@
+import platform
 import ssl
 from urllib.parse import urlparse
 
@@ -12,8 +13,12 @@ EMAIL_KEY = os.getenv("EMAIL_KEY")
 #return connection to database
 def connect():
     url = urlparse(DATABASE)
+    hostname = url.hostname
+    if platform.system() == "Windows" and hostname == "10.0.2.2":
+        hostname = "127.0.0.1"
+
     #checks to determine if the destination is a local postgresSQL
-    is_local = url.hostname in ("localhost", "127.0.0.1")
+    is_local = hostname in ("localhost", "127.0.0.1","10.0.2.2")
 
     ssl_code = None
     #if it's not a local hostname, create a ssl to allow connection to remote db
@@ -23,7 +28,7 @@ def connect():
     return pg8000.connect(
         user=url.username,
         password=url.password,
-        host=url.hostname,
+        host=hostname,
         port=url.port or 5432,
         database=url.path[1:],
         ssl_context=ssl_code,

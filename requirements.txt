@@ -11,3 +11,5 @@ plyer
 flet_permission_handler
 resend
 pg8000
+selenium
+Appium-Python-Client
