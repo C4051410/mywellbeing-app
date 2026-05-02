@@ -1,4 +1,5 @@
 import os
+import time
 from pathlib import Path
 import bcrypt
 import pytest
@@ -125,3 +126,102 @@ def test_e2e(driver,seed_test_user):
     assert wait.until(
         EC.presence_of_element_located((AppiumBy.ACCESSIBILITY_ID, "Welcome NewUser!"))
     )
+    """
+        Check that a user can log an activity by accessing the activities page
+    """
+    #find and click the activities option on the navbar
+    activities_navbar = driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="Activities")
+    activities_navbar.click()
+    #check for an element only on activities
+    assert wait.until(
+        EC.presence_of_element_located((AppiumBy.ACCESSIBILITY_ID,"THIS WEEK'S TOTALS"))
+    )
+    #find and click the new activities button
+    new_activity = driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="New Activity")
+    new_activity.click()
+    #check that start button appears
+    assert wait.until(
+        EC.presence_of_element_located((AppiumBy.ACCESSIBILITY_ID,"START"))
+    )
+    #find and click the start button
+    start_run = driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="START")
+    start_run.click()
+    #used to click allow location permission when it pops up
+    allow_button_id = "com.android.permissioncontroller:id/permission_allow_foreground_only_button"
+    allow_button = wait.until(EC.element_to_be_clickable((AppiumBy.ID, allow_button_id)))
+    allow_button.click()
+    #wait 5 seconds
+    time.sleep(5)
+    #find and click the stop running button
+    stop_run = driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="PAUSE")
+    stop_run.click()
+    #check resume button appears
+    assert wait.until(
+        EC.presence_of_element_located((AppiumBy.ACCESSIBILITY_ID,"RESUME"))
+    )
+    #find and click finish button
+    finish_run = driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="FINISH")
+    finish_run.click()
+    #check that back on activities page it shows the new run log
+    assert wait.until(
+        EC.presence_of_element_located((AppiumBy.XPATH, "//*[contains(@content-desc, 'Run')]"))
+    )
+    time.sleep(7)
+    """
+        Check that a user can log an a nutrition food log by accessing the nutrition page
+    """
+    #find the nutrition option on the navbar and click it
+    nutrition_navbar = driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="Nutrition")
+    nutrition_navbar.click()
+    #check activities page appears by checking for calories in page
+    assert wait.until(
+        EC.presence_of_element_located((AppiumBy.ACCESSIBILITY_ID,"Calories"))
+    )
+    #find and click the enter food button
+    add_food = driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="Enter A Food")
+    add_food.click()
+    #find the enter value button and click it
+    food_name = wait.until(EC.presence_of_element_located(
+        (AppiumBy.XPATH, "//android.widget.EditText[1]")
+    ))
+    food_name.click()
+    #enter apple, this should auto fill the rest of the values
+    food_name.send_keys("Apple")
+    #finds and clicks the mealtype option
+    mealtype = wait.until(EC.presence_of_element_located(
+        (AppiumBy.XPATH, "//android.widget.Button[2]")
+    ))
+    mealtype.click()
+    #find the snack option and click it
+    snack = driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="Snack")
+    snack.click()
+    time.sleep(2)
+    #find and click the food log button and click it
+    save_food = driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="LOG FOOD")
+    save_food.click()
+    #make sure the food log appears back on the nutrition page
+    assert wait.until(
+        EC.presence_of_element_located((AppiumBy.XPATH, "//*[contains(@content-desc, 'Apple')]"))
+    )
+    time.sleep(7)
+    """
+        Test Social Page loads as intended and displays correct information
+    """
+    #find and click social page button on navbar
+    social_navbar = driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="Social")
+    social_navbar.click()
+    #check that social page has loaded properly
+    assert wait.until(
+        EC.presence_of_element_located((AppiumBy.ACCESSIBILITY_ID, "Track progress with friends"))
+    )
+    """
+        Test Settings page loads as intended and displays correct information
+    """
+    #find and click the settings navbar button
+    settings_navbar = driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="Settings")
+    settings_navbar.click()
+    #check that the Manage Account and Goals button Appears
+    assert wait.until(
+        EC.presence_of_element_located((AppiumBy.ACCESSIBILITY_ID, "Manage Account & Goals"))
+    )
+
