@@ -43,6 +43,7 @@ def seed_test_user():
     try:
         #try and delete user if it exists
         cur.execute("DELETE FROM users WHERE email = %s", ("newuser@gmail.com",))
+        cur.execute("DELETE FROM users WHERE email = %s", ("NewUserEmail@email.com",))
         conn.commit()
         #insert the new user into DB
         cur.execute(
@@ -72,6 +73,8 @@ def seed_test_user():
             #try and reset the tables
             cur.execute("TRUNCATE TABLE users RESTART IDENTITY CASCADE")
             cur.execute("TRUNCATE TABLE user_stats RESTART IDENTITY CASCADE")
+            cur.execute("TRUNCATE TABLE foodlog RESTART IDENTITY CASCADE")
+            cur.execute("TRUNCATE TABLE workouts RESTART IDENTITY CASCADE")
             conn.commit()
         except:
             pass
@@ -86,7 +89,7 @@ def test_app_open(driver):
 
 
 
-def test_e2e(driver,seed_test_user):
+def test_e2e_login(driver,seed_test_user):
     """
         End 2 End Test: Check that the front end can properly operate with the backend
     """
@@ -225,3 +228,98 @@ def test_e2e(driver,seed_test_user):
         EC.presence_of_element_located((AppiumBy.ACCESSIBILITY_ID, "Manage Account & Goals"))
     )
 
+def test_e2e_register(driver,seed_test_user):
+    """
+        End 2 End Test: Specifically Tests the Register and Setup Pages
+    """
+    """
+        Checks that you can register account on register page
+    """
+    #sets the wait time for the pages
+    wait = WebDriverWait(driver, 10)
+    #gets the username field and enter the username
+    username_field = wait.until(EC.presence_of_element_located(
+        (AppiumBy.XPATH, "//android.widget.EditText[1]")
+    ))
+    username_field.click()
+    username_field.send_keys("NewUser1")
+    #gets the email field and enter the email
+    email_field = wait.until(EC.presence_of_element_located(
+        (AppiumBy.XPATH, "//android.widget.EditText[2]")
+    ))
+    email_field.click()
+    email_field.send_keys("NewUserEmail@email.com")
+    #gets the password field and enter the password
+    password_field = wait.until(EC.presence_of_element_located(
+        (AppiumBy.XPATH, "//android.widget.EditText[3]")
+    ))
+    password_field.click()
+    password_field.send_keys("Password1!")
+    #find the register button and click it
+    login_btn = driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="Register")
+    login_btn.click()
+    #check that they have gone to the register page
+    assert wait.until(
+        EC.presence_of_element_located((AppiumBy.ACCESSIBILITY_ID, "Set Up Your Profile"))
+    )
+    """
+        Check that user can properly setup their account
+    """
+    #Repeat for all fields, get field, enter value or click on dropdown option
+    age_field = wait.until(EC.presence_of_element_located(
+        (AppiumBy.XPATH, "//android.widget.EditText[1]")
+    ))
+    age_field.click()
+    age_field.send_keys("20")
+    gender_field = wait.until(EC.presence_of_element_located(
+        (AppiumBy.XPATH, "//android.widget.Button[1]")
+    ))
+    gender_field.click()
+    male = driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="Male")
+    male.click()
+    height_field = wait.until(EC.presence_of_element_located(
+        (AppiumBy.XPATH, "//android.widget.EditText[2]")
+    ))
+    height_field.click()
+    height_field.send_keys("185")
+    current_field = wait.until(EC.presence_of_element_located(
+        (AppiumBy.XPATH, "//android.widget.EditText[3]")
+    ))
+    current_field.click()
+    current_field.send_keys("80")
+    target_field = wait.until(EC.presence_of_element_located(
+        (AppiumBy.XPATH, "//android.widget.EditText[4]")
+    ))
+    target_field.click()
+    target_field.send_keys("70")
+    salts_field = wait.until(EC.presence_of_element_located(
+        (AppiumBy.XPATH, "//android.widget.EditText[5]")
+    ))
+    salts_field.click()
+    salts_field.send_keys("0.5")
+    protein_field = wait.until(EC.presence_of_element_located(
+        (AppiumBy.XPATH, "//android.widget.EditText[6]")
+    ))
+    protein_field.click()
+    protein_field.send_keys("20")
+    water_field = wait.until(EC.presence_of_element_located(
+        (AppiumBy.XPATH, "//android.widget.EditText[7]")
+    ))
+    water_field.click()
+    water_field.send_keys("1000")
+    exercise_field = wait.until(EC.presence_of_element_located(
+        (AppiumBy.XPATH, "//android.widget.Button[2]")
+    ))
+    exercise_field.click()
+    light_exercise = driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="Light: exercise 1-3 times/week")
+    light_exercise.click()
+    #used to scroll down page so they can reach button
+    driver.find_element(AppiumBy.ANDROID_UIAUTOMATOR,
+                        'new UiScrollable(new UiSelector().scrollable(true)).scrollToEnd(10)')
+    #find and click button
+    finish_btn = driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="Continue")
+    finish_btn.click()
+    #check that on completion they are sent to home page
+    assert wait.until(
+        EC.presence_of_element_located((AppiumBy.ACCESSIBILITY_ID, "Welcome NewUser1!"))
+    )
