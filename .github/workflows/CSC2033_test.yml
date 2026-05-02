@@ -98,6 +98,10 @@ jobs:
         run: |
           pytest src/tests/integration
   e2e-test:
+    #This stops the e2e test running, as it takes too long and isn't practical
+    #This is due to the fact the test has to download the apk, along with flutter
+    #appium etc. which results in 15+ minute tests, which is unpractical for GitHub Actions
+    if: false
     needs: integration-test
     runs-on: ubuntu-latest
     services:
@@ -173,5 +177,4 @@ jobs:
             
             # Run the E2E tests
             pytest src/tests/e2e/test_e2e_appium.py
-        
           
