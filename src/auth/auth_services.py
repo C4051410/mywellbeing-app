@@ -8,6 +8,8 @@ from plyer import notification
 from auth.login import login, get_user_setup,get_last_email,commit_last_email
 from auth.register import register, get_existing_user, commit_setup
 from database.connection import email_key
+from settings.settings_services import retrieve_notification_status
+
 current_dir = os.path.dirname(__file__)
 #gets API key
 resend.api_key = email_key()
@@ -30,15 +32,16 @@ def login_user(email, password):
     #check password matches
     if not bcrypt.checkpw(password.encode(), stored_password):
         return False, "Invalid Password"
-    #tries to send email
-    try:
-        notification.notify(
-            title="Login Successful",
-            message=f"Welcome Back {user[1]}",
-            app_name="MyWellBeing",
-        )
-    except Exception as e:
-        pass
+    #checks whether user has notifications enabled before trying to send notification
+    if retrieve_notification_status(user[0]):
+        try:
+            notification.notify(
+                title="Login Successful",
+                message=f"Welcome Back {user[1]}",
+                app_name="MyWellBeing",
+            )
+        except Exception as e:
+            pass
     #return true with user data
     return True,user
 
@@ -70,7 +73,6 @@ def register_user(username,email, password):
         return False, "Email Already Exists"
     #register user
     user_id = register(username, email, password)
-    #try and send email
     try:
         notification.notify(
             title="Registration Successful",
@@ -157,21 +159,21 @@ def refresh_inactivity_timer(user_id,username):
             resend.Emails.cancel(old_email_id)
         except Exception:
             pass
+    if retrieve_notification_status(user_id):
+        try:
+            template_path = os.path.join(current_dir, "reminder.html")
+            html_body = load_template(template_path, username)
+            test_email = "m.austoni2@newcastle.ac.uk"
+            #send to user in 20 hours time
+            sent_email = resend.Emails.send({
+                "from": "MyWellBeing <reminders@resend.dev>",
+                "to": test_email,
+                "subject": "We miss you!",
+                "html":html_body,
+                "scheduled_at": "in 20 hours",
+            })
+            #store the last email id in the db
+            commit_last_email(user_id, sent_email["id"])
 
-    try:
-        template_path = os.path.join(current_dir, "reminder.html")
-        html_body = load_template(template_path, username)
-        test_email = "m.austoni2@newcastle.ac.uk"
-        #send to user in 20 hours time
-        sent_email = resend.Emails.send({
-            "from": "MyWellBeing <reminders@resend.dev>",
-            "to": test_email,
-            "subject": "We miss you!",
-            "html":html_body,
-            "scheduled_at": "in 20 hours",
-        })
-        #store the last email id in the db
-        commit_last_email(user_id, sent_email["id"])
-
-    except Exception as e:
-        print(f"Error scheduling email: {e}")
+        except Exception as e:
+            print(f"Error scheduling email: {e}")

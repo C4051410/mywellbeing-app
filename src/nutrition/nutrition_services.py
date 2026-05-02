@@ -5,6 +5,8 @@ from plyer import notification
 
 from nutrition.nutrition_queries import get_foodlog, get_waterlog, commit_foodlog, commit_waterlog, \
     get_daily_stats, get_user_goals
+from settings.settings_services import retrieve_notification_status
+
 
 #retrieves recent foodlogs
 def retrieve_foodlogs(user_id):
@@ -61,17 +63,18 @@ def save_foodlog(food, calories, salts, proteins,date,mealtype,user_id):
         return False, str(e)
     #food is safe to enter so commits to db
     commit_foodlog(food,calories,salts,proteins,date,mealtype,user_id)
-    #try and send notification
-    try:
-        notification.notify(
-            title="Food Log Logged",
-            message=f"{food} Recorded",
-            app_name="MyWellBeing"
-        )
-    except Exception as e:
-        #print if error arises
-        print(e)
-    # returns True and Success message
+    #checks if notifications are enabled, then tries to send one
+    if retrieve_notification_status(user_id):
+        try:
+            notification.notify(
+                title="Food Log Logged",
+                message=f"{food} Recorded",
+                app_name="MyWellBeing"
+            )
+        except Exception as e:
+            #print if error arises
+            print(e)
+        # returns True and Success message
     return True, "Successful"
 
 #same as above but for water
@@ -84,14 +87,16 @@ def save_waterlog(water,date,user_id):
     except Exception as e:
         return False, str(e)
     commit_waterlog(water,date,user_id)
-    try:
-        notification.notify(
-            title="Water Logged",
-            message=f"{water}ml Recorded",
-            app_name="MyWellBeing"
-        )
-    except Exception as e:
-        print(e)
+    #checks if notifications are enabled and then tries to send
+    if retrieve_notification_status(user_id):
+        try:
+            notification.notify(
+                title="Water Logged",
+                message=f"{water}ml Recorded",
+                app_name="MyWellBeing"
+            )
+        except Exception as e:
+            print(e)
     return True, "Successful"
 
 #used to retrieve daily stats
