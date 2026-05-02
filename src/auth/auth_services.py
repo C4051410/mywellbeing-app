@@ -46,7 +46,9 @@ def register_user(username,email, password):
     #checks all fields have been entered
     if not all([username,email, password]):
         return False, "Please Enter All Fields"
-    email = email.lower()
+    username.isspace()
+    if " " in username:
+        return False, "Username must not contain space"
     #check email is correct format
     email_regex = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
     if not re.match(email_regex, email):
@@ -55,7 +57,7 @@ def register_user(username,email, password):
     if len(password) < 8:
         return False, "Password must be at least 8 characters long"
     password_regex = r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$"
-    #check password contains at least 1 uppercase, lowercase, number, and special character
+    #check password contains at least 1 uppercase, lowercase, number, and special character, also prevents white space
     if not re.search(password_regex, password):
         return False, "Password must at least one uppercase letter, one lowercase letter, one number and one special character"
     #checks for existing users
