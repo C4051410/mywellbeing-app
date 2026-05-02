@@ -36,6 +36,8 @@ jobs:
           pip install -r requirements.txt
       #runs the units tests
       - name: "Run Unit Tests"
+        env:
+          PYTHONPATH: ${{ github.workspace }}/src
         run: |
           pytest src/tests/unit
   ##Integration Tests##
