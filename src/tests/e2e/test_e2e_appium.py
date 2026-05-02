@@ -1,6 +1,12 @@
+import os
+
+import bcrypt
 import pytest
 from appium import webdriver
 from appium.options.android import UiAutomator2Options
+
+from database.connection import connect
+
 
 @pytest.fixture
 def driver():
@@ -8,12 +14,44 @@ def driver():
     options.platform_name = "Android"
     options.device_name = "emulator-5554"
     options.automation_name = "UiAutomator2"
-    options.app = "E:/Pycharm_Projects/CSC2033-Project/build/apk/mywellbeing.apk"
+    apk_path = os.getenv("APK_PATH", "build/apk/mywellbeing.apk")
+    options.app = os.path.abspath(apk_path)
     driver = webdriver.Remote("http://127.0.0.1:4723", options=options)
     yield driver
     driver.quit()
 
-def test_app_open(driver):
+
+@pytest.fixture
+def seed_test_user():
+    conn = connect()
+    cur = conn.cursor()
+    password = "Password1!"
+    hashed_password = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt(12)).decode("utf-8")
+    # Ensure the user doesn't already exist to avoid "Duplicate Key" errors
+    cur.execute("DELETE FROM users WHERE email = %s", ("newuser@gmail.com",))
+    conn.commit()
+    cur.execute(
+        "INSERT INTO users (username, email, password) VALUES (%s, %s, %s)",
+        ("NewUser", "newuser@gmail.com", hashed_password)
+    )
+    conn.commit()
+    # Inside seed_test_user fixture after the user insert:
+    cur.execute("SELECT id FROM users WHERE email = %s", ("newuser@gmail.com",))
+    user_id = cur.fetchone()[0]
+
+    # Assuming your table is called 'user_setup' or similar
+    cur.execute("""
+            INSERT INTO user_setup (user_id, age, gender, height_cm, current_weight_kg, weight_goal_kg, calorie_goal, salts_goal, protein_goal, water_goal)
+            VALUES (%s, 25, 'Male', 180, 75, 70, 2000, 5, 150, 2000)
+        """, (user_id,))
+    conn.commit()
+    yield
+    cur.execute("DELETE FROM users WHERE email = %s", ("newuser@gmail.com",))
+    conn.commit()
+    cur.close()
+    conn.close()
+
+def test_app_open(driver, seed_test_user):
     assert driver.current_package is not None
 
 
@@ -21,7 +59,7 @@ from appium.webdriver.common.appiumby import AppiumBy
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-def test_login_interaction(driver):
+def test_login_interaction(driver,seed_test_user):
     # Set a 10-second wait limit
     wait = WebDriverWait(driver, 10)
 
