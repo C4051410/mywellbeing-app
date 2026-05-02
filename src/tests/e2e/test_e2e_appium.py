@@ -85,9 +85,11 @@ def test_app_open(driver):
 
 
 
-def test_login_interaction(driver,seed_test_user):
+def test_e2e(driver,seed_test_user):
     """
         End 2 End Test: Check that the front end can properly operate with the backend
+    """
+    """
         Check that a user can log in using the front end objects and make it to the homepage
     """
     # Set a 10-second wait limit to allow for delays in loading
