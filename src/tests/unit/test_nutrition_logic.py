@@ -34,7 +34,7 @@ class TestFoodSearch:
 #patches certain functions to block/give mock results,
 @patch("nutrition.nutrition_services.commit_foodlog")
 @patch("nutrition.nutrition_services.notification")
-@patch("auth.auth_services.retrieve_notification_status")
+@patch("nutrition.nutrition_services.retrieve_notification_status")
 class TestSaveFoodLog:
     """
     UNIT TESTS: Validates input sanitization for food logging.

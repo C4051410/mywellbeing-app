@@ -12,7 +12,7 @@ class TestActivityLogging:
 
     @patch("activities.activities_services.commit_activity")
     @patch("activities.activities_services.notification")
-    @patch("auth.auth_services.retrieve_notification_status")
+    @patch("activities.activities_services.retrieve_notification_status")
     def test_save_activity_success(self,mock_status, mock_notify, mock_commit):
         mock_status.return_value = True
         valid_date = datetime.now() - timedelta(hours=1)
@@ -57,7 +57,7 @@ class TestPastActivityLogging:
 
     @patch("activities.activities_services.commit_past_activity")
     @patch("activities.activities_services.notification")
-    @patch("auth.auth_services.retrieve_notification_status")
+    @patch("activities.activities_services.retrieve_notification_status")
     def test_save_past_activity_success(self,mock_status, mock_notify, mock_commit):
         mock_status.return_value = True
         #tests a valid save past activity
