@@ -52,3 +52,20 @@ def commit_update_goals(user_id, calorie_goal,water_goal):
         conn.rollback()
         print(e)
         conn.close()
+
+
+def delete_user_account_db(user_id):
+    conn = connect()
+    cur = conn.cursor()
+    try:
+        cur.execute("DELETE FROM users WHERE id = %s", (user_id,))
+        conn.commit()
+        return True
+    except Exception as e:
+        conn.rollback()
+        print(e)
+        return str(e)
+    finally:
+        cur.close()
+        conn.close()
+

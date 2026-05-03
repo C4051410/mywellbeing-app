@@ -2,7 +2,7 @@ import re
 
 import bcrypt
 
-from settings.settings_queries import commit_update_password, retrieve_current_password, commit_update_goals
+from settings.settings_queries import commit_update_password, retrieve_current_password, commit_update_goals, delete_user_account_db
 
 
 #used to check password is okay to update
@@ -47,3 +47,20 @@ def update_goals(user_id, calorie_goal,water_goal):
     commit_update_goals(user_id,calorie_goal,water_goal)
     #return true
     return True, "Goals Updated"
+
+def delete_account(user_id):
+    # Validates ID integrity before dropping an account
+    if not user_id:
+        return False, "Invalid User Id"
+    try:
+        if int(user_id) < 0:
+            return False, "Invalid User Id"
+    except ValueError:
+        return False, "Invalid Value"
+
+    result = delete_user_account_db(user_id)
+
+    if result is True:
+        return True, "Account Deleted Successfully"
+    else:
+        return False, "Failed to Delete Account"
