@@ -112,25 +112,6 @@ class AccountSettingsPage(ft.Column):
             self.page.update()
             return
 
-    def handle_delete_account(self, e):
-        success, message = update_goals(self.user_id, self.cal_goal.value, self.water_goal.value)
-        if success is True:
-            self.page.overlay.append(ft.SnackBar(
-                content=ft.Text("Goals Updated"),
-                bgcolor=ft.Colors.GREEN_400,
-                open=True
-            ))
-            self.page.update()
-            return
-        else:
-            self.page.overlay.append(ft.SnackBar(
-                content=ft.Text(message),
-                bgcolor=ft.Colors.RED_400,
-                open=True
-            ))
-            self.page.update()
-            return
-
     def confirm_delete_account(self, e):
         self.dlg = ft.AlertDialog(
             title=ft.Text("Delete Account"),
