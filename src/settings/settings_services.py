@@ -1,11 +1,12 @@
+import os
 import re
 
 import bcrypt
 
 from settings.settings_queries import commit_update_password, retrieve_current_password, commit_update_goals, \
     get_notification_status, commit_notification_status, delete_user_account_db
-
-
+import resend
+current_dir = os.path.dirname(__file__)
 #used to check password is okay to update
 def update_password(user_id,current_password, new_password,confirm_password):
     #makes sure all fields are returned
@@ -90,8 +91,25 @@ def delete_account(user_id):
         return False, "Invalid Value"
 
     result = delete_user_account_db(user_id)
-
     if result is True:
+        #try and send account deletion email
+        try:
+            #uses this email due to API costs, would be changed on deployment
+            email = "m.austoni2@newcastle.ac.uk"
+            #get the email content from the directory
+            template_path = os.path.join(current_dir, "goodbye.html")
+            with open(template_path) as file:
+                content = file.read()
+            html_body = content
+            #send the email using Resend API
+            resend.Emails.send({
+                "from": "MyWellBeing <reminder@resend.dev>",
+                "to": email,
+                "subject": "Were Sorry to See You Leave",
+                "html": html_body,
+            })
+        except Exception as e:
+            print(e)
         return True, "Account Deleted Successfully"
     else:
         return False, "Failed to Delete Account"

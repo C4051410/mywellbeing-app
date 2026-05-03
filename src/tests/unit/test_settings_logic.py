@@ -4,7 +4,7 @@ import bcrypt
 import pytest
 
 from settings.settings_services import update_password, update_goals, retrieve_notification_status, \
-    update_notification_status
+    update_notification_status, delete_account
 
 
 #used to prevent functions within which could cause errors
@@ -171,6 +171,30 @@ class TestNotificationStatus():
         assert success == False
         success = update_notification_status("User",True)
         assert success == False
+
+@patch('settings.settings_services.delete_user_account_db')
+class TestDeleteUserAccount():
+    def test_valid_delete(self,mock_delete_user_account):
+        #check for when the account is deleted successfully
+        mock_delete_user_account.return_value = True
+        success, message = delete_account(1)
+        assert success == True
+        assert message == "Account Deleted Successfully"
+    def test_invalid_delete(self,mock_delete_user_account):
+        #check that user id has to be vali
+        mock_delete_user_account.return_value = True
+        success,message = delete_account(-1)
+        assert success == False
+        assert message == "Invalid User Id"
+        success,message = delete_account("User")
+        assert success == False
+        assert message == "Invalid Value"
+        #check for when there is an issue with DB
+        mock_delete_user_account.return_value = False
+        success,message = delete_account(1)
+        assert success == False
+        assert message == "Failed to Delete Account"
+
 
 
 
