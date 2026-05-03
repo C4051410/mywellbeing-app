@@ -12,14 +12,11 @@ from social.social_queries import (
     get_friends,
     like_target,
     unlike_target,
-    has_user_liked,
-    count_likes,
     add_comment,
-    count_comments,
     get_comments,
     delete_comment,
     get_social_feed,
-    get_leaderboard
+    get_leaderboard, get_interaction_stats
 )
 
 # Basic moderation list for comments.
@@ -184,15 +181,21 @@ def get_social_overview(user_id):
         if row[0] == user_id:
             current_rank = index + 1
             current_points = row[2]
+
+    #get all ids the activities from activity_rows
+    target_ids = [row[4] for row in activity_rows]
+    #retrieve all the stats for each activity and produces a dictionary
+    stats = get_interaction_stats(user_id, target_ids) if target_ids else {}
+
     activity = []
-
-    # Format activity rows
     for row in activity_rows:
-        activity_type = row[0]
+        #retrieves the target id of activity
         target_id = row[4]
-
+        #retrieves the stats of the post or fallback to default
+        post_stats = stats.get(target_id, {"like_count": 0, "liked_by_user": False, "comment_count": 0})
+        # adds activity to list
         activity.append({
-            "activity_type": activity_type,
+            "activity_type": row[0],
             "username": row[1],
             "title": row[2],
             "calories": row[3],
@@ -200,10 +203,11 @@ def get_social_overview(user_id):
             "owner_user_id": row[5],
             "duration_seconds": row[6],
             "start_date": row[7],
-            "like_count": count_likes(activity_type, target_id),
-            "liked_by_user": has_user_liked(user_id, activity_type, target_id),
-            "comment_count": count_comments(activity_type, target_id)
+            "like_count": post_stats["like_count"],
+            "liked_by_user": post_stats["liked_by_user"],
+            "comment_count": post_stats["comment_count"]
         })
+        #return rank, leaderboard top 3 and activities
     return {
         "rank": {
             "position": current_rank,

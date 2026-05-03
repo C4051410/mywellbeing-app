@@ -187,41 +187,49 @@ def unlike_target(user_id, target_type, target_id):
         cur.close()
         conn.close()
 
-def has_user_liked(user_id, target_type, target_id):
-    """
-    Return True if the user has liked the target.
-    """
-    conn = connect()
-    cur = conn.cursor()
-    try:
-        cur.execute(
-            """
-            SELECT 1 FROM social_likes
-            WHERE user_id = %s AND target_type = %s AND target_id = %s
-            LIMIT 1
-            """,
-            (user_id, target_type, target_id)
-        )
-        return cur.fetchone() is not None
-    finally:
-        cur.close()
-        conn.close()
 
-def count_likes(target_type, target_id):
+
+def get_interaction_stats(user_id, target_ids, target_type="workout"):
     """
-    Return the number of likes for one target.
+    Fetch like counts, user-liked status, and comment counts
     """
+    if not target_ids:
+        return {}
+
     conn = connect()
     cur = conn.cursor()
     try:
+        """
+            Crates a table of posts that displays the posts likes, comments
+            and whether the user has liked the post
+        """
         cur.execute(
             """
-            SELECT COUNT(*) FROM social_likes
-            WHERE target_type = %s AND target_id = %s
+            SELECT
+                t.target_id,
+                COUNT(DISTINCT l.id) AS like_count,
+                BOOL_OR(l.user_id = %s)  AS liked_by_user,
+                COUNT(DISTINCT c.id)  AS comment_count
+            FROM unnest(%s::int[]) AS t(target_id)
+            LEFT JOIN social_likes    l ON l.target_type = %s AND l.target_id = t.target_id
+            LEFT JOIN social_comments c ON c.target_type = %s AND c.target_id = t.target_id
+            GROUP BY t.target_id
             """,
-            (target_type, target_id)
+            (user_id, target_ids, target_type, target_type)
         )
-        return cur.fetchone()[0]
+        rows = cur.fetchall()
+        #converts the rows into a dictionary and returns it
+        return {
+            row[0]: {
+                "like_count":     int(row[1]),
+                "liked_by_user":  bool(row[2]),
+                "comment_count":  int(row[3])
+            }
+            #goes through each row
+            for row in rows
+        }
+    except Exception as e:
+        print(e)
     finally:
         cur.close()
         conn.close()
@@ -250,24 +258,6 @@ def add_comment(user_id, target_type, target_id, content):
         cur.close()
         conn.close()
 
-def count_comments(target_type, target_id):
-    """
-    Return the number of comments for one target.
-    """
-    conn = connect()
-    cur = conn.cursor()
-    try:
-        cur.execute(
-            """
-            SELECT COUNT(*) FROM social_comments
-            WHERE target_type = %s AND target_id = %s
-            """,
-            (target_type, target_id)
-        )
-        return cur.fetchone()[0]
-    finally:
-        cur.close()
-        conn.close()
 
 def get_comments(target_type, target_id):
     """
