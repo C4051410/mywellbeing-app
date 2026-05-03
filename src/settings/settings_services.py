@@ -92,12 +92,16 @@ def delete_account(user_id):
 
     result = delete_user_account_db(user_id)
     if result is True:
+        #try and send account deletion email
         try:
+            #uses this email due to API costs, would be changed on deployment
             email = "m.austoni2@newcastle.ac.uk"
+            #get the email content from the directory
             template_path = os.path.join(current_dir, "goodbye.html")
             with open(template_path) as file:
                 content = file.read()
             html_body = content
+            #send the email using Resend API
             resend.Emails.send({
                 "from": "MyWellBeing <reminder@resend.dev>",
                 "to": email,
