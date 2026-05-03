@@ -3,6 +3,7 @@ from datetime import datetime
 from plyer import notification
 
 from activities.activity_queries import commit_activity, commit_past_activity, get_activities
+from settings.settings_services import retrieve_notification_status
 
 
 def save_activity(user_id,activity_type,distance_km,duration_seconds,start_date):
@@ -31,15 +32,16 @@ def save_activity(user_id,activity_type,distance_km,duration_seconds,start_date)
         return False
     #commit activity to database
     commit_activity(user_id,activity_type,distance_km,duration_seconds,start_date)
-    #try and send a notification
-    try:
-        notification.notify(
-            title="Activity Recorded Logged",
-            message=f"{activity_type} Recorded",
-            app_name="MyWellBeing"
-        )
-    except Exception as e:
-        print(e)
+    #check if notifications are enabled and tries to send if true
+    if retrieve_notification_status(user_id):
+        try:
+            notification.notify(
+                title="Activity Recorded Logged",
+                message=f"{activity_type} Recorded",
+                app_name="MyWellBeing"
+            )
+        except Exception as e:
+            print(e)
     return True
 
 def save_past_activity(user_id, title,calories,duration_seconds,reps,distance,start_date):
@@ -69,15 +71,16 @@ def save_past_activity(user_id, title,calories,duration_seconds,reps,distance,st
         return False
     #commits activity
     commit_past_activity(user_id,title,calories,duration_seconds,reps,distance,start_date)
-    #try and send notification
-    try:
-        notification.notify(
-                title="Activity Recorded Logged",
-                message=f"{title} Recorded",
-                app_name="MyWellBeing"
-        )
-    except Exception as e:
-        print(e)
+    #check if notifications are enabled and tries to send if true
+    if retrieve_notification_status(user_id):
+        try:
+            notification.notify(
+                    title="Activity Recorded Logged",
+                    message=f"{title} Recorded",
+                    app_name="MyWellBeing"
+            )
+        except Exception as e:
+            print(e)
     return True
 
 def retrieve_activities(user_id):

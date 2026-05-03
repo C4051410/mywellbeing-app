@@ -2,7 +2,8 @@ import re
 
 import bcrypt
 
-from settings.settings_queries import commit_update_password, retrieve_current_password, commit_update_goals, delete_user_account_db
+from settings.settings_queries import commit_update_password, retrieve_current_password, commit_update_goals, \
+    get_notification_status, commit_notification_status, delete_user_account_db
 
 
 #used to check password is okay to update
@@ -48,6 +49,36 @@ def update_goals(user_id, calorie_goal,water_goal):
     #return true
     return True, "Goals Updated"
 
+def retrieve_notification_status(user_id):
+    #check that user id is not None or invalid type
+    if not user_id:
+        return False
+    try:
+        if int(user_id) < 0:
+            return False
+    except ValueError:
+        return False
+    #gets the notification status from db
+    status = get_notification_status(user_id)
+    #if it's not None return the status
+    if status:
+        return status
+    else:
+        return False
+
+def update_notification_status(user_id, notification_status):
+    #check that user_id or notification are not None
+    if user_id is None or notification_status is None:
+        return False
+    # check user_id is valid
+    try:
+        if int(user_id) < 0:
+            return False
+    except ValueError:
+        return False
+    #saves updates status to db
+    commit_notification_status(user_id, not notification_status)
+    return True
 def delete_account(user_id):
     # Validates ID integrity before dropping an account
     if not user_id:

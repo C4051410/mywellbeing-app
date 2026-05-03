@@ -11,6 +11,7 @@ from auth.auth_services import login_user, register_user, check_setup_complete, 
 """
 @patch('auth.auth_services.login')
 @patch('auth.auth_services.notification')
+@patch("auth.auth_services.retrieve_notification_status")
 class TestLogin():
     #create valid variables to be used throught
     email = 'testingemail@outlook.com'
@@ -18,22 +19,23 @@ class TestLogin():
     hashed_password = bcrypt.hashpw(password.encode("utf-8"),
                       bcrypt.gensalt(12)).decode("utf-8")
     user = (1,'TestUser','testingemail@outlook.com',hashed_password)
-    def test_valid_login(self,mock_notification, mock_login):
+    def test_valid_login(self,mock_status,mock_notification, mock_login):
         #mock return to be user
         mock_login.return_value = self.user
+        mock_status.return_value = True
         success,message = login_user(self.email,self.password)
         #check success is True and message is correct
         assert success is True
         assert message == self.user
 
-    def test_missing_fields(self,mock_notification, mock_login):
+    def test_missing_fields(self,mock_status,mock_notification, mock_login):
         mock_login.return_value = self.user
         #check when fields are empty/none
         success,message = login_user(None,None)
         assert success is False
         assert message == 'Please Enter All Fields'
 
-    def test_invalid_email(self,mock_notification, mock_login):
+    def test_invalid_email(self,mock_status,mock_notification, mock_login):
         #checks that invalid emails do not pass
         mock_login.return_value = self.user
         success,message = login_user("emailgmail.com",self.password)
@@ -42,13 +44,13 @@ class TestLogin():
         success,message = login_user("email@gmail.c",self.password)
         assert success is False
         assert message == 'Invalid Email'
-    def test_user_not_found(self,mock_notification, mock_login):
+    def test_user_not_found(self,mock_status,mock_notification, mock_login):
         #checks that is user not found returns false with message
         mock_login.return_value = ()
         success,message = login_user(self.email,self.password)
         assert success is False
         assert message == 'User Not Found'
-    def test_incorrect_password(self,mock_notification, mock_login):
+    def test_incorrect_password(self,mock_status,mock_notification, mock_login):
         mock_login.return_value = self.user
         success,message = login_user(self.email,"WrongPassword1")
         assert success is False

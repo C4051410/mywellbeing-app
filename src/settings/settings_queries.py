@@ -53,6 +53,42 @@ def commit_update_goals(user_id, calorie_goal,water_goal):
         print(e)
         conn.close()
 
+def get_notification_status(user_id):
+    #connect to database
+    conn = connect()
+    cur = conn.cursor()
+    try:
+        #try adn retrieve the status from the users_id
+        cur.execute("SELECT notification_status FROM users WHERE id = %s", (user_id,))
+        row = cur.fetchone()
+        cur.close()
+        conn.close()
+        #check it's not None
+        if row is None:
+            return True
+        else:
+            return row[0]
+    #used if their was an issue with connection
+    except Exception as e:
+        print(e)
+        conn.close()
+        return True
+
+def commit_notification_status(user_id, notification_status):
+    #connect to database
+    conn = connect()
+    cur = conn.cursor()
+    try:
+        #try and update the notification status of the user_id with new notification status
+        cur.execute("UPDATE users SET notification_status = %s WHERE id = %s", (notification_status,user_id))
+        conn.commit()
+        cur.close()
+        conn.close()
+    #used if there is an issue with the connection
+    except Exception as e:
+        conn.rollback()
+        print(e)
+        conn.close()
 
 def delete_user_account_db(user_id):
     conn = connect()

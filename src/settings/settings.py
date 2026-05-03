@@ -3,10 +3,11 @@ File for settings page - accessible by clicking 'settings' on nav bar
 '''
 
 import flet as ft
-
+import platform
 from components.userpfp import Userpfp
 from components.bottom_nav import NavBar
 from components.responsive import Responsive
+from settings.settings_services import retrieve_notification_status, update_notification_status
 
 #Sizes of all elements on homepage (as a percent of screen)
 page_title_size = 0.1
@@ -16,11 +17,12 @@ account_v_size = 0.25
 target_v_size = 0.25
 
 class SettingsPage(ft.Column):
-    def __init__(self, page: ft.Page):
+    def __init__(self, page: ft.Page,user_id):
         super().__init__()
 
         self.r = Responsive(page)
-
+        #checks the notification status
+        self.is_enabled = retrieve_notification_status(user_id)
         self.page_title = ft.Text(
             value="Social",
             size=self.r.w(page_title_size),
@@ -47,10 +49,62 @@ class SettingsPage(ft.Column):
             ),
             padding=10
         )
+        #create the notification button
+        self.ntf_btn = ft.ElevatedButton(
+            "Toggle Notifications ",
+            #used to determine appearance based on is enabled
+            icon=ft.Icons.NOTIFICATIONS_OFF if self.is_enabled else ft.Icons.NOTIFICATIONS_ACTIVE,
+            color=ft.Colors.RED if self.is_enabled else ft.Colors.GREEN)
 
-        self.targets_conatiner = ft.Container(
+        # used to open the devices settings to show notifications
+        async def open_device_notification():
+            #used to determine the specific platform
+            system = platform.system()
+            try:
+                if system == "Android":
+                    await self.page.launch_url("app-settings:")
+                elif system == "Windows":
+                    await self.page.launch_url("ms-settings:notifications")
+                elif system == "Darwin":
+                    await self.page.launch_url("app-settings:")
+            except Exception as e:
+                print(e)
+        #used to toggle the notification
+        def toggle_notification(e):
+            #updates the status and flips the status
+            update_notification_status(user_id,self.is_enabled)
+            self.is_enabled = not self.is_enabled
+            #Show turn off notifications
+            if self.is_enabled:
+                self.ntf_btn.icon = ft.Icons.NOTIFICATIONS_OFF
+                self.ntf_btn.color = ft.Colors.RED
+                self.page.overlay.append(ft.SnackBar(
+                    content=ft.Text("Notification Turned On"),
+                    bgcolor=ft.Colors.GREEN_400,
+                    open=True
+                ))
+                #as they have clicked turn on, try and open the notification settings in device
+                self.page.run_task(open_device_notification)
+            else:
+                #else display notification turn on
+                self.ntf_btn.icon = ft.Icons.NOTIFICATIONS_ON
+                self.ntf_btn.color = ft.Colors.GREEN
+                self.page.overlay.append(ft.SnackBar(
+                    content=ft.Text("Notification Turned Off"),
+                    bgcolor=ft.Colors.RED_400,
+                    open=True
+                ))
+            #updates page and button
+            self.page.update()
+            self.ntf_btn.update()
+        #sets notification button to work when clicked
+        self.ntf_btn.on_click=toggle_notification
+        #add button to container
+        self.notification_container = ft.Container(
             border=ft.Border.all(width=2, color=ft.Colors.GREY_400),
-        )
+            alignment=ft.Alignment.CENTER,
+            content=self.ntf_btn,
+            )
 
         self.userpfp = Userpfp(page)
 
@@ -72,7 +126,7 @@ class SettingsPage(ft.Column):
             ),
             self.user_info_container,
             self.account_container,
-            self.targets_conatiner,
+            self.notification_container,
             self.nav_bar
         ]
 
@@ -92,7 +146,7 @@ class SettingsPage(ft.Column):
     def set_widget_size(self):
         self.user_info_container.height = self.r.h(user_info_v_size)
         self.account_container.height = self.r.h(account_v_size)
-        self.targets_conatiner.height = self.r.h(target_v_size)
+        self.notification_container.height = self.r.h(target_v_size)
 
     def resize(self,e ):
         self.r = Responsive(self.this_page)
@@ -105,7 +159,7 @@ class SettingsPage(ft.Column):
 
         self.update()
 
-def main_settings(page: ft.Page):
-    settings_page = SettingsPage(page)
+def main_settings(page: ft.Page,user_id):
+    settings_page = SettingsPage(page,user_id)
 
     return settings_page

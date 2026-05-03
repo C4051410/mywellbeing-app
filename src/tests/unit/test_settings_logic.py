@@ -3,7 +3,9 @@ from unittest.mock import patch
 import bcrypt
 import pytest
 
-from settings.settings_services import update_password, update_goals
+from settings.settings_services import update_password, update_goals, retrieve_notification_status, \
+    update_notification_status
+
 
 #used to prevent functions within which could cause errors
 @patch('settings.settings_services.retrieve_current_password')
@@ -130,6 +132,45 @@ class TestGoalUpdate():
         success, message = update_goals(1,"Invalid","Invalid")
         assert success == False
         assert message == "Invalid Value"
+
+@patch('settings.settings_services.get_notification_status')
+@patch('settings.settings_services.commit_notification_status')
+class TestNotificationStatus():
+    #check that it works when intended
+    def test_valid_retrieve(self,mock_commit,mock_notification_status):
+        #used to mock successful response
+        mock_notification_status.return_value = True
+        success = retrieve_notification_status(1)
+        #check it returns true
+        assert success == True
+    #check that it doesn't allow for invalid responses
+    def test_invalid_retrieve(self,mock_commit,mock_notification_status):
+        #check None returns false
+        mock_notification_status.return_value = None
+        success = retrieve_notification_status(1)
+        assert success == False
+        #check invalid user_ids are caught and return false
+        success = retrieve_notification_status(-1)
+        assert success == False
+        success = retrieve_notification_status("User")
+        assert success == False
+    #check that update works as intended
+    def test_valid_update(self,mock_commit,mock_notification_status):
+        #check both true and false return True to show successful
+        success = update_notification_status(1,True)
+        assert success == True
+        success = update_notification_status(1,False)
+        assert success == True
+
+    def test_invalid_update(self,mock_commit,mock_notification_status):
+        #Check None is rejected
+        success = update_notification_status(1,None)
+        assert success == False
+        #check user_id is valid
+        success = update_notification_status(-1,True)
+        assert success == False
+        success = update_notification_status("User",True)
+        assert success == False
 
 
 
