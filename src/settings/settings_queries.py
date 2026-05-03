@@ -61,7 +61,10 @@ def get_notification_status(user_id):
         row = cur.fetchone()
         cur.close()
         conn.close()
-        return row[0]
+        if row is None:
+            return True
+        else:
+            return row[0]
     except Exception as e:
         print(e)
         conn.close()

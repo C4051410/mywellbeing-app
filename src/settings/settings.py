@@ -3,7 +3,7 @@ File for settings page - accessible by clicking 'settings' on nav bar
 '''
 
 import flet as ft
-
+import platform
 from components.userpfp import Userpfp
 from components.bottom_nav import NavBar
 from components.responsive import Responsive
@@ -52,6 +52,19 @@ class SettingsPage(ft.Column):
             "Toggle Notifications ",
             icon=ft.Icons.NOTIFICATIONS_OFF if self.is_enabled else ft.Icons.NOTIFICATIONS_ACTIVE,
             color=ft.Colors.RED if self.is_enabled else ft.Colors.GREEN)
+
+        async def open_device_notification():
+            system = platform.system()
+            try:
+                if system == "Android":
+                    await self.page.launch_url("app-settings:")
+                elif system == "Windows":
+                    await self.page.launch_url("ms-settings:notifications")
+                elif system == "Darwin":
+                    await self.page.launch_url("app-settings:")
+            except Exception as e:
+                print(e)
+
         def toggle_notification(e):
             update_notification_status(user_id,self.is_enabled)
             self.is_enabled = not self.is_enabled
@@ -63,6 +76,7 @@ class SettingsPage(ft.Column):
                     bgcolor=ft.Colors.GREEN_400,
                     open=True
                 ))
+                self.page.run_task(open_device_notification)
             else:
                 self.ntf_btn.icon = ft.Icons.NOTIFICATIONS_ON
                 self.ntf_btn.color = ft.Colors.GREEN

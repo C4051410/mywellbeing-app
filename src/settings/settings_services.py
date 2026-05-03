@@ -58,7 +58,10 @@ def retrieve_notification_status(user_id):
     except ValueError:
         return False
     status = get_notification_status(user_id)
-    return status
+    if status:
+        return status
+    else:
+        return False
 
 def update_notification_status(user_id, notification_status):
     if user_id is None or notification_status is None:
