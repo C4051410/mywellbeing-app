@@ -4,32 +4,32 @@
 
 **Branching Strategy**
 We adopted as a team a GitHub Flow branching strategy, ensuring the main branch always remained in a stable condition.
-We conducted all development within our own development branch in isolation from main to ensure the main branch never
+We conducted all development within our own development branch in isolation from main to ensure the main branch rarely
 resulted in errors or bugs. Developers should use rebase if their branch falls too much behind the main branch to ensure
-the branch isn't outdated
+the branch isn't outdated.
 
 **Branch Conventions**
 
-"<category-reference-description>"
+"<category-reference-descriptionOfTask>"
 
 
-| Category | When Used                                              |
-|----------|--------------------------------------------------------|
-| feature  | used to implement new functionality                    |
-| bugfix   | used to fix minor errors that occur during production  |
+| Category | When Used                                               |
+|----------|---------------------------------------------------------|
+| feature  | used to implement new functionality                     |
+| bugfix   | used to fix minor errors that occur during production   |
 | hotfix   | used in emergency to fix errors that prevent production |
-| testing  | used when creating tests                               |
+| testing  | used when creating tests                                |
 
 ***
 **Git Commits**
 "<category: description">
 
-| Category | When Used                                        |
-|-------|--------------------------------------------------|
-| feature | when you implement a new functionality           |
-| fix   | when repearing bugs                              |
-| refactor | when changing the structure of the code          |
-| chore | "housekeeping", used when nothing major is chanegd |
+| Category | When Used                                          |
+|----------|----------------------------------------------------|
+| feature  | when you implement a new functionality             |
+| fix      | when repearing bugs                                |
+| refactor | when changing the structure of the code            |
+| chore    | "housekeeping", used when nothing major is chanegd |
 
 ***
 **Pull Requests**

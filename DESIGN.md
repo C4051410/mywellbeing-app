@@ -9,8 +9,14 @@ Logic Tier (Python service functions), and Data Tier ( Database queries in datab
 * The Database and API calls have been encapsulated within the Logic Tier. This means that
 the Front-End never calls directly to either, as it communicates through service modules
 that validate the data and handle errors.
+* The main flet are created using classes, which are then called upon by functions, this is
+done to better control the elements of the page as classes allow us to better separate actions.
 * Common UI components like NavBar or UserPfp have been stored in components/ to stop
 common code being repeated for each page, and that they all have the same logic.
+* When demanded we have split python files relating to the same topic to reduce monolithic file sizes.
+This can be seen in folders like activities, nutrition, settings etc, where pages have been broken down
+into different pages to split the size amongst pages. These smaller pages are not done as classes but rather
+functions which are called within the classes.
 ***
 
 ## Use of Directory and Packages
@@ -28,14 +34,13 @@ allow for easy organization of files
 ├── pyproject.toml        # Stores details like ruff programming style and how the application should be deployed
 ```
 ### File Structure:
-All Program Files are Located in src/
+All Program Files and .env are Located in src/
 
 CI/CD tests are stored in .github/
 
 Screenshots are stored in screenshots/
 
-All .md Files and other non-program files are stored in the project.
-
+Files that dont affect code like .toml and .gitignore remain in project folder
 #### Within src:
 ```
 ├── activities/     # Manages the displayment and creation of activities, including Strava API
