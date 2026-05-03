@@ -21,6 +21,7 @@ class SettingsPage(ft.Column):
         super().__init__()
 
         self.r = Responsive(page)
+        #checks the notification status
         self.is_enabled = retrieve_notification_status(user_id)
         self.page_title = ft.Text(
             value="Social",
@@ -48,12 +49,16 @@ class SettingsPage(ft.Column):
             ),
             padding=10
         )
+        #create the notification button
         self.ntf_btn = ft.ElevatedButton(
             "Toggle Notifications ",
+            #used to determine appearance based on is enabled
             icon=ft.Icons.NOTIFICATIONS_OFF if self.is_enabled else ft.Icons.NOTIFICATIONS_ACTIVE,
             color=ft.Colors.RED if self.is_enabled else ft.Colors.GREEN)
 
+        # used to open the devices settings to show notifications
         async def open_device_notification():
+            #used to determine the specific platform
             system = platform.system()
             try:
                 if system == "Android":
@@ -64,10 +69,12 @@ class SettingsPage(ft.Column):
                     await self.page.launch_url("app-settings:")
             except Exception as e:
                 print(e)
-
+        #used to toggle the notification
         def toggle_notification(e):
+            #updates the status and flips the status
             update_notification_status(user_id,self.is_enabled)
             self.is_enabled = not self.is_enabled
+            #Show turn off notifications
             if self.is_enabled:
                 self.ntf_btn.icon = ft.Icons.NOTIFICATIONS_OFF
                 self.ntf_btn.color = ft.Colors.RED
@@ -76,8 +83,10 @@ class SettingsPage(ft.Column):
                     bgcolor=ft.Colors.GREEN_400,
                     open=True
                 ))
+                #as they have clicked turn on, try and open the notification settings in device
                 self.page.run_task(open_device_notification)
             else:
+                #else display notification turn on
                 self.ntf_btn.icon = ft.Icons.NOTIFICATIONS_ON
                 self.ntf_btn.color = ft.Colors.GREEN
                 self.page.overlay.append(ft.SnackBar(
@@ -85,11 +94,12 @@ class SettingsPage(ft.Column):
                     bgcolor=ft.Colors.RED_400,
                     open=True
                 ))
+            #updates page and button
             self.page.update()
             self.ntf_btn.update()
-
+        #sets notification button to work when clicked
         self.ntf_btn.on_click=toggle_notification
-
+        #add button to container
         self.notification_container = ft.Container(
             border=ft.Border.all(width=2, color=ft.Colors.GREY_400),
             alignment=ft.Alignment.CENTER,
