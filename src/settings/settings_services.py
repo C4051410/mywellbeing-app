@@ -3,7 +3,7 @@ import re
 import bcrypt
 
 from settings.settings_queries import commit_update_password, retrieve_current_password, commit_update_goals, \
-    get_notification_status, commit_notification_status
+    get_notification_status, commit_notification_status, delete_user_account_db
 
 
 #used to check password is okay to update
@@ -79,3 +79,19 @@ def update_notification_status(user_id, notification_status):
     #saves updates status to db
     commit_notification_status(user_id, not notification_status)
     return True
+def delete_account(user_id):
+    # Validates ID integrity before dropping an account
+    if not user_id:
+        return False, "Invalid User Id"
+    try:
+        if int(user_id) < 0:
+            return False, "Invalid User Id"
+    except ValueError:
+        return False, "Invalid Value"
+
+    result = delete_user_account_db(user_id)
+
+    if result is True:
+        return True, "Account Deleted Successfully"
+    else:
+        return False, "Failed to Delete Account"
