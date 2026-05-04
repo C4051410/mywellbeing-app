@@ -21,14 +21,15 @@ class SettingsPage(ft.Column):
         self.is_enabled = retrieve_notification_status(user_id)
         self.uerpfp = Userpfp(page)
 
+        # container for the page header and text and profile picture
         header = ft.Container(
             content=ft.Row(
                 controls=[
                     ft.Column(
                         expand=True,
                         controls=[
-                            ft.Text("settings", size=32, weight=ft.FontWeight.BOLD, color=ft.Colors.BLACK),
-                            ft.Text("Manage your preferences", size=13, color=ft.Colors.GREY_500)
+                            ft.Text("Settings", size=35, weight=ft.FontWeight.BOLD, color=ft.Colors.BLACK),
+                            ft.Text("Manage your account", size=13, color=ft.Colors.GREY_500)
                         ],
                         spacing=2
                     ),
@@ -38,6 +39,7 @@ class SettingsPage(ft.Column):
             padding=ft.padding.only(top=20, left=15, right=15, bottom=20)
         )
 
+        #wraps the account settings button into a styled white card using a ListTile
         account_card = ft.Container(
             bgcolor=ft.Colors.WHITE,
             border_radius=15,
@@ -52,17 +54,21 @@ class SettingsPage(ft.Column):
             )
         )
 
-        self.notifiction_switch = ft.Switch(
+        # visual switch control that defaults to the users saved db status
+        self.notification_switch = ft.Switch(
             value=self.is_enabled,
             on_change=self.toggle_notification,
             active_color=ft.Colors.GREEN
         )
+
+        # Dynamic icon that changes the colour and shape based on the notification status
         self.notification_icon = ft.Icon(
             ft.Icons.NOTIFICATIONS_ACTIVE if self.is_enabled else ft.Icons.NOTIFICATIONS_OFF,
             color=ft.Colors.GREEN if self.is_enabled else ft.Colors.RED,
             size=30
         )
 
+        # wraps the notifications into a styled white card
         notification_card = ft.Container(
             bgcolor=ft.Colors.WHITE,
             border_radius=15,
@@ -78,6 +84,7 @@ class SettingsPage(ft.Column):
             )
         )
 
+        # wraps the logout button into a styled white card
         logout_card = ft.Container(
             bgcolor=ft.Colors.WHITE,
             border_radius=15,
@@ -94,6 +101,7 @@ class SettingsPage(ft.Column):
 
         self.nav_bar = NavBar(page)
 
+        # groups the cards together with small grey section headers
         menu_column = ft.Column(
             controls=[
                 ft.Text("ACCOUNT", size=12, weight=ft.FontWeight.BOLD, color=ft.Colors.GREY_500),
@@ -108,6 +116,7 @@ class SettingsPage(ft.Column):
             spacing=10
         )
 
+        # assembles the header and the menu cards into a scrollable view
         content_column = ft.Column(
             controls=[
                 header,
@@ -124,7 +133,7 @@ class SettingsPage(ft.Column):
         page.on_resize = self.resize
 
     # used to open the devices settings to show notifications
-    async def open_device_notification():
+    async def open_device_notification(self):
         #used to determine the specific platform
         system = platform.system()
         try:
@@ -144,12 +153,13 @@ class SettingsPage(ft.Column):
 
     #used to toggle the notification
     def toggle_notification(self, e):
+        # gets the current value of the switch
         self.is_enabled = self.notification_switch.value
 
         #updates the status and flips the status
         update_notification_status(self.user_id, not self.is_enabled)
 
-        #Show turn off notifications
+        # if turning ON, updates icon to green active bell, show success snackbar, and opens OS settings
         if self.is_enabled:
             self.notification_icon.name = ft.Icons.NOTIFICATIONS_ACTIVE
             self.notification_icon.color = ft.Colors.GREEN
@@ -160,8 +170,9 @@ class SettingsPage(ft.Column):
             ))
             #as they have clicked turn on, try and open the notification settings in device
             self.page.run_task(self.open_device_notification)
+
+        # if turning OFF, update icon to red disabled bell and show snackbar
         else:
-            #else display notification turn on
             self.notification_icon.name = ft.Icons.NOTIFICATIONS_OFF
             self.notification_icon.color = ft.Colors.RED
             self.page.overlay.append(ft.SnackBar(
@@ -170,6 +181,7 @@ class SettingsPage(ft.Column):
                 open=True
             ))
 
+        # updates the UI to reflect changes
         self.this_page.update()
 
     def handle_logout(self, e):
@@ -177,22 +189,11 @@ class SettingsPage(ft.Column):
         self.this_page.user_id = None
         self.this_page.clean()
 
-        restart_msg = ft.Container(
-            content=ft.Column([
-                ft.Icon(ft.Icons.LOGOUT, color=ft.Colors.BLUE, size=60),
-                ft.Text("Logged Out", size=24, weight="bold"),
-                ft.Text("You have been successfully logged out.",
-                        text_align=ft.TextAlign.CENTER),
-                ft.Text("Please restart the application to log back in.", color=ft.Colors.GREY_700,
-                        text_align=ft.TextAlign.CENTER)
-            ], alignment=ft.MainAxisAlignment.CENTER, horizontal_alignment=ft.CrossAxisAlignment.CENTER),
-            expand=True,
-            alignment=ft.Alignment(0, 0)
-        )
-        self.this_page.add(restart_msg)
-        self.this_page.update()
+        # Navigate back to the login/register screen
+        self.this_page.go("/login")
 
 
+    # handles element resizing when window size changes
     def resize(self,e ):
         self.r = Responsive(self.this_page)
         self.userpfp.resize()
