@@ -282,6 +282,14 @@ Unit testing done in test_settings_logic.py testing the logic of the functions i
 | TestNotificationStatus | Test that notification status is changed as expected and catches any errors                                                             |
 | TestDeleteUserAccount  | Test that delete account works as intended and that it catches any errors                                                               |
 
+### Integration Testing
+Integration testing is done within test_settings_integration.py which tests that the functions can be properly implemented with the db.
+
+| Test Function             | What it Tests                                                                                                  |
+|---------------------------|----------------------------------------------------------------------------------------------------------------|
+| test_settings_integration | Test that user can update their passwords and user goals, and that they can delete there account within the db |
+
+
 ## Admin Page Testing
 
 ### Manual Testing
