@@ -177,6 +177,13 @@ Unit testing done in test_home_logic.py testing the logic of the functions is co
 |---------------|----------------------------------------------------------------------------------------------|
 | TestHomeLogic | Tests the home functions including returning username, friends_activities and current streak |
 
+### Integration Testing
+Integration testing is done within test_home_integration which tests that the functions can be properly implemented 
+with the db.
+
+| Test Function         | What it Tests                                                                     |
+|-----------------------|-----------------------------------------------------------------------------------|
+| test_home_integration | Tests that user stats and friends activities are returned as expected from the db |
 ##
 
 ## Activities Page Testing
