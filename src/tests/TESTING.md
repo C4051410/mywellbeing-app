@@ -48,7 +48,7 @@ it would not be practical to wait 15+ minutes to get the CI/CD back.
     
     run within integration: 
     ```bash
-    psql -U postgres -d database_name -f schema.sql
+    psql -U postgres -d database_name -f source/to/schema.sql
     ```
     Add link to .env as DATABASE_URL to link the Database to connection.py
     postgresql://username:password@localhost:5432/database_name
