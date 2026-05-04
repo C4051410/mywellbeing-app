@@ -190,6 +190,7 @@ class SettingsPage(ft.Column):
         # Wipes session data
         self.this_page.user_id = None
         self.this_page.clean()
+        #remove the users session infor so they dont auto log back in next time
         clear_session()
 
         # Navigate back to the login/register screen

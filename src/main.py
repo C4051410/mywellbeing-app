@@ -99,11 +99,12 @@ def main(page: ft.Page):
         page.clean()
         page.add(main_homepage(page, user_id))
         page.update()
-
+    #checks if there is a saved user first before loading auth page
     saved_user = load_session()
     if saved_user:
         page.user_id = saved_user
         page.add(main_homepage(page, saved_user))
+    #if no previous account, load auth page
     else:
         page.add(authPage(on_login_success, on_register_success))
 

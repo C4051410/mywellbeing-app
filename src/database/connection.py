@@ -12,7 +12,7 @@ TEST_DATABASE = os.getenv("TEST_DATABASE_URL")
 EMAIL_KEY = os.getenv("EMAIL_KEY")
 #return connection to database
 def connect():
-    url = urlparse(DATABASE)
+    url = urlparse(TEST_DATABASE)
     hostname = url.hostname
     if platform.system() == "Windows" and hostname == "10.0.2.2":
         hostname = "127.0.0.1"

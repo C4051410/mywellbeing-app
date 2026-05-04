@@ -9,6 +9,7 @@ from auth.register import register, get_existing_user, commit_setup
 from database.connection import email_key
 from settings.settings_services import retrieve_notification_status
 
+#find the current directory of this file
 CURRENT_DIR = os.path.dirname(__file__)
 #gets API key
 resend.api_key = email_key()
@@ -176,26 +177,30 @@ def refresh_inactivity_timer(user_id,username):
 
         except Exception as e:
             print(f"Error scheduling email: {e}")
-            
+
+#create the file called .user_session to store the users detail when logged in
 SESSION_FILE = os.path.join(CURRENT_DIR, ".user_session")
 
 def save_session(user_id):
+    #try and write the users name into the file
     try:
         with open(SESSION_FILE, "w") as file:
             json.dump({"user_id": user_id}, file)
     except Exception as e:
         print(f"Error saving session: {e}")
 
+#used to find and load the user session
 def load_session():
     try:
         if os.path.exists(SESSION_FILE):
             with open(SESSION_FILE, "r") as file:
                 data = json.load(file)
+                #returns the users id
                 return data.get("user_id")
     except Exception as e:
         print(f"Error loading session: {e}")
         return None
-
+#used to clear the json file when logging out
 def clear_session():
     try:
         if os.path.exists(SESSION_FILE):
