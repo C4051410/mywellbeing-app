@@ -1,7 +1,7 @@
 import flet as ft
 
 from admin.admin import main_admin
-from auth.auth_services import check_setup_complete
+from auth.auth_services import check_setup_complete, load_session
 from auth.authpage import authPage
 from activities.activities import main_activities, main_activity_detail
 from database.connection import connect
@@ -100,7 +100,12 @@ def main(page: ft.Page):
         page.add(main_homepage(page, user_id))
         page.update()
 
-    page.add(authPage(on_login_success, on_register_success))
+    saved_user = load_session()
+    if saved_user:
+        page.user_id = saved_user
+        page.add(main_homepage(page, saved_user))
+    else:
+        page.add(authPage(on_login_success, on_register_success))
 
 current_page = "/homepage"
 

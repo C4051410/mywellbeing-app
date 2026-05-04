@@ -1,16 +1,15 @@
 import os
 import re
-
+import json
 import bcrypt
 import resend
 from plyer import notification
-
 from auth.login import login, get_user_setup,get_last_email,commit_last_email
 from auth.register import register, get_existing_user, commit_setup
 from database.connection import email_key
 from settings.settings_services import retrieve_notification_status
 
-current_dir = os.path.dirname(__file__)
+CURRENT_DIR = os.path.dirname(__file__)
 #gets API key
 resend.api_key = email_key()
 
@@ -86,7 +85,7 @@ def register_user(username,email, password):
     test_email = "m.austoni2@newcastle.ac.uk"
     try:
         #gets html to be used in email
-        template_path = os.path.join(current_dir, "welcome.html")
+        template_path = os.path.join(CURRENT_DIR, "welcome.html")
         html_body = load_template(template_path, username)
         #sends emails
         resend.Emails.send({
@@ -161,7 +160,7 @@ def refresh_inactivity_timer(user_id,username):
             pass
     if retrieve_notification_status(user_id):
         try:
-            template_path = os.path.join(current_dir, "reminder.html")
+            template_path = os.path.join(CURRENT_DIR, "reminder.html")
             html_body = load_template(template_path, username)
             test_email = "m.austoni2@newcastle.ac.uk"
             #send to user in 20 hours time
@@ -177,3 +176,30 @@ def refresh_inactivity_timer(user_id,username):
 
         except Exception as e:
             print(f"Error scheduling email: {e}")
+            
+SESSION_FILE = os.path.join(CURRENT_DIR, ".user_session")
+
+def save_session(user_id):
+    try:
+        with open(SESSION_FILE, "w") as file:
+            json.dump({"user_id": user_id}, file)
+    except Exception as e:
+        print(f"Error saving session: {e}")
+
+def load_session():
+    try:
+        if os.path.exists(SESSION_FILE):
+            with open(SESSION_FILE, "r") as file:
+                data = json.load(file)
+                return data.get("user_id")
+    except Exception as e:
+        print(f"Error loading session: {e}")
+        return None
+
+def clear_session():
+    try:
+        if os.path.exists(SESSION_FILE):
+            os.remove(SESSION_FILE)
+    except Exception as e:
+        print(f"Error removing session: {e}")
+

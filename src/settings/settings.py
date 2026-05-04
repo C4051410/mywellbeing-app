@@ -4,6 +4,8 @@ File for settings page - accessible by clicking 'settings' on nav bar
 
 import flet as ft
 import platform
+
+from auth.auth_services import clear_session
 from components.userpfp import Userpfp
 from components.bottom_nav import NavBar
 from components.responsive import Responsive
@@ -188,6 +190,7 @@ class SettingsPage(ft.Column):
         # Wipes session data
         self.this_page.user_id = None
         self.this_page.clean()
+        clear_session()
 
         # Navigate back to the login/register screen
         self.this_page.go("/login")
