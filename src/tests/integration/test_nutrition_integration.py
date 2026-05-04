@@ -21,7 +21,7 @@ def db_cleanup():
     conn.close()
 
 @patch("nutrition.nutrition_services.notification")
-def test_foodlog_integration(mock_notification, db_cleanup):
+def test_nutrition_integration(mock_notification, db_cleanup):
     """
     INTEGRATION TEST: Checks that functions are properly integrated with db
     Checks that foodlog can be successfully saved and retrieved from a user in the db

@@ -234,12 +234,12 @@ Unit testing done in test_nutrition_logic.py testing the logic of the functions 
 | TestUserGoalsLogic  | Tests that retrieve goals returns either correct values or defaults values if error occurs          |
 
 ### Integration Testing
-Integration testing is done within test_foodlog_integration.py which tests that the functions can be properly implemented 
+Integration testing is done within test_nutrition_integration.py which tests that the functions can be properly implemented 
 with the db.
 
-| Test Function            | What it Tests                                                                                   |
-|--------------------------|-------------------------------------------------------------------------------------------------|
-| test_foodlog_integration | Tests that foodlogs can be successfully added to the db and can then be retrieved without error |
+| Test Function              | What it Tests                                                                                    |
+|----------------------------|--------------------------------------------------------------------------------------------------|
+| test_nutrition_integration | Tests that food logs can be successfully added to the db and can then be retrieved without error |
 
 ## Social Page Testing
 ### Manual Testing
