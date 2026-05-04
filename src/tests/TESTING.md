@@ -291,7 +291,7 @@ Unit testing done in test_settings_logic.py testing the logic of the functions i
 | **MT2** | Delete User    | Check that admin can delete a user or moderator              | Pass: Admin can delete a specific user                       | Tests the admin power of deleting account               |
 | **MT3** | Make Moderator | Check that an admin can turn a normal user into a modeartor  | Pass: Admin can make a normal user into a moderator          | Tests the admin power of creating a moderator of a user |
 
-## Unit Testing
+### Unit Testing
 Unit testing done in test_admin_logic.py testing the logic of the functions is correct
 
 | Test Class           | What it Tests                                                        |
@@ -301,6 +301,14 @@ Unit testing done in test_admin_logic.py testing the logic of the functions is c
 | TestRemoveUsers      | Test that the delete user works for deleting users from the DB       |
 | TestUpdateModerators | Test that users can have their role changed from users to moderators |
 
+### Integration Testing
+Integration testing is done within test_admin_integration.py which tests that the functions can be properly implemented with the db.
+
+| Test Function          | What it Tests                                                                                                                 |
+|------------------------|-------------------------------------------------------------------------------------------------------------------------------|
+| test_admin_integration | Test that admin can retrieve all users and moderator and can change them to a moderator and can also delete users from the db |
+
+
 ## Moderator Page Testing
 
 ### Manual Testing
@@ -309,7 +317,7 @@ Unit testing done in test_admin_logic.py testing the logic of the functions is c
 | **MT1** | Search Users | Check that moderators can search for a specific user | Pass: Search feature returns the specific user   | Tests that moderators can find specific users |
 | **MT1** | Delete Post  | Check that moderators can delete a post              | Pass: Delete feature remove the post from the DB | Tests that moderators can delete posts        |
 
-## Unit Testing
+### Unit Testing
 Unit testing done in test_moderators_logic.py testing the logic of the functions is correct
 
 | Test Class         | What it Tests                                                          |
@@ -317,3 +325,11 @@ Unit testing done in test_moderators_logic.py testing the logic of the functions
 | TestCheckModerator | Test that the checking the moderator role returns the correct response |
 | TestRetrievePosts  | Test that the posts are returned as intended                           |
 | TestRemovePosts    | Test that the delete posts removes them from the database              |
+
+### Integration Testing
+Integration testing is done within test_moderator_integration.py which tests that the functions can be properly implemented with the db.
+
+| Test Function              | What it Tests                                                                 |
+|----------------------------|-------------------------------------------------------------------------------|
+| test_moderator_integration | Test that the moderator can retrieve users posts, and delete them from the db |
+
