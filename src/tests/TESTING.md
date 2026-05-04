@@ -48,7 +48,7 @@ it would not be practical to wait 15+ minutes to get the CI/CD back.
     
     run within integration: 
     ```bash
-    psql -U postgres -d database_name -f schema.sql
+    psql -U postgres -d database_name -f source/to/schema.sql
     ```
     Add link to .env as DATABASE_URL to link the Database to connection.py
     postgresql://username:password@localhost:5432/database_name
@@ -177,6 +177,13 @@ Unit testing done in test_home_logic.py testing the logic of the functions is co
 |---------------|----------------------------------------------------------------------------------------------|
 | TestHomeLogic | Tests the home functions including returning username, friends_activities and current streak |
 
+### Integration Testing
+Integration testing is done within test_home_integration which tests that the functions can be properly implemented 
+with the db.
+
+| Test Function         | What it Tests                                                                     |
+|-----------------------|-----------------------------------------------------------------------------------|
+| test_home_integration | Tests that user stats and friends activities are returned as expected from the db |
 ##
 
 ## Activities Page Testing
@@ -227,12 +234,12 @@ Unit testing done in test_nutrition_logic.py testing the logic of the functions 
 | TestUserGoalsLogic  | Tests that retrieve goals returns either correct values or defaults values if error occurs          |
 
 ### Integration Testing
-Integration testing is done within test_foodlog_integration.py which tests that the functions can be properly implemented 
+Integration testing is done within test_nutrition_integration.py which tests that the functions can be properly implemented 
 with the db.
 
-| Test Function            | What it Tests                                                                                   |
-|--------------------------|-------------------------------------------------------------------------------------------------|
-| test_foodlog_integration | Tests that foodlogs can be successfully added to the db and can then be retrieved without error |
+| Test Function              | What it Tests                                                                                    |
+|----------------------------|--------------------------------------------------------------------------------------------------|
+| test_nutrition_integration | Tests that food logs can be successfully added to the db and can then be retrieved without error |
 
 ## Social Page Testing
 ### Manual Testing
@@ -252,6 +259,13 @@ Unit testing done in test_social_logic.py testing the logic of the functions is 
 | TestFriendshipLogic        | Test that friends function works as intended, and that it doesnt cause any errors when invalid data is entered |
 | TestSocialInteractionLogic | Test that the functions involving the posts and likes work as intended and dont cause any errors               |
 | TestSocialFeedLogic        | Test that user feed returns as expected and correct response is returned                                       |
+
+### Integration Testing
+Integration testing is done within test_social_integration.py which tests that the functions can be properly implemented with the db.
+
+| Test Function           | What it Tests                                                                                              |
+|-------------------------|------------------------------------------------------------------------------------------------------------|
+| test_social_integration | Test that user can add friends, like and comment on posts and retrieve the leaderboard correctly in the db |
 
 
 ## Settings Page Testing
@@ -275,6 +289,14 @@ Unit testing done in test_settings_logic.py testing the logic of the functions i
 | TestNotificationStatus | Test that notification status is changed as expected and catches any errors                                                             |
 | TestDeleteUserAccount  | Test that delete account works as intended and that it catches any errors                                                               |
 
+### Integration Testing
+Integration testing is done within test_settings_integration.py which tests that the functions can be properly implemented with the db.
+
+| Test Function             | What it Tests                                                                                                  |
+|---------------------------|----------------------------------------------------------------------------------------------------------------|
+| test_settings_integration | Test that user can update their passwords and user goals, and that they can delete there account within the db |
+
+
 ## Admin Page Testing
 
 ### Manual Testing
@@ -284,7 +306,7 @@ Unit testing done in test_settings_logic.py testing the logic of the functions i
 | **MT2** | Delete User    | Check that admin can delete a user or moderator              | Pass: Admin can delete a specific user                       | Tests the admin power of deleting account               |
 | **MT3** | Make Moderator | Check that an admin can turn a normal user into a modeartor  | Pass: Admin can make a normal user into a moderator          | Tests the admin power of creating a moderator of a user |
 
-## Unit Testing
+### Unit Testing
 Unit testing done in test_admin_logic.py testing the logic of the functions is correct
 
 | Test Class           | What it Tests                                                        |
@@ -294,6 +316,14 @@ Unit testing done in test_admin_logic.py testing the logic of the functions is c
 | TestRemoveUsers      | Test that the delete user works for deleting users from the DB       |
 | TestUpdateModerators | Test that users can have their role changed from users to moderators |
 
+### Integration Testing
+Integration testing is done within test_admin_integration.py which tests that the functions can be properly implemented with the db.
+
+| Test Function          | What it Tests                                                                                                                 |
+|------------------------|-------------------------------------------------------------------------------------------------------------------------------|
+| test_admin_integration | Test that admin can retrieve all users and moderator and can change them to a moderator and can also delete users from the db |
+
+
 ## Moderator Page Testing
 
 ### Manual Testing
@@ -302,7 +332,7 @@ Unit testing done in test_admin_logic.py testing the logic of the functions is c
 | **MT1** | Search Users | Check that moderators can search for a specific user | Pass: Search feature returns the specific user   | Tests that moderators can find specific users |
 | **MT1** | Delete Post  | Check that moderators can delete a post              | Pass: Delete feature remove the post from the DB | Tests that moderators can delete posts        |
 
-## Unit Testing
+### Unit Testing
 Unit testing done in test_moderators_logic.py testing the logic of the functions is correct
 
 | Test Class         | What it Tests                                                          |
@@ -310,3 +340,11 @@ Unit testing done in test_moderators_logic.py testing the logic of the functions
 | TestCheckModerator | Test that the checking the moderator role returns the correct response |
 | TestRetrievePosts  | Test that the posts are returned as intended                           |
 | TestRemovePosts    | Test that the delete posts removes them from the database              |
+
+### Integration Testing
+Integration testing is done within test_moderator_integration.py which tests that the functions can be properly implemented with the db.
+
+| Test Function              | What it Tests                                                                 |
+|----------------------------|-------------------------------------------------------------------------------|
+| test_moderator_integration | Test that the moderator can retrieve users posts, and delete them from the db |
+

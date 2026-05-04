@@ -19,7 +19,9 @@ CREATE TABLE users (
     password VARCHAR(100),
     email VARCHAR(100),
     role VARCHAR(10),
+    notification_status BOOLEAN DEFAULT TRUE,
     last_scheduled_email_id TEXT
+
 );
 
 -- 3. CREATE USER PROFILES

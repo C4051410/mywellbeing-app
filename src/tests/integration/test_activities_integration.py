@@ -4,26 +4,8 @@ import pytest
 from activities.activities_services import save_activity,save_past_activity,retrieve_activities
 from database.connection import connect
 
-@pytest.fixture
-def db_cleanup():
-    test_duration = 60
-    conn = connect()
-    cur = conn.cursor()
-    # deletes all record that could be remaining
-    cur.execute("TRUNCATE TABLE users RESTART IDENTITY CASCADE")
-    cur.execute("TRUNCATE TABLE workouts RESTART IDENTITY CASCADE")
-    conn.commit()
-    #used to clean db whether test fails or not
-    yield test_duration
-    #deletes all record that could be remaining
-    cur.execute("TRUNCATE TABLE workouts RESTART IDENTITY CASCADE")
-    cur.execute("TRUNCATE TABLE workouts RESTART IDENTITY CASCADE")
-    conn.commit()
-    cur.close()
-    conn.close()
-
 @patch('activities.activities_services.notification')
-def test_activities_integration(mock_notification,db_cleanup):
+def test_activities_integration(mock_notification):
     """
     INTEGRATION TEST: Checks that functions are properly integrated with db
     Checks that activities_services, current and past, save properly from db and can be retrieved
@@ -43,7 +25,7 @@ def test_activities_integration(mock_notification,db_cleanup):
     #define the elements needed in activity
     type = "Run"
     distance_km = 1.5
-    test_duration = db_cleanup
+    test_duration = 60
     #fix issue with datetime and how long it takes to perform test
     date = datetime.now() - timedelta(seconds=30)
     #try and save activity to database

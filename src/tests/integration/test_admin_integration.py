@@ -3,24 +3,7 @@ import pytest
 from database.connection import connect
 from admin.admin_services import retrieve_users_admin, delete_users_admin, make_moderators_admin, remove_users_admin
 
-#used to clean up db before an after test
-@pytest.fixture
-def db_cleanup():
-    conn = connect()
-    cur = conn.cursor()
-    #removes anything in users and reset id back to 1
-    cur.execute("TRUNCATE TABLE users RESTART IDENTITY CASCADE")
-    conn.commit()
-    test_user = "UserTester"
-    #when called wait until other function finishes
-    yield test_user
-    #does same as above
-    cur.execute("TRUNCATE TABLE users RESTART IDENTITY CASCADE")
-    conn.commit()
-    cur.close()
-    conn.close()
-
-def test_admin_integration(db_cleanup):
+def test_admin_integration():
     """
     INTEGRATION TEST: Checks that the functions are properly integrated with the db
     Check that admin_services properly retrieve users, and can delete and make mods in the db
@@ -32,7 +15,7 @@ def test_admin_integration(db_cleanup):
     #insert two users into users for testing
     cur.execute(
         "INSERT INTO users (id, username, email, password, role) VALUES (%s, %s, %s, %s, %s), (%s, %s, %s, %s, %s)",
-        (1, db_cleanup, "act@test.com", "dummypass1!", "user",
+        (1, "UserTester", "act@test.com", "dummypass1!", "user",
          2, "ModTester", "mod@test.com", "Dummypass1!", "moderator")
     )
     #commit users
