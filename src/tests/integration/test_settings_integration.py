@@ -36,13 +36,14 @@ def test_settings_integration_flow(mock_resend):
     assert bcrypt.checkpw("NewPass1!".encode('utf-8'), new_hashed_pw)
 
     #try and update goals
-    success_goal, msg_goal = update_goals(1, 2500, 3000)
+    success_goal, msg_goal = update_goals(1, 2500, 3000,4)
     assert success_goal is True
     #check that the goals have been successfully updated in the db
-    cur.execute("SELECT calorie_goal, water_goal FROM user_stats WHERE user_id = 1")
+    cur.execute("SELECT calorie_goal, water_goal, weekly_activity_goal FROM user_stats WHERE user_id = 1")
     row = cur.fetchone()
     assert row[0] == 2500
     assert row[1] == 3000
+    assert row[2] == 4
 
     #try and delete the account
     success_del, msg_del = delete_account(1)
