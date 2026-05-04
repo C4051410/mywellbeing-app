@@ -83,6 +83,16 @@ class AccountSettingsPage(ft.Column):
             input_filter=ft.InputFilter(allow=True, regex_string=r"^[0-9]*$", replacement_string="")
         )
 
+        self.weekly_activity_goal = ft.TextField(
+            label="Weekly Activity Goal",
+            hint_text="Enter a value from 0 to 7",
+            input_filter=ft.InputFilter(
+                allow=True,
+                regex_string=r"^[0-9]*$",
+                replacement_string=""
+            )
+        )
+
         # wraps the goal fields into a styled white card
         goals_section = ft.Container(
             bgcolor=ft.Colors.WHITE,
@@ -95,6 +105,7 @@ class AccountSettingsPage(ft.Column):
                     ft.Divider(height=5, color=ft.Colors.TRANSPARENT),
                     self.cal_goal,
                     self.water_goal,
+                    self.weekly_activity_goal,
                     ft.ElevatedButton(
                         "Update Goals",
                         bgcolor=ft.Colors.BLUE,
@@ -179,7 +190,7 @@ class AccountSettingsPage(ft.Column):
 
     def handle_goal_reset(self, e):
         # attempts to update goals via the service layer
-        success, message = update_goals(self.user_id, self.cal_goal.value, self.water_goal.value)
+        success, message = update_goals(self.user_id, self.cal_goal.value, self.water_goal.value, self.weekly_activity_goal.value)
 
         #displays success message if updated correctly
         if success is True:

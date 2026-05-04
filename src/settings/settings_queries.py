@@ -40,17 +40,23 @@ def commit_update_password(user_id, new_password):
         conn.close()
 
 
-def commit_update_goals(user_id, calorie_goal,water_goal):
+def commit_update_goals(user_id, calorie_goal, water_goal, weekly_activity_goal):
     conn = connect()
     cur = conn.cursor()
     try:
-        cur.execute("UPDATE user_stats SET calorie_goal = %s, water_goal = %s WHERE user_id = %s",
-                    (calorie_goal,water_goal,user_id))
+        cur.execute("""
+                    UPDATE user_stats 
+                    SET calorie_goal = %s, water_goal = %s, weekly_activity_goal = %s
+                    WHERE user_id = %s""",
+                    (calorie_goal, water_goal, weekly_activity_goal, user_id))
         conn.commit()
-        conn.close()
+        return True
     except Exception as e:
         conn.rollback()
         print(e)
+        return False
+    finally:
+        cur.close()
         conn.close()
 
 def get_notification_status(user_id):

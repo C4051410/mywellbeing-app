@@ -107,10 +107,13 @@ class TestGoalUpdate():
     #sets values
     calories = 2500
     water = 2600
+    weekly_goal = 5
     #tests a valid update
     def test_valid_update(self,mock_goals):
+        # Mock a successful goal update
+        mock_goals.return_value = True
         #valid inputs for update goal
-        success,message = update_goals(1,self.calories,self.water)
+        success,message = update_goals(1,self.calories,self.water,self.weekly_goal)
         #checks it returns true and correct message
         assert success == True
         assert message == "Goals Updated"
@@ -118,18 +121,23 @@ class TestGoalUpdate():
     #checks if missing fields are caught
     def test_missing_field(self,mock_goals):
         #None used to represent missing fields
-        success,message = update_goals(1,None,None)
+        success,message = update_goals(1,None,None,None)
         #checks it false and correct message
         assert success == False
         assert message == "All Fields Required"
 
     def test_invalid_goals(self,mock_goals):
         #checks that negative values arent allowed
-        success,message = update_goals(1,-1,-1)
+        success,message = update_goals(1,-1,-1, -1)
         assert success == False
-        assert message == "Calories and Water Must Be Greater Than 0"
+        assert message == "Calories and Water Must Be Greater Than or Equal To 0"
+        # Checks that activity goal must stay in between 0-7
+        success, message = update_goals(1, 2000, 2000, 8)
+        assert success == False
+        assert message == "Weekly Activity Goal Must Be Between 0 and 7"
         #checks incorrect type isnt allowed
-        success, message = update_goals(1,"Invalid","Invalid")
+        success, message = update_goals(1,"Invalid","Invalid", "Invalid")
+        assert success == False
         assert success == False
         assert message == "Invalid Value"
 
