@@ -46,7 +46,8 @@ CREATE TABLE user_stats (
     steps_today INTEGER DEFAULT 0,
     salts_goal REAL,
     proteins_goal REAL,
-    water_goal INTEGER
+    water_goal INTEGER,
+    weekly_activity_goal INTEGER DEFAULT 3
 );
 
 -- 5. CREATE WORKOUTS
