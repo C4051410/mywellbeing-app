@@ -28,15 +28,20 @@ def test_moderator_integration():
                 "(%s, %s, %s)",
                 (20, 1, "Gym Session",
                  21,2,"Run"))
+    #create two separate comments
+    cur.execute("INSERT INTO social_comments (id, user_id,target_id,target_type, content) VALUES "
+                "(%s, %s,%s,%s,%s),(%s, %s,%s,%s,%s)",
+                (30,1,21,"workout","Nice Workout",
+                31,2,20,"workout","Nice Job"))
     conn.commit()
 
     #retrieve the 4 posts from the database
     posts = retrieve_posts_moderator("")
-    assert len(posts) == 4
+    assert len(posts) == 6
 
     #check that the search filter only returns specific users posts
     search_results = retrieve_posts_moderator("First")
-    assert len(search_results) == 2
+    assert len(search_results) == 3
     assert search_results[0][1] == "FirstOwner"
 
     #try and delete a post from the db
@@ -48,7 +53,7 @@ def test_moderator_integration():
     assert cur.fetchone()[0] == 0
     #check the other remaining 3 posts remain
     posts = retrieve_posts_moderator("")
-    assert len(posts) == 3
+    assert len(posts) == 5
 
     cur.close()
     conn.close()

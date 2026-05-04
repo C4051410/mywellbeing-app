@@ -40,7 +40,8 @@ class TestRetrievePosts():
     #creates fake response to function
     rows = [
         ("Pizza","PizzaKing1",2),
-        ("Pushups","AbsQueen",3)
+        ("Pushups","AbsQueen",3),
+        ("Great Run","CommentJack",4)
     ]
     #tests rows are properly returned
     def test_valid_retrieve(self, mock_get_posts_moderators):
@@ -48,7 +49,8 @@ class TestRetrievePosts():
         returned_rows = retrieve_posts_moderator("")
         assert returned_rows[0] == ("Pizza","PizzaKing1",2)
         assert returned_rows[1] == ("Pushups","AbsQueen",3)
-        assert len(returned_rows) == 2
+        assert returned_rows[2] == ("Great Run","CommentJack",4)
+        assert len(returned_rows) == 3
 
     #tests empty row returns an empty row
     def test_empty_retrieve(self, mock_get_posts_moderators):
@@ -65,6 +67,8 @@ class TestRemovePosts():
         deleted_post = remove_posts_moderator(1,"food")
         assert deleted_post == True
         deleted_post = remove_posts_moderator(2,"work")
+        assert deleted_post == True
+        deleted_post = remove_posts_moderator(3,"comment")
         assert deleted_post == True
     #tests empty id returns false
     def test_empty_id(self, mock_delete_posts_moderator):
