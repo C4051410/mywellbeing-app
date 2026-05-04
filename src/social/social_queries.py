@@ -385,6 +385,7 @@ def get_leaderboard(user_id):
                 ) AS total_points
             FROM friend_group fg
             JOIN users u ON u.id = fg.member_id
+            LEFT JOIN user_stats us ON us.user_id = u.id
             LEFT JOIN weekly_workouts ww ON ww.user_id = u.id
             ORDER BY total_points DESC, u.username ASC
             """,
