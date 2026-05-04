@@ -223,9 +223,16 @@ def test_e2e_login(driver,seed_test_user):
     #find and click the settings navbar button
     settings_navbar = driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="Settings")
     settings_navbar.click()
-    #check that the Manage Account and Goals button Appears
+    #check that the settings page as been properly loaded
     assert wait.until(
-        EC.presence_of_element_located((AppiumBy.ACCESSIBILITY_ID, "Manage Account & Goals"))
+        EC.presence_of_element_located((AppiumBy.ACCESSIBILITY_ID, "Manage your account"))
+    )
+    #find the logout button on the setting page and click it
+    logout_btn = driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="Logout\nSign out of your account")
+    logout_btn.click()
+    #check the user has been returned to the auth page for full circle testing.
+    assert wait.until(
+        EC.presence_of_element_located((AppiumBy.ACCESSIBILITY_ID, "Register"))
     )
 
 def test_e2e_register(driver,seed_test_user):

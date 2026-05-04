@@ -1,8 +1,6 @@
 import flet as ft
 from components.bottom_nav import NavBar
 from components.responsive import Responsive
-from flet.controls import alignment
-from rich import color
 from settings.settings_services import update_password, update_goals, delete_account
 
 class AccountSettingsPage(ft.Column):
