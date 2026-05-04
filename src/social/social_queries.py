@@ -351,7 +351,10 @@ def get_social_feed(user_id):
 def get_leaderboard(user_id):
     """
     Retrieve a weekly leaderboard for the current user and their friends.
-    It counts the weekly workouts and add current streak bonus
+    Scoring:
+    - goal completion score based on weekly activity goal
+    - current streak bonus
+    If weekly activity goal is 0, then the completion score is 0
     """
     conn = connect()
     cur = conn.cursor()
@@ -379,7 +382,16 @@ def get_leaderboard(user_id):
                 u.id,
                 u.username,
                 CAST(
-                    LEAST(COALESCE(ww.weekly_completed, 0), 7) * 100
+                    (
+                        CASE
+                            -- A goal of 0 means no weekly completion score
+                            WHEN COALESCE(us.weekly_activity_goal, 0) <= 0 THEN 0
+                            ELSE ROUND(
+                                LEAST(COALESCE(ww.weekly_completed, 0)::numeric
+                                    / NULLIF(us.weekly_activity_goal, 0),1.0) * 1000
+                            )
+                        END
+                    )
                     + LEAST(COALESCE(us.current_streak, 0), 7) * 50
                     AS INTEGER
                 ) AS total_points
