@@ -150,6 +150,8 @@ class TestCheckSetup():
 @patch('auth.auth_services.commit_setup')
 class TestSaveSetup():
     def test_complete_setup(self,mock_commit):
+        # Mock a successful setup save
+        mock_commit.return_value = True
         #test valid setup
         setup = save_setup(1,18,"Male",185,
                            85,75,2500,

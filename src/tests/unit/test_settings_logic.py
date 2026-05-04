@@ -107,8 +107,11 @@ class TestGoalUpdate():
     #sets values
     calories = 2500
     water = 2600
+    weekly_goal = 5
     #tests a valid update
     def test_valid_update(self,mock_goals):
+        # Mock a successful goal update
+        mock_goals.return_value = True
         #valid inputs for update goal
         success,message = update_goals(1,self.calories,self.water,self.weekly_goal)
         #checks it returns true and correct message
@@ -127,11 +130,11 @@ class TestGoalUpdate():
         #checks that negative values arent allowed
         success,message = update_goals(1,-1,-1, -1)
         assert success == False
-        assert message == "Calories and Water Must Be Greater Than 0"
-        # Chensks that activity goal must stay in between 0-7
+        assert message == "Calories and Water Must Be Greater Than or Equal To 0"
+        # Checks that activity goal must stay in between 0-7
         success, message = update_goals(1, 2000, 2000, 8)
         assert success == False
-        assert message == "Weekly Activity goal Must Be Between 0 and 7"
+        assert message == "Weekly Activity Goal Must Be Between 0 and 7"
         #checks incorrect type isnt allowed
         success, message = update_goals(1,"Invalid","Invalid", "Invalid")
         assert success == False
