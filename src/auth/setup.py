@@ -32,7 +32,7 @@ def setupGoalsPage(user_id, on_setup_complete):
             "Moderate: exercise 4-5 times/week": 5,
             "Active: daily exercise": 7,
         }
-        return mapping[activity_level_value, 3]
+        return mapping.get(activity_level_value, 3)
 
     def handle_continue(e):
         if not all([age.value, gender.value, height.value, current_weight.value, goal_weight.value,goal_salts.value,goal_proteins.value,goal_water.value,activity_level.value]):
@@ -100,6 +100,8 @@ def setupGoalsPage(user_id, on_setup_complete):
             success = save_setup(user_id, age_val, gender.value, height_val, current_weight_val, goal_weight_val, calorie_goal,salts_val,protein_val,water_val,weekly_activity_goal)
             if not success:
                 message.value = "Error Upon Completion, Please Try Again"
+                e.page.update()
+                return
             on_setup_complete(user_id)
 
         except ValueError:
