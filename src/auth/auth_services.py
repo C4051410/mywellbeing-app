@@ -142,8 +142,8 @@ def save_setup(user_id, age, gender, height_cm, current_weight_kg, weight_goal_k
             return False
     except ValueError:
         return False
-    commit_setup(user_id, age, gender, height_cm, current_weight_kg, weight_goal_kg, calorie_goal,salts_goal,protein_goal,water_goal,weekly_activity_goal)
-    return True
+    success = commit_setup(user_id, age, gender, height_cm, current_weight_kg, weight_goal_kg, calorie_goal,salts_goal,protein_goal,water_goal,weekly_activity_goal)
+    return success
 
 def load_template(file_path, username):
     with open(file_path, 'r') as file:

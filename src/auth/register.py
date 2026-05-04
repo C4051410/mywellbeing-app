@@ -57,9 +57,10 @@ def commit_setup(user_id, age, gender, height_cm, current_weight_kg, weight_goal
         conn.commit()
         cur.close()
         conn.close()
-        return "Setup saved"
+        return True
 
     except Exception as e:
         conn.rollback()
         conn.close()
-        return str(e)
+        print(e)
+        return False

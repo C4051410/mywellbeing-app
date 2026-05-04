@@ -41,7 +41,7 @@ def update_goals(user_id, calorie_goal, water_goal, weekly_activity_goal):
     try:
         #if values are less then 0 return false
         if float(calorie_goal) < 0 or float(water_goal) < 0:
-             return False, "Calories and Water Must Be Greater Than 0"
+             return False, "Calories and Water Must Be Greater Than or Equal To 0"
         if int(weekly_activity_goal) < 0 or int(weekly_activity_goal) > 7:
             return False, "Weekly Activity Goal Must Be Between 0 and 7"
     #if of wrong type return false

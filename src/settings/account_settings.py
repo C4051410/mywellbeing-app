@@ -85,7 +85,7 @@ class AccountSettingsPage(ft.Column):
 
         self.weekly_activity_goal = ft.TextField(
             label="Weekly Activity Goal",
-            hint_text="Enter a value from 1 to 7",
+            hint_text="Enter a value from 0 to 7",
             input_filter=ft.InputFilter(
                 allow=True,
                 regex_string=r"^[0-9]*$",
