@@ -27,7 +27,7 @@ def setupGoalsPage(user_id, on_setup_complete):
     # Map the selected setup activity level to a weekly activity goal
     def map_activity_level_to_weekly_goal(activity_level_value):
         mapping = {
-            "Sedentary: no exercise": 1,
+            "Sedentary: no exercise": 0,
             "Light: exercise 1-3 times/week": 3,
             "Moderate: exercise 4-5 times/week": 5,
             "Active: daily exercise": 7,
