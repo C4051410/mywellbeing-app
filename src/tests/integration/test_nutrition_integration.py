@@ -5,23 +5,8 @@ import pytest
 from database.connection import connect
 from nutrition.nutrition_services import retrieve_foodlogs,save_foodlog
 
-#used to clean db whether tests completes or fails
-@pytest.fixture
-def db_cleanup():
-    #used to wait for other function to finish before returning
-    test_title = "Apple"
-    yield test_title
-    conn = connect()
-    cur = conn.cursor()
-    #deletes foodlog or user if they exist
-    cur.execute("DELETE FROM foodlog WHERE title =%s",(test_title,))
-    cur.execute("DELETE FROM users WHERE id = 1")
-    conn.commit()
-    cur.close()
-    conn.close()
-
 @patch("nutrition.nutrition_services.notification")
-def test_nutrition_integration(mock_notification, db_cleanup):
+def test_nutrition_integration(mock_notification, ):
     """
     INTEGRATION TEST: Checks that functions are properly integrated with db
     Checks that foodlog can be successfully saved and retrieved from a user in the db
@@ -36,7 +21,7 @@ def test_nutrition_integration(mock_notification, db_cleanup):
     )
     conn.commit()
     #used to call cleanup when function successeds or fails
-    test_title = db_cleanup
+    test_title = "Apple"
     #tests values including 0 and floats
     calories = 200
     salts = 0

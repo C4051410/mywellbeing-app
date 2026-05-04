@@ -2,24 +2,7 @@ import pytest
 from database.connection import connect
 from moderator.moderator_services import retrieve_posts_moderator, remove_posts_moderator
 
-
-@pytest.fixture
-def db_mod_setup():
-    conn = connect()
-    cur = conn.cursor()
-    #remove everything from the tables
-    cur.execute("TRUNCATE TABLE users RESTART IDENTITY CASCADE")
-    conn.commit()
-    #wait for test to finish
-    yield
-    #repeat same above
-    cur.execute("TRUNCATE TABLE users RESTART IDENTITY CASCADE")
-    conn.commit()
-    cur.close()
-    conn.close()
-
-
-def test_moderator_integration(db_mod_setup):
+def test_moderator_integration():
     """
     INTEGRATION TEST: Verifies that the moderator service correctly
     retrieves and deletes posts from both foodlog and workouts within the db.

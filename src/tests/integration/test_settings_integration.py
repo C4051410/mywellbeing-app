@@ -4,24 +4,8 @@ import bcrypt
 from database.connection import connect
 from settings.settings_services import update_password, update_goals, delete_account
 
-
-@pytest.fixture
-def db_settings_setup():
-    conn = connect()
-    cur = conn.cursor()
-    #delet all users that could be remaining in the db
-    cur.execute("TRUNCATE TABLE users RESTART IDENTITY CASCADE")
-    conn.commit()
-    #wait till testing is finished
-    yield
-    #delete any users that could be remaining
-    cur.execute("TRUNCATE TABLE users RESTART IDENTITY CASCADE")
-    conn.commit()
-    cur.close()
-    conn.close()
-
 @patch("auth.auth_services.resend")
-def test_settings_integration_flow(db_settings_setup):
+def test_settings_integration_flow(mock_resend):
     """
     INTEGRATION TEST: Verifies that settings page correctly updates
     password hashing, goal updates, and deletion in the db.

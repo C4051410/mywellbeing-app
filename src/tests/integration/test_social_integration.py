@@ -8,24 +8,7 @@ from social.social_service import (
     list_friends
 )
 
-
-@pytest.fixture
-def db_social_setup():
-    conn = connect()
-    cur = conn.cursor()
-    #deletes any remaining data in the db from previous tests
-    cur.execute("TRUNCATE TABLE users RESTART IDENTITY CASCADE")
-    conn.commit()
-    #waits until test is finished before continuing
-    yield
-    #clear any data from the db
-    cur.execute("TRUNCATE TABLE users RESTART IDENTITY CASCADE")
-    conn.commit()
-    cur.close()
-    conn.close()
-
-
-def test_social_integration_flow(db_social_setup):
+def test_social_integration_flow():
     """
     INTEGRATION TEST: Verifies friend management, interactions, and feed logic
     can be stored and retrieved from the db.

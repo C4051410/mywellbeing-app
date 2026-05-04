@@ -5,24 +5,7 @@ from database.connection import connect
 from home.home_services import retrieve_user_stats, retrieve_friends_activities
 from datetime import date
 
-
-@pytest.fixture
-def db_home_setup():
-    conn = connect()
-    cur = conn.cursor()
-    #remove all data from all tables involved and resets identity back to 1
-    cur.execute("TRUNCATE TABLE users,user_stats,friends, workouts RESTART IDENTITY CASCADE")
-    conn.commit()
-    #run the test and wait
-    yield
-    #repeat step above
-    cur.execute("TRUNCATE TABLE users, user_stats,friends, workouts RESTART IDENTITY CASCADE")
-    conn.commit()
-    cur.close()
-    conn.close()
-
-
-def test_home_integration(db_home_setup):
+def test_home_integration():
     """
     INTEGRATION TEST: Verifies database aggregation for streaks,
     daily calories, and friend activities.
