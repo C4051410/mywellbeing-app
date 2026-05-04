@@ -9,8 +9,7 @@ from activities.activities import load_activity_data
 from components.userpfp import Userpfp
 from components.bottom_nav import NavBar
 from components.responsive import Responsive
-from home.home_services import retrieve_friends_activities, retrieve_current_streaks,retrieve_username
-from nutrition.nutrition_services import retrieve_daily_stats,retrieve_user_goals
+from home.home_services import retrieve_friends_activities,retrieve_user_stats
 
 #Sizes of all elements on homepage (as percent of screen)
 welcome_text_size = 0.09
@@ -39,16 +38,12 @@ class WorkoutApp(ft.Column):
         self.foodlog_container = ft.Container(width=100, height=100)
 
         #gets username
-        user = retrieve_username(user_id)
-        steps = 3000
+        username,current_streak,longest_streak,calories_goal,daily_calories = retrieve_user_stats(user_id)
         #retrieves users goal and current stats
-        calories_goal, salts_goal, protein_goal, water_goal = retrieve_user_goals(user_id)
-        daily_calories, daily_salts, daily_proteins, daily_water = retrieve_daily_stats(user_id, date.today())
         #retrieves friends data
         friends_data = retrieve_friends_activities(user_id,date.today())
         friends_list = []
         #gets users current streak and best streak
-        streak = retrieve_current_streaks(user_id)
 
         tot_dist, tot_time, activities_completed, activities_list = load_activity_data(page)
         activities_completed = int(activities_completed)
@@ -68,7 +63,7 @@ class WorkoutApp(ft.Column):
 
         #Welcome text to be shown to the user
         self.welcome_text = ft.Text(
-            value=f"Welcome {user}!",
+            value=f"Welcome {username}!",
             size=self.r.w(welcome_text_size),
             color=ft.Colors.BLACK,
             weight=ft.FontWeight.BOLD
@@ -88,10 +83,6 @@ class WorkoutApp(ft.Column):
         # calorie progress display
         self.calories_text = ft.Text(f"{daily_calories} / {calories_goal}", size=self.r.w(widget_text_size), weight=ft.FontWeight.BOLD)
         self.calories_bar = ft.ProgressBar(value=(daily_calories / calories_goal) if calories_goal else 0, width=150, height=15, color=ft.Colors.DEEP_ORANGE, border_radius=10, bgcolor="#F3F4F6")
-
-        self.salts_text = ft.Text(f"Salt: {daily_salts} / {salts_goal} g",size=self.r.w(widget_text_size))
-        self.protein_text = ft.Text(f"Protein: {daily_proteins} / {protein_goal} g",size=self.r.w(widget_text_size))
-        self.water_text = ft.Text(f"Water: {daily_water} / {water_goal} ml",size=self.r.w(widget_text_size))
 
         for name, title, f_streak, act_type, distance, duration, calories in friends_data:
             # build summary based on activity type
@@ -118,8 +109,7 @@ class WorkoutApp(ft.Column):
             )
 
         # TODO: add strava activities to streak
-        self.current_streak_text = ft.Text(f"{streak[0]}", size=25, color=ft.Colors.WHITE, weight=ft.FontWeight.BOLD)
-        self.longest_streak_text = ft.Text(f"{streak[1]}")
+        self.current_streak_text = ft.Text(f"{current_streak}", size=25, color=ft.Colors.WHITE, weight=ft.FontWeight.BOLD)
 
         # activities widget
         self.activity_container = ft.Container(

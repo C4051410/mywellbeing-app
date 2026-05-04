@@ -142,14 +142,18 @@ class TestSocialFeedLogic:
 
     @patch("social.social_service.get_leaderboard")
     @patch("social.social_service.get_social_feed")
-    @patch("social.social_service.count_likes")
-    @patch("social.social_service.has_user_liked")
-    @patch("social.social_service.count_comments")
-    def test_get_social_overview_ranking(self, m_count_c, m_liked, m_count_l, m_feed, m_lb):
+    @patch("social.social_service.get_interaction_stats")
+    def test_get_social_overview_ranking(self, mock_stats,mock_feed,mock_leader):
         #setup Leaderboard: User 1 is in 2nd place
-        m_lb.return_value = [(2, "Winner", 1000), (1, "Me", 500), (3, "Third", 100)]
+        mock_leader.return_value = [
+            (2, "User Two", 1000),
+            (1, "User One", 500),
+            (3, "User Three", 250),
+            (4, "User Four", 100)
+        ]
         #keep feed empty for this test
-        m_feed.return_value = []
+        mock_feed.return_value = []
+        mock_stats.return_value = {}
 
         data = get_social_overview(1)
 
