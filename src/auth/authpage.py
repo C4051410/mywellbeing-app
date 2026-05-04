@@ -1,7 +1,7 @@
 import flet as ft
 from auth.register import register
 from auth.login import login
-from auth.auth_services import login_user, register_user, refresh_inactivity_timer
+from auth.auth_services import login_user, register_user, refresh_inactivity_timer, save_session
 
 
 def authPage(on_login_success, on_register_success):
@@ -18,7 +18,9 @@ def authPage(on_login_success, on_register_success):
         success,user = login_user(email.value, password.value)
         #logs in user if successful
         if success:
-            #refreshes the inactivity timer used to send email notification
+            #save the login for the next time they load the app
+            save_session(user[0])
+            # refreshes the inactivity timer used to send email notification
             refresh_inactivity_timer(user[0],user[1])
             on_login_success(user[0])
         #displays specific failed category
@@ -33,6 +35,8 @@ def authPage(on_login_success, on_register_success):
         success,user = register_user(username.value,email.value, password.value)
         #successfully registers user if successful
         if success:
+            #save the user for next time they load the app
+            save_session(user)
             on_register_success(user)
         #display specific failed category
         else:

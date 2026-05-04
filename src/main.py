@@ -1,7 +1,7 @@
 import flet as ft
 
 from admin.admin import main_admin
-from auth.auth_services import check_setup_complete
+from auth.auth_services import check_setup_complete, load_session
 from auth.authpage import authPage
 from activities.activities import main_activities, main_activity_detail
 from database.connection import connect
@@ -99,8 +99,14 @@ def main(page: ft.Page):
         page.clean()
         page.add(main_homepage(page, user_id))
         page.update()
-
-    page.add(authPage(on_login_success, on_register_success))
+    #checks if there is a saved user first before loading auth page
+    saved_user = load_session()
+    if saved_user:
+        page.user_id = saved_user
+        page.add(main_homepage(page, saved_user))
+    #if no previous account, load auth page
+    else:
+        page.add(authPage(on_login_success, on_register_success))
 
 current_page = "/homepage"
 
