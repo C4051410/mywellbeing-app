@@ -260,6 +260,13 @@ Unit testing done in test_social_logic.py testing the logic of the functions is 
 | TestSocialInteractionLogic | Test that the functions involving the posts and likes work as intended and dont cause any errors               |
 | TestSocialFeedLogic        | Test that user feed returns as expected and correct response is returned                                       |
 
+### Integration Testing
+Integration testing is done within test_social_integration.py which tests that the functions can be properly implemented with the db.
+
+| Test Function           | What it Tests                                                                                              |
+|-------------------------|------------------------------------------------------------------------------------------------------------|
+| test_social_integration | Test that user can add friends, like and comment on posts and retrieve the leaderboard correctly in the db |
+
 
 ## Settings Page Testing
 ### Manual Testing
