@@ -41,14 +41,19 @@ def get_existing_user(username, email):
         conn.close()
         return str(e)
 
-def commit_setup(user_id, age, gender, height_cm, current_weight_kg, weight_goal_kg, calorie_goal,salts_goal,protein_goal,water_goal):
+def commit_setup(user_id, age, gender, height_cm, current_weight_kg, weight_goal_kg, calorie_goal,salts_goal,protein_goal,water_goal, weekly_activity_goal):
     conn = connect()
     try:
         cur = conn.cursor()
         cur.execute(
-                "INSERT INTO user_stats (user_id, age, gender, height_cm, current_weight_kg, weight_goal_kg, "
-                "calorie_goal,salts_goal,proteins_goal,water_goal,current_streak,longest_streak) VALUES (%s, %s, %s, %s, %s, %s, %s,%s, %s,%s,%s,%s)",
-                (user_id, age, gender, height_cm, current_weight_kg, weight_goal_kg, calorie_goal,salts_goal,protein_goal,water_goal,1,1))
+            """
+            INSERT INTO user_stats (user_id,age,gender,height_cm,
+                                    current_weight_kg,weight_goal_kg,
+                                    calorie_goal,salts_goal,proteins_goal,water_goal,
+                                    weekly_activity_goal,current_streak,longest_streak)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """,
+            (user_id,age,gender,height_cm,current_weight_kg,weight_goal_kg,calorie_goal,salts_goal,protein_goal,water_goal,weekly_activity_goal,1,1))
         conn.commit()
         cur.close()
         conn.close()

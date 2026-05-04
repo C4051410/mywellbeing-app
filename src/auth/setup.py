@@ -24,8 +24,18 @@ def setupGoalsPage(user_id, on_setup_complete):
         ft.dropdown.Option("Light: exercise 1-3 times/week"), ft.dropdown.Option("Moderate: exercise 4-5 times/week"),
                                                                   ft.dropdown.Option("Active: daily exercise")])
 
+    # Map the selected setup activity level to a weekly activity goal
+    def map_activity_level_to_weekly_goal(activity_level_value):
+        mapping = {
+            "Sedentary: no exercise": 1,
+            "Light: exercise 1-3 times/week": 3,
+            "Moderate: exercise 4-5 times/week": 5,
+            "Active: daily exercise": 7,
+        }
+        return mapping[activity_level_value, 3]
+
     def handle_continue(e):
-        if not all([age.value, gender.value, height.value, current_weight.value, goal_weight.value,goal_salts.value,goal_proteins.value,goal_water.value]):
+        if not all([age.value, gender.value, height.value, current_weight.value, goal_weight.value,goal_salts.value,goal_proteins.value,goal_water.value,activity_level.value]):
             message.value = "Please fill in all fields"
             e.page.update()
             return
@@ -85,8 +95,9 @@ def setupGoalsPage(user_id, on_setup_complete):
             else:
                 calorie_goal = round(daily_calories)
 
+            weekly_activity_goal = map_activity_level_to_weekly_goal(activity_level.value)
             # save and store users setup data
-            success = save_setup(user_id, age_val, gender.value, height_val, current_weight_val, goal_weight_val, calorie_goal,salts_val,protein_val,water_val)
+            success = save_setup(user_id, age_val, gender.value, height_val, current_weight_val, goal_weight_val, calorie_goal,salts_val,protein_val,water_val,weekly_activity_goal)
             if not success:
                 message.value = "Error Upon Completion, Please Try Again"
             on_setup_complete(user_id)
