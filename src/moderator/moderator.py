@@ -1,5 +1,6 @@
 import flet as ft
 
+from auth.auth_services import clear_session
 from components.responsive import Responsive
 from database.connection import connect
 from moderator.moderator_services import retrieve_posts_moderator, remove_posts_moderator
@@ -72,4 +73,5 @@ class ModeratorApp(ft.Column):
 
 def main_moderator(page: ft.Page):
     mod_page = ModeratorApp(page)
+    clear_session()
     return mod_page
