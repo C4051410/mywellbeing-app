@@ -351,8 +351,7 @@ def get_social_feed(user_id):
 def get_leaderboard(user_id):
     """
     Retrieve a weekly leaderboard for the current user and their friends.
-    Score is calculated based on a combination of calories, distance and duration..
-    TODO: upgrade to a more accurate weekly relative effort score
+    It counts the weekly workouts and add current streak bonus
     """
     conn = connect()
     cur = conn.cursor()
@@ -371,9 +370,7 @@ def get_leaderboard(user_id):
             weekly_workouts AS (
                 SELECT
                     user_id,
-                    COALESCE(SUM(calories), 0) AS total_calories,
-                    COALESCE(SUM(distance_km), 0) AS total_distance,
-                    COALESCE(SUM(duration_seconds), 0) AS total_seconds
+                    COUNT(*) AS weekly_completed
                 FROM workouts
                 WHERE start_date >= date_trunc('week', CURRENT_DATE)
                 GROUP BY user_id
@@ -382,9 +379,8 @@ def get_leaderboard(user_id):
                 u.id,
                 u.username,
                 CAST(
-                    COALESCE(ww.total_calories, 0)
-                    + COALESCE(ww.total_distance, 0) * 100
-                    + COALESCE(ww.total_seconds, 0) / 60
+                    LEAST(COALESCE(ww.weekly_completed, 0), 7) * 100
+                    + LEAST(COALESCE(us.current_streak, 0), 7) * 50
                     AS INTEGER
                 ) AS total_points
             FROM friend_group fg
