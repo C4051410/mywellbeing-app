@@ -2,6 +2,7 @@
 import flet as ft
 
 from admin.admin_services import retrieve_users_admin, remove_users_admin, make_moderators_admin
+from auth.auth_services import clear_session
 from components.responsive import Responsive
 from database.connection import connect
 
@@ -89,5 +90,6 @@ class AdminApp(ft.Column):
 
 def main_admin(page: ft.Page):
     admin_page = AdminApp(page)
+    clear_session()
     return admin_page
 
