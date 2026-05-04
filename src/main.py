@@ -29,6 +29,8 @@ def main(page: ft.Page):
         else:
             print("User logged in",uid)
         if page.route != current_page:
+            if page.route == "/login":
+                page.add(authPage(on_login_success, on_register_success))
             if page.route == "/home":
                 page.add(main_homepage(page,uid))
             if page.route == "/activities":
