@@ -225,7 +225,12 @@ def test_e2e_login(driver,seed_test_user):
     settings_navbar.click()
     #check that the Manage Account and Goals button Appears
     assert wait.until(
-        EC.presence_of_element_located((AppiumBy.ACCESSIBILITY_ID, "Manage Account & Goals"))
+        EC.presence_of_element_located((AppiumBy.ACCESSIBILITY_ID, "Manage your account"))
+    )
+    logout_btn = driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="Logout\nSign out of your account")
+    logout_btn.click()
+    assert wait.until(
+        EC.presence_of_element_located((AppiumBy.ACCESSIBILITY_ID, "Register"))
     )
 
 def test_e2e_register(driver,seed_test_user):
