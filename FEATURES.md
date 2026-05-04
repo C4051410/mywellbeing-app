@@ -1,26 +1,120 @@
 # Features and Functionality
 
 ***
----
+## Minimum Requirements
+### Database Integration
+We have implemented a remote database using Neon, to allow users to be able to access the database
+from anywhere with an internet access. This also means that the app updates in real time, meaning 
+users can see others posts and information as it occurs.
 
-## Intermediate Functionality
-| Feature                  | Description of Implementation                                                                                                                                                                                                                                                                | Reference File                                            |
-|:-------------------------|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------|
-| **Alert/Notifications**  | plyer.notifications are used to create notifications that occur outside of the application, being sent when users sign in or complete an activity. Resend is used to send email notifications when users register for an account, and when they dont log in for an extend duration           | auth_service.py, activities_service.py,nutrition_services |
-| **User Roles**           | There are multiple roles within the application including users, moderators and admins. Users are the basic role and cant control other users data. Moderators are allowed to view and delete other users posts. Admins are allowed to create new moderators and delete users and moderators | main.py, admin.py, moderator.py                           |                                                                                              |
-| **Dashboards**           | The application contains multiple dashboards which allow users to view a wide range of data, this includes being able to see details about exercises by clicking on them, while also being able to view other users activities on the social side                                            | activities.py,social.py, homepage.py                      |
-| **Game Mechanics**       | To encourage users to come back and continue using the app, we created multiple reasons to return, this includes having a streak which the user has to log an activity each day to keep similar to duolingo, and also have a leaderboard system to encourage them to reach the top           | activities.py, social.py                                  |
-| **Docker Usage**         | Rather then using docker to create a standalone executable, we use Flet's on application builder, using flet build can create standalone applications for android/ios/windows to allow for complete isolation from the project while still functioning up to standard                        | pyproject.toml                                            |
-| **Database Integration** | We have used an remote PostgreSQL database using Neon, allowing the data to be persistent across all users and devices, allowing for real time updates of leaderboards and activities                                                                                                        | database/                                                 |
+src/database
+### Access Control
+We have 3 types of user roles, admin, moderators and users. Admins have the powers to manage users
+and moderators being able to delete accounts and promote others to moderators.
+Users cant change other users data, with the most restricted access.
 
----
+src/admin
+### Three Tier Architecture
+* The Project has been created with the Three-Tier Architecture in mind. The project
+has been seperated into the Presentation Tier (Flet UI Classes), 
+Logic Tier (Python service functions), and Data Tier ( Database queries in database/).
+* The Database and API calls have been encapsulated within the Logic Tier. This means that
+the Front-End never calls directly to either, as it communicates through service modules
+that validate the data and handle errors.
 
-## Advanced Functionality
-| Feature               | Description of Implementation                                                                                                                                                                                                                                                                     | Reference File                 |
-|:----------------------|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------|
-| **Location Features** | We use Flet's own flet_geolocator to find and collect the location of the user, and then track them as they go on activities, allowing them to track their route on top of an actual map                                                                                                          | map.py                         |
-| **User Roles (UX)**   | Admin and Moderators have their own UI when the log into the application, allowing them to perform their tasks without having all the other unnecessary pages                                                                                                                                     | admin.py,moderator.py          |
-| **External APIs**     | We use Strava API, which is a tool provided by strava which allows the users to sign into their strava account and collect their runs and other activities to display on our app. We also use Resend as mentioned above which can create and store emails ready to send through a set time period | strava_api.py,auth_services.py |
-| **Data Science**      | We use data scene in our setup, using the collection of the users setup to create the correct calorie goal for a user to try and go from their current weight to their target weight                                                                                                              | setup.py                       |
+src/
+### UN Sustainable Goals
+The application promotes the UN goals as it encourages Good Health and Wellbeing.
+The app provides a links to the website on the homepage.
 
----
+src/home/homepage.py
+
+## Enable User Intearction
+The application allows for user interaction by allowing them to track their activities and
+nutrition values, while also being able to view others on the social page.
+
+src/activities, src/nutrition and src/social
+
+## Intermediate Requirements
+### Alert/Notification
+* The application uses two types of notifications. The first is plyer.notifications, which is used
+to create notifications which appear on the users actual device, which is used for when they 
+log in/register and create new activities and nutrition logs.
+* The second type is Resend. This is an email notification system, which is used to send emails 
+to the email related to the user. This is done when the user registers a new account, deletes
+their account, or when they have not signed in for 20 hours, reminding them to keep their streak
+
+src/auth/auth_services.py, src/activities/activities_services.py, src/nutrition/nutrition_services.py and 
+src/settings/settings_services.py
+
+### Further User Roles
+We created a moderator role as an extended role, they are allowed to view and delete users posts,
+acting as a back-up in case any posts are released which contain foul langauge or anything inappropriate
+
+src/moderators
+
+### Dashboards
+There are multiple dashboards showing the users stats and posts. The user can get an overview from the homepage,
+They can get more detailed views in activities, nutrition and social pages.
+
+src/home/homepage.py,src/activities/activities.py,src/nutrition/nutrition.py and
+src/social/social.py
+
+### Game Mechanics
+We have implemented two gamification techniques
+* We created a duolingo like streak system, where the user is required to enter an activity each day
+to keep their streak going, encouraging them to come back to the app each day.
+* We have also implemented a leaderboard system which encourages users to try and beat their friends to
+be the highest scoring player.
+
+src/activities/activities_services.py and src/social
+
+### Deployment System
+Rather then using Docker, we have used flet's own built in deployment tool, using flet build to create
+an isolated executable for a range of different platforms, like IOS, Andorid and Windows, this not only allows
+our app to run separately from the code, but it can be suited for each system providing a better user experience.
+To define how the executable is made, we use pyproject to determine what notifications and dependencies are needed.
+
+pyproject.toml
+
+## Advanced Requirements
+### Location Based Features
+We use flets geolocator in order to find the users current location, we then use this to allow users
+to track live runs and cycles by getting their current gps coordinates and tracking the distance they travel
+over the entire journey. This provides users with an alternative way to track their exercises.
+
+src/activities/map.py
+
+### Further User Roles
+Admin and Moderators are provided with an alternative page to streamline what they are required to do.
+There page provides the tools that they need to access and alter the data, creating an isolation from normal
+users preventing them from being accessed via the regular app.
+
+src/admin/admin.py and src/moderator/moderator.py
+
+### External API's and Services
+We use a wide range of different API's and Services
+#### API
+* We use Strava API to allow users to connect their strava account to our application, allowing them to store
+strava activities to create a nice synergy between the two applications
+* We also use Resend API as mentioned above to create email notifications to send to users.
+
+src/activities/activities_services
+
+#### Services
+* We use Flet to create our application, as it's a great service to allow python and flutter to communicate
+with each other, allowing use to create a responsive application which works on multiple platforms.
+* To create our end-to-end testing, we use appium to allow us to create UI testing by using the tools
+to open and run our application on an emulator, using Appium Inspector to find the flutter objects to make sure
+the test works as intended.
+* We also use GitHub Actions to create a CI/CD cycle to run testing pipelines on every push. This ensures
+that each push we made had to past the tests before merging into main.
+
+src/tests/e2e/ and .github/workflows/CSC2033_test.yml
+### Data Science
+* We use data science in our data setup, as it is used to figure out the target calories count based on the 
+target weight by using the amount of exercise they do with the BMI.
+* We also use it to figure out the scores of the leaderboard, multiplying a range of values
+to figure out the users total score.
+
+src/auth/setup.py and src/social/social_queries.py

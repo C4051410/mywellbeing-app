@@ -13,8 +13,7 @@
 Follows the Python Methodology
 
 ***
-
-**Formating**
+## Formating
 
 * 4 Space Indentation
 * Use Inline Commenting for explaining complex lines of code
@@ -23,12 +22,13 @@ Follows the Python Methodology
 
 ***
 
-**Configuration Files**
+## Configuration Files
 
-ruff is used to enforce a coding standard across python code
+We use ruff to enforce a coding standard across python code
 Its information is stored in pyproject.toml.
 It includes stating the maximum line length a code should be
 and what errors should be picked up. It also sets the 
 format and complexity. Used within the GitHub Actions to prevent
-code being merged which breaks it.
+code being merged which breaks it rules, this means that we maintain
+a similar coding style throughout all the code.
 

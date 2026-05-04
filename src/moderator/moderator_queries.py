@@ -7,15 +7,20 @@ def get_posts_moderators(search_query=""):
         cur = conn.cursor()
         #query used to merge both foodlog and workouts, using source to distinguish
         query = """
-                SELECT * FROM (SELECT f.title, u.username, f.id, 'food' as source \
-                               FROM foodlog f \
-                                        JOIN users u ON f.user_id = u.id \
-                               UNION ALL \
-                               SELECT w.title, u.username, w.id, 'work' as source \
-                               FROM workouts w \
-                                        JOIN users u ON w.user_id = u.id)
-                    AS combined
-        """
+                        SELECT * FROM (
+                            SELECT f.title AS display_text, u.username, f.id, 'food' as source 
+                            FROM foodlog f 
+                            JOIN users u ON f.user_id = u.id 
+                            UNION ALL 
+                            SELECT w.title AS display_text, u.username, w.id, 'work' as source 
+                            FROM workouts w 
+                            JOIN users u ON w.user_id = u.id
+                            UNION ALL
+                            SELECT c.content AS display_text, u.username, c.id, 'comment' as source
+                            FROM social_comments c
+                            JOIN users u ON c.user_id = u.id
+                        ) AS combined
+                """
         params = []
         #used for searching for specific user
         if search_query:
@@ -43,6 +48,8 @@ def delete_posts_moderator(post_id:int, source:str):
         #else if would be work
         elif source == "work":
             cur.execute("DELETE FROM workouts WHERE id = %s", (post_id,))
+        elif source == "comment":
+            cur.execute("DELETE FROM social_comments WHERE id = %s", (post_id,))
         conn.commit()
         cur.close()
         conn.close()

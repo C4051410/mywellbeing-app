@@ -8,21 +8,34 @@ from auth.auth_services import save_setup
 def setupGoalsPage(user_id, on_setup_complete):
     message = ft.Text()
 
-    # user data fields
-    age = ft.TextField(label="Age")
+    #only allow integer values
+    age = ft.TextField(label="Age",input_filter=ft.InputFilter(allow=True,regex_string=r"^[0-9]*$",replacement_string=""))
+    #provide dropdown option of different genders
     gender = ft.Dropdown(label="Gender", options=[ft.dropdown.Option("Male"), ft.dropdown.Option("Female"),ft.dropdown.Option("Non-Binary"), ft.dropdown.Option("Other")])
-    height = ft.TextField(label="Height (cm)")
-    current_weight = ft.TextField(label="Current Weight (kg)")
-    goal_weight = ft.TextField(label="Goal Weight (kg)")
-    goal_salts = ft.TextField(hint_text="Salts (g)",input_filter=ft.InputFilter(allow=True,regex_string=r"^\d*\.?\d*$",replacement_string=""),height=40) # only allow numerical values + "."
+    height = ft.TextField(label="Height (cm)",input_filter=ft.InputFilter(allow=True,regex_string=r"^[0-9]*$",replacement_string=""))
+    #only allow integers and "."
+    current_weight = ft.TextField(label="Current Weight (kg)",input_filter=ft.InputFilter(allow=True,regex_string=r"^\d*\.?\d*$",replacement_string=""))
+    goal_weight = ft.TextField(label="Goal Weight (kg)",input_filter=ft.InputFilter(allow=True,regex_string=r"^\d*\.?\d*$",replacement_string=""))
+    goal_salts = ft.TextField(hint_text="Salts (g)",input_filter=ft.InputFilter(allow=True,regex_string=r"^\d*\.?\d*$",replacement_string=""),height=40)
     goal_proteins = ft.TextField(hint_text="Protein Goal (g)",input_filter=ft.InputFilter(allow=True,regex_string=r"^\d*\.?\d*$",replacement_string=""),height=40)
-    goal_water = ft.TextField(hint_text="Water (ml)",input_filter=ft.InputFilter(allow=True,regex_string=r"^[0-9]*$",replacement_string=""),height=40) # only allow numerical values
+    goal_water = ft.TextField(hint_text="Water (ml)",input_filter=ft.InputFilter(allow=True,regex_string=r"^[0-9]*$",replacement_string=""),height=40)
+    #give options of different dropdown options
     activity_level = ft.Dropdown(label="Activity Level", options=[ft.dropdown.Option("Sedentary: no exercise"),
         ft.dropdown.Option("Light: exercise 1-3 times/week"), ft.dropdown.Option("Moderate: exercise 4-5 times/week"),
                                                                   ft.dropdown.Option("Active: daily exercise")])
 
+    # Map the selected setup activity level to a weekly activity goal
+    def map_activity_level_to_weekly_goal(activity_level_value):
+        mapping = {
+            "Sedentary: no exercise": 0,
+            "Light: exercise 1-3 times/week": 3,
+            "Moderate: exercise 4-5 times/week": 5,
+            "Active: daily exercise": 7,
+        }
+        return mapping.get(activity_level_value, 3)
+
     def handle_continue(e):
-        if not all([age.value, gender.value, height.value, current_weight.value, goal_weight.value,goal_salts.value,goal_proteins.value,goal_water.value]):
+        if not all([age.value, gender.value, height.value, current_weight.value, goal_weight.value,goal_salts.value,goal_proteins.value,goal_water.value,activity_level.value]):
             message.value = "Please fill in all fields"
             e.page.update()
             return
@@ -82,10 +95,13 @@ def setupGoalsPage(user_id, on_setup_complete):
             else:
                 calorie_goal = round(daily_calories)
 
+            weekly_activity_goal = map_activity_level_to_weekly_goal(activity_level.value)
             # save and store users setup data
-            success = save_setup(user_id, age_val, gender.value, height_val, current_weight_val, goal_weight_val, calorie_goal,salts_val,protein_val,water_val)
+            success = save_setup(user_id, age_val, gender.value, height_val, current_weight_val, goal_weight_val, calorie_goal,salts_val,protein_val,water_val,weekly_activity_goal)
             if not success:
                 message.value = "Error Upon Completion, Please Try Again"
+                e.page.update()
+                return
             on_setup_complete(user_id)
 
         except ValueError:

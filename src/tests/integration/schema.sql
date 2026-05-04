@@ -19,7 +19,9 @@ CREATE TABLE users (
     password VARCHAR(100),
     email VARCHAR(100),
     role VARCHAR(10),
+    notification_status BOOLEAN DEFAULT TRUE,
     last_scheduled_email_id TEXT
+
 );
 
 -- 3. CREATE USER PROFILES
@@ -44,7 +46,8 @@ CREATE TABLE user_stats (
     steps_today INTEGER DEFAULT 0,
     salts_goal REAL,
     proteins_goal REAL,
-    water_goal INTEGER
+    water_goal INTEGER,
+    weekly_activity_goal INTEGER DEFAULT 3
 );
 
 -- 5. CREATE WORKOUTS

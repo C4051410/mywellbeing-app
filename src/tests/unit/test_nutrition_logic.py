@@ -34,21 +34,23 @@ class TestFoodSearch:
 #patches certain functions to block/give mock results,
 @patch("nutrition.nutrition_services.commit_foodlog")
 @patch("nutrition.nutrition_services.notification")
+@patch("nutrition.nutrition_services.retrieve_notification_status")
 class TestSaveFoodLog:
     """
     UNIT TESTS: Validates input sanitization for food logging.
     Ensures negative values and missing fields are blocked before DB commit.
     """
 
-    def test_save_food_success(self, mock_notify, mock_commit):
+    def test_save_food_success(self,mock_status, mock_notify, mock_commit):
         #valid foodlog should be stored successfully
+        mock_status.return_value = True
         success, message = save_foodlog("Pizza", 500, 2, 15, date.today(), "Dinner", 1)
         assert success is True
         assert message == "Successful"
         #check the commit_foodlog was only called once
         mock_commit.assert_called_once()
 
-    def test_save_food_negative_values(self, mock_notify, mock_commit):
+    def test_save_food_negative_values(self,mock_status, mock_notify, mock_commit):
         #checks calories cannot be negative
         success, message = save_foodlog("Pizza", -500, 2, 15, date.today(), "Dinner", 1)
         assert success is False
@@ -56,7 +58,7 @@ class TestSaveFoodLog:
         #check commit wasnt called
         mock_commit.assert_not_called()
 
-    def test_save_food_missing_fields(self, mock_notify, mock_commit):
+    def test_save_food_missing_fields(self,mock_status, mock_notify, mock_commit):
         #checks values cant be missing or None
         success, message = save_foodlog("", None, 2, 15, date.today(), "Dinner", 1)
         assert success is False

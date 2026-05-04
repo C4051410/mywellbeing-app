@@ -1,18 +1,32 @@
+from datetime import date
+
 from database.connection import connect
 
 #returns users username
-def get_username(user_id):
+def get_user_stats(user_id):
     conn = connect()
     try:
         cur = conn.cursor()
-        cur.execute("SELECT username FROM users WHERE id = %s", (user_id,))
+        cur.execute("""
+            SELECT u.username,
+            us.current_streak,
+            us.longest_streak,
+            us.calorie_goal,
+            COALESCE(SUM(CASE WHEN fl.date = %s THEN fl.calories ELSE 0 END), 0) AS daily_calories
+            FROM users u
+            LEFT JOIN user_stats us ON us.user_id = u.id
+            LEFT JOIN foodlog fl ON fl.user_id = u.id
+            WHERE u.id = %s
+            GROUP BY u.username, us.current_streak, us.longest_streak,us.calorie_goal
+        """, (date.today(), user_id))
         row = cur.fetchone()
         cur.close()
         conn.close()
-        return row[0]
+        return row
     #if connection fails returns None
     except Exception as e:
         conn.close()
+        print(e)
         return None
 
 #returns friends activities
@@ -40,23 +54,6 @@ def get_friends_activities(user_id,date):
         conn.close()
         return None
 
-def get_current_streaks(user_id):
-    conn = connect()
-    try:
-        cur = conn.cursor()
-        cur.execute("""
-            SELECT current_streak, longest_streak
-            FROM user_stats 
-            WHERE user_id = %s
-        """,(user_id,))
-        streaks = cur.fetchone()
-        cur.close()
-        conn.close()
-        return streaks
-    #return None if connection fails
-    except Exception as e:
-        conn.close()
-        return None
 
 
 

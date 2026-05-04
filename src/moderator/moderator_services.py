@@ -40,7 +40,7 @@ def remove_posts_moderator(user_id,source):
     except ValueError:
         return False
     #checks source is food or work string
-    if source not in ["food","work"]:
+    if source not in ["food","work","comment"]:
         return False
 
     delete_posts_moderator(user_id,source)

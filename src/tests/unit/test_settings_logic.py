@@ -3,7 +3,9 @@ from unittest.mock import patch
 import bcrypt
 import pytest
 
-from settings.settings_services import update_password, update_goals
+from settings.settings_services import update_password, update_goals, retrieve_notification_status, \
+    update_notification_status, delete_account
+
 
 #used to prevent functions within which could cause errors
 @patch('settings.settings_services.retrieve_current_password')
@@ -105,10 +107,13 @@ class TestGoalUpdate():
     #sets values
     calories = 2500
     water = 2600
+    weekly_goal = 5
     #tests a valid update
     def test_valid_update(self,mock_goals):
+        # Mock a successful goal update
+        mock_goals.return_value = True
         #valid inputs for update goal
-        success,message = update_goals(1,self.calories,self.water)
+        success,message = update_goals(1,self.calories,self.water,self.weekly_goal)
         #checks it returns true and correct message
         assert success == True
         assert message == "Goals Updated"
@@ -116,20 +121,88 @@ class TestGoalUpdate():
     #checks if missing fields are caught
     def test_missing_field(self,mock_goals):
         #None used to represent missing fields
-        success,message = update_goals(1,None,None)
+        success,message = update_goals(1,None,None,None)
         #checks it false and correct message
         assert success == False
         assert message == "All Fields Required"
 
     def test_invalid_goals(self,mock_goals):
         #checks that negative values arent allowed
-        success,message = update_goals(1,-1,-1)
+        success,message = update_goals(1,-1,-1, -1)
         assert success == False
-        assert message == "Calories and Water Must Be Greater Than 0"
+        assert message == "Calories and Water Must Be Greater Than or Equal To 0"
+        # Checks that activity goal must stay in between 0-7
+        success, message = update_goals(1, 2000, 2000, 8)
+        assert success == False
+        assert message == "Weekly Activity Goal Must Be Between 0 and 7"
         #checks incorrect type isnt allowed
-        success, message = update_goals(1,"Invalid","Invalid")
+        success, message = update_goals(1,"Invalid","Invalid", "Invalid")
+        assert success == False
         assert success == False
         assert message == "Invalid Value"
+
+@patch('settings.settings_services.get_notification_status')
+@patch('settings.settings_services.commit_notification_status')
+class TestNotificationStatus():
+    #check that it works when intended
+    def test_valid_retrieve(self,mock_commit,mock_notification_status):
+        #used to mock successful response
+        mock_notification_status.return_value = True
+        success = retrieve_notification_status(1)
+        #check it returns true
+        assert success == True
+    #check that it doesn't allow for invalid responses
+    def test_invalid_retrieve(self,mock_commit,mock_notification_status):
+        #check None returns false
+        mock_notification_status.return_value = None
+        success = retrieve_notification_status(1)
+        assert success == False
+        #check invalid user_ids are caught and return false
+        success = retrieve_notification_status(-1)
+        assert success == False
+        success = retrieve_notification_status("User")
+        assert success == False
+    #check that update works as intended
+    def test_valid_update(self,mock_commit,mock_notification_status):
+        #check both true and false return True to show successful
+        success = update_notification_status(1,True)
+        assert success == True
+        success = update_notification_status(1,False)
+        assert success == True
+
+    def test_invalid_update(self,mock_commit,mock_notification_status):
+        #Check None is rejected
+        success = update_notification_status(1,None)
+        assert success == False
+        #check user_id is valid
+        success = update_notification_status(-1,True)
+        assert success == False
+        success = update_notification_status("User",True)
+        assert success == False
+
+@patch('settings.settings_services.delete_user_account_db')
+class TestDeleteUserAccount():
+    def test_valid_delete(self,mock_delete_user_account):
+        #check for when the account is deleted successfully
+        mock_delete_user_account.return_value = True
+        success, message = delete_account(1)
+        assert success == True
+        assert message == "Account Deleted Successfully"
+    def test_invalid_delete(self,mock_delete_user_account):
+        #check that user id has to be vali
+        mock_delete_user_account.return_value = True
+        success,message = delete_account(-1)
+        assert success == False
+        assert message == "Invalid User Id"
+        success,message = delete_account("User")
+        assert success == False
+        assert message == "Invalid Value"
+        #check for when there is an issue with DB
+        mock_delete_user_account.return_value = False
+        success,message = delete_account(1)
+        assert success == False
+        assert message == "Failed to Delete Account"
+
 
 
 
