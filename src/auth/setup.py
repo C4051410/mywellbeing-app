@@ -3,7 +3,8 @@ File used for profile setup - users will be redirected here after registration
 '''
 
 import flet as ft
-from auth.auth_services import save_setup
+from auth.auth_services import save_setup, save_session
+
 
 def setupGoalsPage(user_id, on_setup_complete):
     message = ft.Text()
@@ -102,6 +103,7 @@ def setupGoalsPage(user_id, on_setup_complete):
                 message.value = "Error Upon Completion, Please Try Again"
                 e.page.update()
                 return
+            save_session(user_id)
             on_setup_complete(user_id)
 
         except ValueError:
