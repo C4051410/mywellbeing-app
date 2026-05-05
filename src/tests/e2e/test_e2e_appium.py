@@ -47,8 +47,11 @@ def seed_test_user():
         conn.commit()
         #insert the new user into DB
         cur.execute(
-            "INSERT INTO users (username, email, password) VALUES (%s, %s, %s)",
-            ("NewUser", "newuser@gmail.com", hashed_password)
+            "INSERT INTO users (username, email, password,role) VALUES (%s, %s, %s,%s),"
+            "(%s, %s, %s,%s),(%s, %s, %s,%s)",
+            ("NewUser", "newuser@gmail.com", hashed_password,"user",
+             "ModAccount","modemail@gmail.com",hashed_password,"moderator",
+             "AdminAccount","adminemail@gmail.com",hashed_password,"admin",)
         )
         conn.commit()
         #get the users ID
