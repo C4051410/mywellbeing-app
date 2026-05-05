@@ -131,6 +131,55 @@ class TestGoalUpdate():
         assert success == False
         assert message == "Invalid Value"
 
+        #Makes sure a deleted account is removed from the database
+        def test_delete_account_integration():
+            """
+            INTEGRATION TEST:
+            Verifies that deleting a user removes them from the database.
+            """
+            conn = connect()
+            cur = conn.cursor()
+
+            cur.execute("INSERT INTO users (id, username, email, password) VALUES (%s,%s,%s,%s)",
+                        (13, "delete_user", "delete@test.com", "pass"))
+            conn.commit()
+
+            success, message = delete_account(13)
+            assert success is True
+            assert message == "Account Deleted Successfully"
+
+            cur.execute("SELECT * FROM users WHERE id = %s", (13,))
+            assert cur.fetchone() is None
+
+            cur.close()
+            conn.close()
+
+            #Makes sure users notification prefrences are saved
+            def test_notification_status_toggle():
+                """
+                INTEGRATION TEST:
+                Ensures notification status can be updated and retrieved from the database correctly.
+                """
+                conn = connect()
+                cur = conn.cursor()
+
+                cur.execute("INSERT INTO users (id, username, email, password) VALUES (%s,%s,%s,%s)",
+                            (10, "notify_user", "notify@test.com", "pass"))
+                conn.commit()
+
+                # turn ON notifications
+                update_notification_status(10, True)
+                assert retrieve_notification_status(10) is True
+
+                # turn OFF notifications
+                update_notification_status(10, False)
+                assert retrieve_notification_status(10) is False
+
+                cur.execute("DELETE FROM users WHERE id = %s", (10,))
+                conn.commit()
+                cur.close()
+                conn.close()
+
 
 
 
