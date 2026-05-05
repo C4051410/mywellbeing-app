@@ -101,3 +101,13 @@ class TestActivityRetrieval:
         #checks that incorrect id types are rejected
         assert retrieve_activities(-1) == []
         assert retrieve_activities("invalid") == []
+
+        #Makes sure invalid activities cant be saved
+        def test_save_activity_invalid_type():
+            result = save_activity(1, "Swimming", 1.0, 60, datetime.now())
+            assert result is False
+
+            #Makes sure negative values cannot be saved
+            def test_save_activity_negative_values():
+                assert save_activity(1, "Run", -1, 60, datetime.now()) is False
+                assert save_activity(1, "Run", 1, -60, datetime.now()) is False
