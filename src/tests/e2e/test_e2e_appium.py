@@ -1,5 +1,6 @@
 import os
 import time
+from datetime import datetime, timedelta
 from pathlib import Path
 import bcrypt
 import pytest
@@ -41,17 +42,27 @@ def seed_test_user():
     password = "Password1!"
     hashed_password = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt(12)).decode("utf-8")
     try:
+        cur.execute("""
+            SELECT pg_terminate_backend(pid)
+            FROM pg_stat_activity
+            WHERE pid <> pg_backend_pid()
+            AND datname = current_database();
+        """)
+        conn.commit()
         #try and delete user if it exists
-        cur.execute("DELETE FROM users WHERE email = %s", ("newuser@gmail.com",))
-        cur.execute("DELETE FROM users WHERE email = %s", ("NewUserEmail@email.com",))
+        cur.execute("DELETE FROM workouts")
+        cur.execute("DELETE FROM user_stats")
+        cur.execute("DELETE FROM users")
+        cur.execute("ALTER SEQUENCE users_id_seq RESTART WITH 1")
         conn.commit()
         #insert the new user into DB
         cur.execute(
             "INSERT INTO users (username, email, password,role) VALUES (%s, %s, %s,%s),"
-            "(%s, %s, %s,%s),(%s, %s, %s,%s)",
+            "(%s, %s, %s,%s),(%s, %s, %s,%s),(%s, %s, %s,%s)",
             ("NewUser", "newuser@gmail.com", hashed_password,"user",
              "ModAccount","modemail@gmail.com",hashed_password,"moderator",
-             "AdminAccount","adminemail@gmail.com",hashed_password,"admin",)
+             "AdminAccount","adminemail@gmail.com",hashed_password,"admin",
+             "MockUser","mockemail@gmail.com",hashed_password,"user")
         )
         conn.commit()
         #get the users ID
@@ -64,6 +75,19 @@ def seed_test_user():
                     INSERT INTO user_stats (user_id, age, gender, height_cm, current_weight_kg, weight_goal_kg, calorie_goal, salts_goal, proteins_goal, water_goal)
                     VALUES (%s, 25, 'Male', 180, 75, 70, 2000, 5, 150, 2000)
                 """, (user_id,))
+
+        activity_data = (
+            4,
+            "Run",
+            "Run",
+            10.5,
+            3600,
+            datetime.now() - timedelta(seconds=30)
+        )
+        cur.execute("""
+            INSERT INTO workouts (user_id, activity_type,title, distance_km, duration_seconds, start_date)
+            VALUES (%s, %s,%s, %s, %s, %s)
+        """,(activity_data))
         conn.commit()
         #wait until the test is finished
         yield
@@ -92,7 +116,7 @@ def test_app_open(driver):
 
 
 
-def test_e2e_login(driver,seed_test_user):
+def test_e2e_login(seed_test_user,driver):
     """
         End 2 End Test: Check that the front end can properly operate with the backend
     """
@@ -239,7 +263,7 @@ def test_e2e_login(driver,seed_test_user):
         EC.presence_of_element_located((AppiumBy.ACCESSIBILITY_ID, "Register"))
     )
 
-def test_e2e_register(driver,seed_test_user):
+def test_e2e_register(seed_test_user,driver):
     """
         End 2 End Test: Specifically Tests the Register and Setup Pages
     """
@@ -349,3 +373,58 @@ def test_e2e_register(driver,seed_test_user):
     assert wait.until(
         EC.presence_of_element_located((AppiumBy.ACCESSIBILITY_ID, "Register"))
     )
+
+def test_e2e_moderator(seed_test_user,driver):
+    """
+        End to End Test, Specifically Testing Moderator Page
+    """
+    # Set a 10-second wait limit to allow for delays in loading
+    wait = WebDriverWait(driver, 10)
+
+    # look for the button to switch from registration to login
+    switch_to_login = wait.until(
+        EC.presence_of_element_located((AppiumBy.ACCESSIBILITY_ID, "Already have an account? Login"))
+    )
+    switch_to_login.click()
+
+    # looks for the email text field on the page, using the Xpath collected using appium inspector
+    email_field = wait.until(EC.presence_of_element_located(
+        (AppiumBy.XPATH, "//android.widget.EditText[1]")
+    ))
+    # click on the text field
+    email_field.click()
+    # enter the into the field the user email
+    email_field.send_keys("modemail@gmail.com")
+
+    # repeat the same as above but for password field
+    pass_field = wait.until(EC.presence_of_element_located(
+        (AppiumBy.XPATH, "//android.widget.EditText[2]")
+    ))
+    pass_field.click()
+    pass_field.send_keys("Password1!")
+
+    # Finds the login button and clicks it
+    login_btn = driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="Login")
+    login_btn.click()
+    time.sleep(10)
+    #verify we have entered mod page by finding its text field
+    assert wait.until(
+        EC.presence_of_element_located((AppiumBy.XPATH, "//android.widget.EditText"))
+    )
+    #verify that the activity and name of the user is correct
+    assert wait.until(
+        EC.presence_of_element_located((AppiumBy.ACCESSIBILITY_ID,"Run"))
+    )
+    assert wait.until(
+        EC.presence_of_element_located((AppiumBy.ACCESSIBILITY_ID,"MockUser"))
+    )
+    #try and delete the post
+    del_btn = driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="DEL")
+    del_btn.click()
+    #check to see if its not on the page
+    is_gone = wait.until(
+        EC.invisibility_of_element_located((AppiumBy.ACCESSIBILITY_ID, "MockUser"))
+    )
+    #check its gone
+    assert is_gone
+
