@@ -19,7 +19,8 @@ def calculate_distance(lat1, lon1, lat2, lon2):
 
 def main_map(page: ft.Page):
     # --- State Variables ---
-    path_points = []
+    #used to create list of lists so path points can be seperated after pauses
+    path_points = [[]]
     total_dist = 0.0
     is_tracking = False
 
@@ -81,17 +82,33 @@ def main_map(page: ft.Page):
 
         if is_tracking:
             page.run_task(map_ctrl.move_to,get_offset_location(current_gps_loc))
+            #get the most recent path point
+            current_segment = path_points[-1]
+            # if the segment already has a point find the distance
+            if current_segment:
+                #find the last point
+                prev = current_segment[-1]
+                #find the distance between the two and add it to total
+                total_dist += calculate_distance(
+                    prev.latitude, prev.longitude,
+                    current_gps_loc.latitude, current_gps_loc.longitude
+                )
 
-            if path_points:
-                prev = path_points[-1]
-                total_dist += calculate_distance(prev.latitude, prev.longitude, current_gps_loc.latitude,
-                                                 current_gps_loc.longitude)
-
-            path_points.append(current_gps_loc)
+            current_segment.append(current_gps_loc)
+            #return the added distance
             distance_value.value = f"{total_dist:.2f}"
 
-            if len(path_points) > 1:
-                polyline_layer.polylines[0].coordinates = list(path_points)
+            #create the polylines for the map
+            polyline_layer.polylines = [
+                ftm.PolylineMarker(
+                    coordinates=seg,
+                    color=ft.Colors.BLUE,
+                    stroke_width=4
+                )
+                #used to create separate points for when the user pauses
+                #this is done to stop polyline connecting between breaks
+                for seg in path_points if len(seg) > 1
+            ]
         page.update()
     #create geolocator to update position
     gl = Geolocator(
@@ -126,11 +143,13 @@ def main_map(page: ft.Page):
     def go_back(e):
         page.go("/activities")
 
+    #used to create centre that suits page better
     def get_offset_location(loc, offset=-0.006):
-        """Return a point slightly north so the marker appears above the dashboard"""
+        #able to customise location based on centre
         return ftm.MapLatitudeLongitude(loc.latitude + offset, loc.longitude)
 
     async def recenter_map(e):
+        #recentre the map and update the page
         await map_ctrl.move_to(get_offset_location(current_gps_loc), zoom=14)
         page.update()
 
@@ -173,6 +192,8 @@ def main_map(page: ft.Page):
         nonlocal is_tracking, activity_start_time
         is_tracking = True
         activity_start_time = time.time()
+        #create a new point for path points with current location
+        path_points.append([current_gps_loc])
 
         paused_row.visible = False
         tracking_row.visible = True
@@ -205,6 +226,7 @@ def main_map(page: ft.Page):
         ))
 
         path_points.clear()
+        path_points.append([])
         total_dist = 0.0
         total_time_seconds = 0.0
         distance_value.value = "0.00"
