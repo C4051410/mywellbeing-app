@@ -17,6 +17,13 @@ def authPage(on_login_success, on_register_success):
             open = True
         ))
         e.page.update()
+    def success_snackbar(message,e):
+        e.page.overlay.clear()
+        e.page.overlay.append(ft.SnackBar(
+            content=ft.Text(message),
+            bgcolor=ft.Colors.GREEN_400,
+            open = True
+        ))
     # fields only show on the signup page
     signup = [username]
 
@@ -24,6 +31,7 @@ def authPage(on_login_success, on_register_success):
         success,user = login_user(email.value, password.value)
         #logs in user if successful
         if success:
+            success_snackbar("Successfully logged in!",e)
             #save the login for the next time they load the app
             save_session(user[0])
             # refreshes the inactivity timer used to send email notification
@@ -40,6 +48,7 @@ def authPage(on_login_success, on_register_success):
         success,user = register_user(username.value,email.value, password.value)
         #successfully registers user if successful
         if success:
+            success_snackbar("Successfully registered!",e)
             on_register_success(user)
         #display specific failed category
         else:
