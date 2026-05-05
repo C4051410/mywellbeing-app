@@ -80,7 +80,7 @@ def main_map(page: ft.Page):
                        coordinates=current_gps_loc))
 
         if is_tracking:
-            map_ctrl.center = current_gps_loc
+            page.run_task(map_ctrl.move_to,get_offset_location(current_gps_loc))
 
             if path_points:
                 prev = path_points[-1]
@@ -126,8 +126,12 @@ def main_map(page: ft.Page):
     def go_back(e):
         page.go("/activities")
 
-    def recenter_map(e):
-        map_ctrl.center = current_gps_loc
+    def get_offset_location(loc, offset=-0.006):
+        """Return a point slightly north so the marker appears above the dashboard"""
+        return ftm.MapLatitudeLongitude(loc.latitude + offset, loc.longitude)
+
+    async def recenter_map(e):
+        await map_ctrl.move_to(get_offset_location(current_gps_loc), zoom=14)
         page.update()
 
     async def start_tracking(e):
