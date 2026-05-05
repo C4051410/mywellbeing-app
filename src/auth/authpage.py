@@ -5,12 +5,25 @@ from auth.auth_services import login_user, register_user, refresh_inactivity_tim
 
 
 def authPage(on_login_success, on_register_success):
-    message = ft.Text(color=ft.Colors.RED)
     # signup fields
     username = ft.TextField(label="Username",input_filter=ft.InputFilter(allow=True,regex_string="^[^\s]*$",replacement_string=""))
     email = ft.TextField(label="Email",input_filter=ft.InputFilter(allow=True,regex_string="^[^\s]*$",replacement_string=""))
     password = ft.TextField(label="Password", password=True,input_filter=ft.InputFilter(allow=True,regex_string="^[^\s]*$",replacement_string=""))
-
+    def fail_snackbar(message,e):
+        e.page.overlay.clear()
+        e.page.overlay.append(ft.SnackBar(
+            content=ft.Text(message),
+            bgcolor=ft.Colors.RED_400,
+            open = True
+        ))
+        e.page.update()
+    def success_snackbar(message,e):
+        e.page.overlay.clear()
+        e.page.overlay.append(ft.SnackBar(
+            content=ft.Text(message),
+            bgcolor=ft.Colors.GREEN_400,
+            open = True
+        ))
     # fields only show on the signup page
     signup = [username]
 
@@ -18,6 +31,7 @@ def authPage(on_login_success, on_register_success):
         success,user = login_user(email.value, password.value)
         #logs in user if successful
         if success:
+            success_snackbar("Successfully logged in!",e)
             #save the login for the next time they load the app
             save_session(user[0])
             # refreshes the inactivity timer used to send email notification
@@ -25,22 +39,20 @@ def authPage(on_login_success, on_register_success):
             on_login_success(user[0])
         #displays specific failed category
         else:
-            message.value = user
+            fail_snackbar(user,e)
             e.page.update()
 
     def handle_register(e):
         # registers users
-        message.value = ""
         e.page.update()
         success,user = register_user(username.value,email.value, password.value)
         #successfully registers user if successful
         if success:
-            #save the user for next time they load the app
-            save_session(user)
+            success_snackbar("Successfully registered!",e)
             on_register_success(user)
         #display specific failed category
         else:
-            message.value = user
+            fail_snackbar(user,e)
             e.page.update()
 
     def show_register(e):
@@ -90,7 +102,7 @@ def authPage(on_login_success, on_register_success):
                                         offset=ft.Offset(0, 8)),
                     content=ft.Column([
                         username, email, password,
-                        signup_buttons, login_buttons, message
+                        signup_buttons, login_buttons,
                     ]),
                     margin=ft.margin.symmetric(horizontal=20),
                 ),
