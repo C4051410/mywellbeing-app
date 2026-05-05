@@ -121,37 +121,3 @@ class TestUserGoalsLogic:
         assert s == 6.0
         assert p == 1.0 #defaults to 1 to avoid /0
         assert w == 3000
-
-        #Checks multiple food logs are correctly stored for an individual user
-        def test_foodlogs_return_in_correct_order():
-            """
-            INTEGRATION TEST:
-            Ensures multiple foodlogs are returned for a user
-            and ordering is preserved (latest first if implemented in query).
-            """
-            conn = connect()
-            cur = conn.cursor()
-
-            cur.execute("TRUNCATE TABLE foodlog RESTART IDENTITY CASCADE")
-            cur.execute("TRUNCATE TABLE users RESTART IDENTITY CASCADE")
-            conn.commit()
-
-            cur.execute(
-                "INSERT INTO users (id, username, email, password) VALUES (%s,%s,%s,%s)",
-                (1, "tester", "test@test.com", "pass")
-            )
-            conn.commit()
-
-            save_foodlog("Apple", 95, 0, 0.3, date.today(), "Snack", 1)
-            save_foodlog("Chicken", 250, 2, 25, date.today(), "Lunch", 1)
-
-            logs = retrieve_foodlogs(1)
-
-            assert len(logs) == 2
-
-            # most recent first (assuming DESC ordering)
-            assert logs[0][0] in ["Apple", "Chicken"]
-            assert logs[1][0] in ["Apple", "Chicken"]
-
-            cur.close()
-            conn.close()
