@@ -8,7 +8,21 @@ from auth.auth_services import save_setup, save_session
 
 def setupGoalsPage(user_id, on_setup_complete):
     message = ft.Text()
-
+    def fail_snackbar(message, e):
+        e.page.overlay.clear()
+        e.page.overlay.append(ft.SnackBar(
+            content=ft.Text(message),
+            bgcolor=ft.Colors.RED_400,
+            open=True
+        ))
+        e.page.update()
+    def success_snackbar(message,e):
+        e.page.overlay.clear()
+        e.page.overlay.append(ft.SnackBar(
+            content=ft.Text(message),
+            bgcolor=ft.Colors.GREEN_400,
+            open = True
+        ))
     #only allow integer values
     age = ft.TextField(label="Age",input_filter=ft.InputFilter(allow=True,regex_string=r"^[0-9]*$",replacement_string=""))
     #provide dropdown option of different genders
@@ -37,7 +51,7 @@ def setupGoalsPage(user_id, on_setup_complete):
 
     def handle_continue(e):
         if not all([age.value, gender.value, height.value, current_weight.value, goal_weight.value,goal_salts.value,goal_proteins.value,goal_water.value,activity_level.value]):
-            message.value = "Please fill in all fields"
+            fail_snackbar("Please Enter All Fields",e)
             e.page.update()
             return
 
@@ -54,17 +68,21 @@ def setupGoalsPage(user_id, on_setup_complete):
 
             # input validation
             if age_val < 13 or age_val > 100:
-                message.value = "Age must be between 13 and 100"
+                fail_snackbar("Age must be between 13 and 100", e)
                 e.page.update()
                 return
 
             if height_val < 100 or height_val > 300:
-                message.value = "Height must between 100cm and 300cm"
+                fail_snackbar("Height must between 100cm and 300cm", e)
                 e.page.update()
                 return
 
-            if current_weight_val <= 0 or goal_weight_val <= 0:
-                message.value = "Weight must be greater than 0"
+            if current_weight_val < 40 or current_weight_val > 500:
+                fail_snackbar("Current Weight must between 40kg and 500kg", e)
+                e.page.update()
+                return
+            if goal_weight_val < 40 or goal_weight_val > 500:
+                fail_snackbar("Target Weight must be between 40kg and 500kg", e)
                 e.page.update()
                 return
 
@@ -100,10 +118,11 @@ def setupGoalsPage(user_id, on_setup_complete):
             # save and store users setup data
             success = save_setup(user_id, age_val, gender.value, height_val, current_weight_val, goal_weight_val, calorie_goal,salts_val,protein_val,water_val,weekly_activity_goal)
             if not success:
-                message.value = "Error Upon Completion, Please Try Again"
+                fail_snackbar("Error Upon Completion, Please Try Again", e)
                 e.page.update()
                 return
             save_session(user_id)
+            success_snackbar("Successfully Set Up",e)
             on_setup_complete(user_id)
 
         except ValueError:
