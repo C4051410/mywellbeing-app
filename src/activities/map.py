@@ -1,3 +1,8 @@
+"""
+    Map Page
+    Used to display and track a users exercise on a map, tracking the distance and location
+    Sits on the UI to provide users with a visual representation of their exercise
+"""
 import math
 import time
 import asyncio
@@ -5,8 +10,8 @@ from datetime import datetime
 import flet as ft
 import flet_map as ftm
 from flet_geolocator import Geolocator
-from plyer import notification
 from activities.activities_services import save_activity
+
 
 
 def calculate_distance(lat1, lon1, lat2, lon2):
@@ -51,12 +56,12 @@ def main_map(page: ft.Page):
         text_size=14,
         border_radius=10
     )
-
+    #create the marker layer and lines layer for map
     marker_layer = ftm.MarkerLayer(markers=[])
     polyline_layer = ftm.PolylineLayer(
         polylines=[ftm.PolylineMarker(coordinates=[], color=ft.Colors.BLUE, stroke_width=4)]
     )
-
+    #create map
     map_ctrl = ftm.Map(
         expand=True,
         initial_center=current_gps_loc,
@@ -73,8 +78,9 @@ def main_map(page: ft.Page):
         nonlocal total_dist, is_tracking, current_gps_loc
         lat = e.latitude if hasattr(e, 'latitude') else e.position.latitude
         lon = e.longitude if hasattr(e, 'longitude') else e.position.longitude
-
+        #get the current location of user
         current_gps_loc = ftm.MapLatitudeLongitude(lat, lon)
+        #remove and update the users current position
         marker_layer.markers.clear()
         marker_layer.markers.append(
             ftm.Marker(content=ft.Icon(ft.Icons.MY_LOCATION, color=ft.Colors.BLUE, size=30),
@@ -119,6 +125,7 @@ def main_map(page: ft.Page):
     # Background task to tick the stopwatch every second!
     async def run_stopwatch():
         while page.route in ["/map", "/map/"]:
+            #used to calcuate total time and display it
             if is_tracking:
                 elapsed = total_time_seconds + (time.time() - activity_start_time)
 
@@ -126,15 +133,17 @@ def main_map(page: ft.Page):
                 m = int((elapsed % 3600) // 60)
                 s = int(elapsed % 60)
                 timer_value.value = f"{h:02d}:{m:02d}:{s:02d}"
-
+                #used to calculate speed as long as its greater then 0
                 if elapsed > 0:
                     speed = total_dist / (elapsed / 3600)
                     speed_value.value = f"{speed:.1f} km/h"
 
                 try:
                     page.update()
+                #catch any issues that occur to avoid error
                 except Exception:
                     pass
+            #wait one second before moving on
             await asyncio.sleep(1)
 
     page.run_task(run_stopwatch)
@@ -153,21 +162,25 @@ def main_map(page: ft.Page):
         await map_ctrl.move_to(get_offset_location(current_gps_loc), zoom=14)
         page.update()
 
+    #used to start the tracking of the run
     async def start_tracking(e):
         nonlocal is_tracking, activity_start_time
+        #set tracking to true and set teh start time
         is_tracking = True
         activity_start_time = time.time()
-
+        #make sure the correct objects appear when running is active
         start_btn.visible = False
         tracking_row.visible = True
         paused_row.visible = False
         activity_dropdown.disabled = True
         page.update()
 
+        #check that location permission is approved
         if gl is not None:
             status = await gl.get_permission_status()
             if "denied" in str(status).lower():
                 await gl.request_permission()
+            #try and get location or return default
             try:
                 await gl.get_current_position()
             except Exception as err:
@@ -178,16 +191,17 @@ def main_map(page: ft.Page):
                 longitude = -1.6178
 
             on_position_change(MockEvent())
-
+    #used to pause runs
     def pause_tracking(e):
         nonlocal is_tracking, total_time_seconds
+        #stop tracking and find total time between pauses
         is_tracking = False
         total_time_seconds += time.time() - activity_start_time
 
         tracking_row.visible = False
         paused_row.visible = True
         page.update()
-
+    #used to resume runs after pause
     def resume_tracking(e):
         nonlocal is_tracking, activity_start_time
         is_tracking = True
@@ -198,18 +212,18 @@ def main_map(page: ft.Page):
         paused_row.visible = False
         tracking_row.visible = True
         page.update()
-
+    #used to finish run
     def finish_and_save(e):
         nonlocal is_tracking, total_dist, total_time_seconds, activity_start_time
-
+        #stop tracking if It's still tracking
         if is_tracking:
             total_time_seconds += time.time() - activity_start_time
             is_tracking = False
-
+        #finds the final distance and time and activity type
         final_distance = total_dist
         final_seconds = int(total_time_seconds)
         selected_activity = activity_dropdown.value
-
+        #used to save activity
         save_activity(
             user_id=page.user_id,
             activity_type=selected_activity,
@@ -217,14 +231,14 @@ def main_map(page: ft.Page):
             duration_seconds=final_seconds,
             start_date=datetime.now()
         )
-
+        #display the activity through a snackbar
         page.overlay.append(ft.SnackBar(
             content=ft.Text(f"{selected_activity} Saved! Dist: {final_distance:.2f}km | Time: {final_seconds}s",
                             weight=ft.FontWeight.BOLD),
             bgcolor=ft.Colors.GREEN,
             open=True
         ))
-
+        #clears everything for next recording
         path_points.clear()
         path_points.append([])
         total_dist = 0.0
@@ -240,11 +254,11 @@ def main_map(page: ft.Page):
         paused_row.visible = False
         tracking_row.visible = False
         start_btn.visible = True
-
+        #takes user to next page
         page.go("/activities")
 
     # --- UI LAYOUT ---
-
+    #display the button to return user back to activities page
     top_back_button = ft.Container(
         content=ft.FloatingActionButton(
             content=ft.Icon(ft.Icons.ARROW_BACK, color=ft.Colors.BLACK),
@@ -255,7 +269,7 @@ def main_map(page: ft.Page):
         top=40,
         left=20
     )
-
+    #used to recentre the map with the user slocation
     recenter_button = ft.Container(
         content=ft.FloatingActionButton(
             content=ft.Icon(ft.Icons.MY_LOCATION, color=ft.Colors.BLUE_600),
@@ -266,18 +280,23 @@ def main_map(page: ft.Page):
         top=40,
         right=20
     )
-
+    #used to create the button to start run
     start_btn = ft.FloatingActionButton(content=ft.Text("START", weight=ft.FontWeight.BOLD, color=ft.Colors.WHITE),
                                         icon=ft.Icons.FIBER_MANUAL_RECORD, bgcolor=ft.Colors.BLUE, width=150,
                                         on_click=start_tracking)
+    #used to create button to pause run
     pause_btn = ft.FloatingActionButton(content=ft.Text("PAUSE", weight=ft.FontWeight.BOLD, color=ft.Colors.WHITE),
                                         icon=ft.Icons.PAUSE, bgcolor=ft.Colors.GREY_800, width=150,
                                         on_click=pause_tracking)
+    #creates row which pause button is in
     tracking_row = ft.Row(controls=[pause_btn], alignment=ft.MainAxisAlignment.CENTER, visible=False)
+    #creates resume button to resume after pause
     resume_btn = ft.FloatingActionButton(content=ft.Text("RESUME", weight=ft.FontWeight.BOLD, color=ft.Colors.WHITE),
                                          bgcolor=ft.Colors.GREEN, width=140, on_click=resume_tracking)
+    #creates finish button to finish activity
     finish_btn = ft.FloatingActionButton(content=ft.Text("FINISH", weight=ft.FontWeight.BOLD, color=ft.Colors.WHITE),
                                          bgcolor=ft.Colors.RED, width=140, on_click=finish_and_save)
+    #store both resume and finish button
     paused_row = ft.Row(controls=[resume_btn, finish_btn], alignment=ft.MainAxisAlignment.CENTER, visible=False,
                         spacing=15)
 
