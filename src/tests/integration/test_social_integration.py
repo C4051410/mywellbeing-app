@@ -1,3 +1,4 @@
+from unittest.mock import patch
 from database.connection import connect
 from social.social_service import (
     add_friend_by_username,
@@ -6,8 +7,8 @@ from social.social_service import (
     get_social_overview,
     list_friends
 )
-
-def test_social_integration_flow():
+@patch("social.social_service.resend")
+def test_social_integration_flow(mock_resend):
     """
     INTEGRATION TEST: Verifies friend management, interactions, and feed logic
     can be stored and retrieved from the db.
@@ -39,11 +40,11 @@ def test_social_integration_flow():
     assert cur.fetchone()[0] == 2
 
     #try and like a post
-    like_res = like_item(1, "workout", 100)
+    like_res = like_item(1, "workout", 100,2)
     assert like_res == "Liked successfully"
 
     #try and leave a comment on a post
-    comment_res = comment_on_item(1, "workout", 100, "Great run!")
+    comment_res = comment_on_item(1, "workout", 100, "Great run!",2)
     assert comment_res == "Comment added successfully"
 
     #try and retrieve all posts and leaderboard

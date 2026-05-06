@@ -72,27 +72,27 @@ class TestSocialInteractionLogic:
     UNIT TESTS: Social Interactions (Likes/Comments)
     Validates content moderation, length constraints, and ownership.
     """
-
+    @patch("social.social_service.resend")
     @patch("social.social_service.add_comment")
-    def test_add_comment(self,mock_add_comment):
+    def test_add_comment(self,mock_add_comment,mock_resend):
         mock_add_comment.return_value = True
-        result = comment_on_item(2,"workout",101,"Valid Comment")
+        result = comment_on_item(2,"workout",101,"Valid Comment",2)
         assert result == "Comment added successfully"
 
     def test_comment_blacklist_moderation(self):
         # 'word1' is in the BLACKLIST
-        result = comment_on_item(1, "workout", 101, "This comment has word1")
+        result = comment_on_item(1, "workout", 101, "This comment has word1",2)
         assert result == "Comment contains inappropriate language"
 
     def test_comment_length_validation(self):
         #creates comment longer then the 300 character limit
         long_comment = "a" * 301
-        result = comment_on_item(1, "workout", 101, long_comment)
+        result = comment_on_item(1, "workout", 101, long_comment,2)
         assert result == "Comment is too long"
 
     def test_comment_empty_validation(self):
         #check empty comment cant be added
-        result = comment_on_item(1, "workout", 101, "   ")
+        result = comment_on_item(1, "workout", 101, "   ",2)
         assert result == "Comment cannot be empty"
 
     @patch("social.social_service.delete_comment")
@@ -114,18 +114,19 @@ class TestSocialInteractionLogic:
         # Checking that the service converted the date to a string as intended
         assert isinstance(comments[0]["created_at"], str)
 
+    @patch("social.social_service.resend")
     @patch("social.social_service.like_target")
-    def test_like_item(self, mock_like):
+    def test_like_item(self, mock_like,mock_resend):
         #test valid like
         mock_like.return_value = True
-        result = like_item(1, "workout", 10)
+        result = like_item(1, "workout", 10,2)
         assert result == "Liked successfully"
         mock_like.assert_called_once()
 
     @patch("social.social_service.like_target")
     def test_like_item_invalid_type(self, mock_like):
         #check invalid profile type doesnt work
-        result = like_item(1, "profile", 10)
+        result = like_item(1, "profile", 10,2)
         assert result == "Invalid target type"
         mock_like.assert_not_called()
 
