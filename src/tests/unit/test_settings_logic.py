@@ -193,18 +193,19 @@ class TestNotificationStatus():
         assert success == False
 
 @patch('settings.settings_services.delete_user_account_db')
+@patch('settings.settings_services.resend')
 class TestDeleteUserAccount():
     """
         UNIT TESTS: Tests that the delete user account function
         works as intended.
     """
-    def test_valid_delete(self,mock_delete_user_account):
+    def test_valid_delete(self,mock_resend,mock_delete_user_account):
         #check for when the account is deleted successfully
         mock_delete_user_account.return_value = True
         success, message = delete_account(1)
         assert success == True
         assert message == "Account Deleted Successfully"
-    def test_invalid_delete(self,mock_delete_user_account):
+    def test_invalid_delete(self,mock_resend,mock_delete_user_account):
         #check that user id has to be vali
         mock_delete_user_account.return_value = True
         success,message = delete_account(-1)

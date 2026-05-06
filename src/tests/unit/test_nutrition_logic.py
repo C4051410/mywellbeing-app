@@ -5,7 +5,52 @@
 """
 from unittest.mock import patch
 from datetime import date
-from nutrition.nutrition_services import search_food_db, save_foodlog, retrieve_daily_stats, retrieve_user_goals
+
+import pytest
+
+from nutrition.nutrition_services import (search_food_db, save_foodlog, retrieve_daily_stats,
+                                          retrieve_user_goals, save_waterlog, retrieve_foodlogs, retrieve_waterlogs)
+
+
+
+@patch('nutrition.nutrition_services.get_foodlog')
+class TestRetrieveFoodLogs:
+    """
+    UNIT TESTS: Tests that food logs are returned correctly
+    """
+    def test_retrieve_food_logs(self,mock_foodlog):
+        #create food logs to be returned
+        mock_foodlog.return_value = [["Apple",200,0.1,2,"Snack",date.today()],
+                                     ["Steak",500,3.4,15.6,"Dinner",date.today()]]
+        foodlogs = retrieve_foodlogs(1)
+        #check that both food logs are returned correctly
+        assert len(foodlogs) == 2
+        assert foodlogs[0][0] == "Apple"
+        assert foodlogs[1][0] == "Steak"
+    def test_retrieve_food_logs_empty(self,mock_foodlog):
+        #test that None returns an empty row
+        mock_foodlog.return_value = None
+        foodlogs = retrieve_foodlogs(1)
+        assert len(foodlogs) == 0
+
+@patch('nutrition.nutrition_services.get_waterlog')
+class TestRetrieveWaterLogs:
+    """
+    UNIT TESTS: Tests that water logs are returned correctly
+    """
+    def test_retrieve_water_logs(self,mock_waterlog):
+        #mock water logs values
+        mock_waterlog.return_value = [[1000,date.today()],[2000,date.today()]]
+        waterlogs = retrieve_waterlogs(1)
+        #make sure water logs are returned and retrieved successfully
+        assert len(waterlogs) == 2
+        assert waterlogs[0][0] == 1000
+        assert waterlogs[1][0] == 2000
+    def test_retrieve_water_logs_empty(self,mock_waterlog):
+        #check that None returns empty row
+        mock_waterlog.return_value = None
+        waterlogs = retrieve_waterlogs(1)
+        assert len(waterlogs) == 0
 
 
 class TestFoodSearch:
@@ -68,6 +113,38 @@ class TestSaveFoodLog:
         assert success is False
         assert message == "All Fields Required"
         mock_commit.assert_not_called()
+
+#patches certain functions to block/give mock results,
+@patch("nutrition.nutrition_services.commit_waterlog")
+@patch("nutrition.nutrition_services.notification")
+@patch("nutrition.nutrition_services.retrieve_notification_status")
+class TestSaveWaterlog:
+    """
+    UNIT TESTS: Validates input sanitization for waterlog.
+    """
+    def test_save_waterlog_success(self,mock_status, mock_notify, mock_commit):
+        #tests that a valid response returns correct message
+        mock_commit.return_value = True
+        success, message = save_waterlog(1000,date.today(),1)
+        assert success is True
+        assert message == "Successful"
+
+    #will test both 0 and negative values
+    @pytest.mark.parametrize("value", [0, -1])
+    def test_save_waterlog_negative_values(self, mock_status, mock_notify, mock_commit,value):
+        success, message = save_waterlog(value, date.today(), 1)
+        #check 0 and negative fails
+        assert success is False
+        assert message == "Values Cannot be Negative or 0"
+
+    #checks that each field will catch if None
+    @pytest.mark.parametrize("values", [[None,date.today(),1],[1000,None,1],[1000,date.today(),None]])
+    def test_save_waterlog_missing_fields(self,mock_status, mock_notify, mock_commit,values):
+        success, message = save_waterlog(values[0],values[1],values[2])
+        #check that catches missing fields
+        assert success is False
+        assert message == "All Fields Required"
+
 
 
 @patch("nutrition.nutrition_services.get_daily_stats")

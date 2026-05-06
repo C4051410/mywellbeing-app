@@ -5,7 +5,11 @@ from social.social_service import (
     like_item,
     comment_on_item,
     get_social_overview,
-    list_friends
+    list_friends,
+    unlike_item,
+    delete_comment_item,
+    remove_friend_by_id,
+    list_comments
 )
 @patch("social.social_service.retrieve_notification_status")
 @patch("social.social_service.resend")
@@ -39,6 +43,9 @@ def test_social_integration_flow(mock_resend,mock_retrieve_notification_status):
     #check that friends have been added successfully, user to friend and friend to user
     cur.execute("SELECT COUNT(*) FROM friends")
     assert cur.fetchone()[0] == 2
+    #check friends appear in friends list
+    friends = list_friends(1)
+    assert len(friends) == 1
 
     #try and like a post
     like_res = like_item(1, "workout", 100,2)
@@ -47,6 +54,18 @@ def test_social_integration_flow(mock_resend,mock_retrieve_notification_status):
     #try and leave a comment on a post
     comment_res = comment_on_item(1, "workout", 100, "Great run!",2)
     assert comment_res == "Comment added successfully"
+    #check list comments contains the comment
+    comments = list_comments("workout", 100)
+    assert len(comments) == 1
+    #check like actually saves to db
+    cur.execute("SELECT COUNT(*) FROM social_likes")
+    assert cur.fetchone()[0] == 1
+    #check comment actually saved to db
+    cur.execute("SELECT COUNT(*) FROM social_comments")
+    assert cur.fetchone()[0] == 1
+
+
+
 
     #try and retrieve all posts and leaderboard
     overview = get_social_overview(1)
@@ -64,6 +83,23 @@ def test_social_integration_flow(mock_resend,mock_retrieve_notification_status):
     assert "MainUser" in leaderboard_usernames
     assert "FriendUser" in leaderboard_usernames
     assert "StrangerUser" not in leaderboard_usernames
+
+    #check that unlike works
+    unlike_res = unlike_item(1, "workout", 100)
+    assert unlike_res == "Like removed successfully"
+    #check that delete comment works
+    del_comment = delete_comment_item(1,1)
+    assert del_comment == "Comment deleted successfully"
+    #check both are removed from the db
+    cur.execute("SELECT COUNT(*) FROM social_likes")
+    assert cur.fetchone()[0] == 0
+    cur.execute("SELECT COUNT(*) FROM social_comments")
+    assert cur.fetchone()[0] == 0
+
+    remove_friend = remove_friend_by_id(1,2)
+    assert remove_friend == "Friend removed successfully"
+    cur.execute("SELECT COUNT(*) FROM friends")
+    assert cur.fetchone()[0] == 0
 
     cur.close()
     conn.close()

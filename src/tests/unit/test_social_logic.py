@@ -4,6 +4,9 @@
     they return the correct response
 """
 from unittest.mock import patch, MagicMock
+
+import pytest
+
 from social.social_service import (
     add_friend_by_username,
     comment_on_item,
@@ -12,7 +15,8 @@ from social.social_service import (
     list_friends,
     list_comments,
     like_item,
-    unlike_item
+    unlike_item,
+    remove_friend_by_id,
 )
 
 
@@ -53,6 +57,53 @@ class TestFriendshipLogic:
         result = add_friend_by_username(1, "GhostUser")
         assert result == "User not found"
 
+    @patch("social.social_service.get_user_by_username")
+    def test_add_friend_empty_friend(self, mock_get_user):
+        #test that missing friend field doesn't return value
+        result = add_friend_by_username(1,None)
+        assert result == "Friend username is required"
+
+    @patch("social.social_service.get_user_by_username")
+    #cycles through range of invalid user_ids
+    @pytest.mark.parametrize("value",[None,-1,"Invalid"])
+    def test_add_friend_invalid_user(self, mock_get_user,value):
+        #check that invalid user ids are caught
+        result = add_friend_by_username(value,"MyFriend")
+        assert result == "Invalid user_id"
+
+    @patch("social.social_service.get_user_by_username")
+    @patch("social.social_service.add_friend")
+    def test_add_friend_failure(self, mock_add_friend,mock_get_user):
+        #checks for when add friend returns false
+        mock_get_user.return_value = (2,"MyFriend","My@Friend.com")
+        mock_add_friend.return_value = False
+        result = add_friend_by_username(1,"MyFriend")
+        assert result == "Error adding friend"
+
+    @patch("social.social_service.remove_friend")
+    def test_remove_friend(self,mock_remove_friend):
+        #check for successful removal
+        mock_remove_friend.return_value = True
+        result = remove_friend_by_id(1,2)
+        assert result == "Friend removed successfully"
+
+    @patch("social.social_service.remove_friend")
+    #cycles through all invalid ids
+    @pytest.mark.parametrize("value",[[None,None],[-1,-1],["User","User"]])
+    def test_remove_friend_self_error(self, mock_remove_friend,value):
+        #check for invalid ids
+        result = remove_friend_by_id(value[0],value[1])
+        assert result == "Invalid ids"
+
+    @patch("social.social_service.remove_friend")
+    def test_remove_friend_not_found(self, mock_remove_friend):
+        #check for when remove friend fails
+        mock_remove_friend.return_value = False
+        result = remove_friend_by_id(1,2)
+        assert result == "Error removing friend"
+
+
+
     @patch("social.social_service.get_friends")
     def test_list_friends_transformation(self, mock_get):
         #mocking raw database rows (tuples)
@@ -65,6 +116,12 @@ class TestFriendshipLogic:
         assert friends[1]["id"] == 11
         assert isinstance(friends[0], dict)
 
+    @patch("social.social_service.get_friends")
+    def test_list_friends_empty(self, mock_get):
+        #test that empty friends list return empty list
+        mock_get.return_value = []
+        friends = list_friends(1)
+        assert len(friends) == 0
 
 
 class TestSocialInteractionLogic:
@@ -76,9 +133,11 @@ class TestSocialInteractionLogic:
     @patch("social.social_service.resend")
     @patch("social.social_service.add_comment")
     def test_add_comment(self,mock_add_comment,mock_resend,mock_notification_status):
+        #tests that valid comment works
         mock_add_comment.return_value = True
         result = comment_on_item(2,"workout",101,"Valid Comment",2)
         assert result == "Comment added successfully"
+
 
     def test_comment_blacklist_moderation(self):
         # 'word1' is in the BLACKLIST
@@ -102,6 +161,13 @@ class TestSocialInteractionLogic:
         mock_delete.return_value = False
         result = delete_comment_item(1, 500)
         assert result == "Comment could not be deleted"
+
+    @patch("social.social_service.delete_comment")
+    def test_delete_comment(self, mock_delete):
+        # if the query returns False, it means user_id didn't match owner_id
+        mock_delete.return_value = True
+        result = delete_comment_item(1, 500)
+        assert result == "Comment deleted successfully"
 
     @patch("social.social_service.get_comments")
     def test_list_comments_transformation(self, mock_get_comm):
@@ -132,6 +198,20 @@ class TestSocialInteractionLogic:
         assert result == "Invalid target type"
         mock_like.assert_not_called()
 
+    @patch("social.social_service.like_target")
+    def test_like_item_empty_fields(self, mock_like):
+        #test empty fields
+        result = like_item(None,None,None,None)
+        assert result == "All fields required"
+
+    @patch("social.social_service.like_target")
+    @pytest.mark.parametrize("value",[[-1,-1,-1],["id","id","id"]])
+    def test_like_item_invalid_fields(self, mock_like,value):
+        #test invalid ids dont work
+        result = like_item(value[0],"workout",value[1],value[2])
+        assert result == "Invalid ids"
+
+
     @patch("social.social_service.unlike_target")
     def test_unlike_item_success(self, mock_unlike):
         mock_unlike.return_value = True
@@ -139,6 +219,32 @@ class TestSocialInteractionLogic:
         result = unlike_item(1, "workout", 50)
         assert result == "Like removed successfully"
         mock_unlike.assert_called_once_with(1, "workout", 50)
+
+    @patch("social.social_service.unlike_target")
+    def test_unlike_item_empty_fields(self, mock_unlike):
+        #test empty fields fail on unlike
+        result = unlike_item(None,None,None)
+        assert result == "All fields required"
+
+    @patch("social.social_service.unlike_target")
+    @pytest.mark.parametrize("value", [[-1, -1], ["id", "id"]])
+    def test_unlike_item_invalid_fields(self, mock_unlike,value):
+        #test that invalid ids fail on unlike
+        result = unlike_item(value[0],"workout",value[1])
+        assert result == "Invalid ids"
+
+    @patch("social.social_service.unlike_target")
+    def test_unlike_item_invalid_type(self, mock_unlike):
+        #test invalid target type fails
+        result = unlike_item(1,"profile",2)
+        assert result == "Invalid target type"
+
+    @patch("social.social_service.unlike_target")
+    def test_unlike_item_failure(self, mock_unlike):
+        #test what happens if unlike_target returns false
+        mock_unlike.return_value = False
+        result = unlike_item(1, "workout", 10)
+        assert result == "Error removing like"
 
 
 class TestSocialFeedLogic:

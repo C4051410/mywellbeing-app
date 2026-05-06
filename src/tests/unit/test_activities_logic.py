@@ -86,6 +86,16 @@ class TestPastActivityLogging:
         success = save_past_activity(1, "Gym", dist, duration, reps, calories,datetime.now())
         assert success is False
 
+    #test for a future date
+    def test_save_past_activity_future_date(self):
+        future_date = datetime.now() + timedelta(days=1)
+        success = save_past_activity(1, "Gym", 200, 3600,0,0,future_date)
+        assert success is False
+    #test for invalid date
+    def test_save_past_activity_invalid_date(self):
+        success = save_past_activity(1, "Gym", 200, 3600,0,0,"2 O'Clock May 6th")
+        assert success is False
+
 class TestActivityRetrieval:
     """
     UNIT TESTS: Activity Data Retrieval
@@ -106,13 +116,3 @@ class TestActivityRetrieval:
         #checks that incorrect id types are rejected
         assert retrieve_activities(-1) == []
         assert retrieve_activities("invalid") == []
-
-        #Makes sure invalid activities cant be saved
-        def test_save_activity_invalid_type():
-            result = save_activity(1, "Swimming", 1.0, 60, datetime.now())
-            assert result is False
-
-            #Makes sure negative values cannot be saved
-            def test_save_activity_negative_values():
-                assert save_activity(1, "Run", -1, 60, datetime.now()) is False
-                assert save_activity(1, "Run", 1, -60, datetime.now()) is False

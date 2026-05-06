@@ -1,9 +1,11 @@
 from unittest.mock import patch
 import bcrypt
 from database.connection import connect
-from settings.settings_services import update_password, update_goals, delete_account
+from settings.settings_services import update_password, update_goals, delete_account, retrieve_notification_status, \
+    update_notification_status
 
-@patch("auth.auth_services.resend")
+
+@patch("settings.settings_services.resend")
 def test_settings_integration_flow(mock_resend):
     """
     INTEGRATION TEST: Verifies that settings page correctly updates
@@ -16,8 +18,9 @@ def test_settings_integration_flow(mock_resend):
     hashed_old = bcrypt.hashpw(original_password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
     #insert user into db
     cur.execute(
-        "INSERT INTO users (id, username, email, password, role) VALUES (%s, %s, %s, %s, %s)",
-        (1, "SettingsUser", "set@test.com", hashed_old, "user")
+        "INSERT INTO users (id, username, email, password, role,notification_status) "
+        "VALUES (%s, %s, %s, %s, %s,%s)",
+        (1, "SettingsUser", "set@test.com", hashed_old, "user",True)
     )
     #Insert stats for user so it can be successfully updated
     cur.execute("INSERT INTO user_stats (user_id, calorie_goal, water_goal) VALUES (1, 2000, 2000)")
@@ -43,6 +46,17 @@ def test_settings_integration_flow(mock_resend):
     assert row[0] == 2500
     assert row[1] == 3000
     assert row[2] == 4
+
+    #try and retrieve the notification status and check its correct
+    status = retrieve_notification_status(1)
+    assert status is True
+    #try and update the notification status and check it completed
+    update_status = update_notification_status(1,status)
+    assert update_status is True
+    #check the db to see that the notification status has updated
+    cur.execute("SELECT notification_status FROM users WHERE id = %s",(1,))
+    row = cur.fetchone()
+    assert row[0] == False
 
     #try and delete the account
     success_del, msg_del = delete_account(1)

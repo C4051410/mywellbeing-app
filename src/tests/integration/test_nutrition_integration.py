@@ -1,7 +1,9 @@
 from datetime import date
 from unittest.mock import patch
 from database.connection import connect
-from nutrition.nutrition_services import retrieve_foodlogs,save_foodlog
+from nutrition.nutrition_services import retrieve_foodlogs, save_foodlog, save_waterlog, retrieve_waterlogs, \
+    retrieve_daily_stats, retrieve_user_goals
+
 
 @patch("nutrition.nutrition_services.notification")
 def test_nutrition_integration(mock_notification, ):
@@ -17,6 +19,10 @@ def test_nutrition_integration(mock_notification, ):
         "VALUES (%s, %s, %s, %s)",
         (1, "FoodTester", "food@test.com", "dummypass1!")
     )
+    cur.execute(
+        "INSERT INTO user_stats (user_id,calorie_goal,salts_goal,"
+        "proteins_goal,water_goal) VALUES (%s, %s, %s, %s, %s)",
+        (1,2000,4,50,3000))
     conn.commit()
     #used to call cleanup when function successeds or fails
     test_title = "Apple"
@@ -39,10 +45,38 @@ def test_nutrition_integration(mock_notification, ):
     assert row[2] == 0
     assert row[3] == 0.6
     #try and retrieve the foodlogs for that user
-    logs = retrieve_foodlogs(1)
+    foodlogs = retrieve_foodlogs(1)
     #check only the single log returns with right name
-    assert len(logs) == 1
-    assert logs[0][0] == test_title
+    assert len(foodlogs) == 1
+    assert foodlogs[0][0] == test_title
+    #try and insert the waterlog
+    success, message = save_waterlog(1000,date.today(),1)
+    #check it returns successfully
+    assert success is True
+    assert message == "Successful"
+    #try and retrieve water log from the db
+    cur.execute("SELECT water FROM waterlog WHERE user_id =%s",(1,))
+    row = cur.fetchone()
+    #check its correct
+    assert row[0] == 1000
+    #check that water log retrieve works as intended
+    waterlogs = retrieve_waterlogs(1)
+    assert len(waterlogs) == 1
+    assert waterlogs[0][0] == 1000
+    #retrieve the total values of the stats
+    total_c, total_s, total_p, total_w = retrieve_daily_stats(1,date.today())
+    #check all the stats match up
+    assert total_c == 200
+    assert total_s == 0
+    assert total_p == 0.6
+    assert total_w == 1000
+    #retrieve the users goal
+    goal_c, goal_s, goal_p, goal_w = retrieve_user_goals(1)
+    #check that values match up
+    assert goal_c == 2000
+    assert goal_s == 4
+    assert goal_p == 50
+    assert goal_w == 3000
     #cleans db to protect it from errors
     cur.execute("DELETE FROM foodlog WHERE title =%s",(test_title,))
     cur.execute("DELETE FROM users WHERE id = 1")

@@ -83,7 +83,8 @@ def save_foodlog(food, calories, salts, proteins,date,mealtype,user_id):
 
 #same as above but for water
 def save_waterlog(water,date,user_id):
-    if not all([water,date,user_id]):
+    fields = [water,date,user_id]
+    if any(field is None for field in fields):
         return False, "All Fields Required"
     try:
         if float(water) <= 0:
