@@ -1,3 +1,8 @@
+"""
+    This module is used to access the personal details about the users
+    account, allowing them to change their passwords, goals and can
+    delete their account
+"""
 import flet as ft
 from components.bottom_nav import NavBar
 from components.responsive import Responsive
