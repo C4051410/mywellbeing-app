@@ -428,3 +428,81 @@ def test_e2e_moderator(seed_test_user,driver):
     #check its gone
     assert is_gone
 
+def test_e2e_admin(seed_test_user,driver):
+    """
+        End to End Test, Specifically Testing admin  Page
+    """
+    # Set a 10-second wait limit to allow for delays in loading
+    wait = WebDriverWait(driver, 10)
+
+    # look for the button to switch from registration to login
+    switch_to_login = wait.until(
+        EC.presence_of_element_located((AppiumBy.ACCESSIBILITY_ID, "Already have an account? Login"))
+    )
+    switch_to_login.click()
+
+    # looks for the email text field on the page, using the Xpath collected using appium inspector
+    email_field = wait.until(EC.presence_of_element_located(
+        (AppiumBy.XPATH, "//android.widget.EditText[1]")
+    ))
+    # click on the text field
+    email_field.click()
+    # enter the into the field the user email
+    email_field.send_keys("adminemail@gmail.com")
+
+    # repeat the same as above but for password field
+    pass_field = wait.until(EC.presence_of_element_located(
+        (AppiumBy.XPATH, "//android.widget.EditText[2]")
+    ))
+    pass_field.click()
+    pass_field.send_keys("Password1!")
+
+    # Finds the login button and clicks it
+    login_btn = driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="Login")
+    login_btn.click()
+    time.sleep(10)
+    #check that we have reached the admin page
+    assert wait.until(
+        EC.presence_of_element_located((AppiumBy.ACCESSIBILITY_ID, "ADMIN PAGE"))
+    )
+    #find the search field
+    search_field = wait.until(EC.presence_of_element_located(
+        (AppiumBy.XPATH, "//android.widget.EditText")
+    ))
+    #click and enter Mod into the search field
+    search_field.click()
+    search_field.send_keys("Mod")
+    #find the mod account which should be the only one returned
+    assert wait.until(EC.presence_of_element_located(
+        (AppiumBy.ACCESSIBILITY_ID, "ModAccount")
+    ))
+    #find the delete button amd click it
+    del_btn = wait.until(EC.presence_of_element_located(
+        (AppiumBy.ACCESSIBILITY_ID, "DEL")
+    ))
+    del_btn.click()
+    #check that the mod account is gone from the page
+    is_gone = wait.until(
+        EC.invisibility_of_element_located((AppiumBy.ACCESSIBILITY_ID, "ModAccount"))
+    )
+    assert is_gone
+    #clear the field and find the mock user
+    search_field.click()
+    search_field.clear()
+    search_field.send_keys("Mock")
+    #check the mock user is returned
+    assert wait.until(EC.presence_of_element_located(
+        (AppiumBy.ACCESSIBILITY_ID, "MockUser")
+    ))
+    #find and click the mod button
+    mod_btn = wait.until(EC.presence_of_element_located(
+        (AppiumBy.ACCESSIBILITY_ID, "MOD")
+    ))
+    mod_btn.click()
+    #clear the search field
+    search_field.click()
+    search_field.clear()
+    #check that the mock user has been updated
+    assert wait.until(EC.presence_of_element_located(
+        (AppiumBy.ACCESSIBILITY_ID, "moderator")
+    ))
