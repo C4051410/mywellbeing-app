@@ -1,3 +1,4 @@
+"""Used to connect users to external resources like database and email API keys"""
 import platform
 import ssl
 from urllib.parse import urlparse
