@@ -43,6 +43,13 @@ def add_friend_by_username(user_id, friend_username):
     """
     Add friend using username.
     """
+    if not user_id:
+        return "Invalid user_id"
+    try:
+        if int(user_id) < 0:
+            return "Invalid user_id"
+    except ValueError:
+        return "Invalid user_id"
     # Basic validation before touching the database
     if not friend_username or not friend_username.strip():
         return "Friend username is required"
@@ -59,16 +66,23 @@ def add_friend_by_username(user_id, friend_username):
     result = add_friend(user_id, friend_id)
     if result is True:
         return "Friend added successfully"
-    return str(result)
+    return "Error adding friend"
 
 def remove_friend_by_id(user_id, friend_id):
     """
     Remove an existing friend relationship.
     """
+    if not user_id or not friend_id:
+        return "Invalid ids"
+    try:
+        if int(user_id) < 0 or int(friend_id) < 0:
+            return "Invalid ids"
+    except ValueError:
+        return "Invalid ids"
     result = remove_friend(user_id, friend_id)
     if result is True:
         return "Friend removed successfully"
-    return str(result)
+    return "Error removing friend"
 
 def list_friends(user_id):
     """
@@ -90,6 +104,14 @@ def like_item(user_id, target_type, target_id,owner_id):
     """
     Add a like to one workout activity item.
     """
+    if not user_id or not target_type or not target_id or not owner_id:
+        return "All fields required"
+    try:
+        if int(user_id) < 0 or int(owner_id) < 0 or int(target_id) <0:
+            return "Invalid ids"
+    except ValueError:
+        return "Invalid ids"
+
     if target_type != "workout":
         return "Invalid target type"
 
@@ -128,13 +150,20 @@ def unlike_item(user_id, target_type, target_id):
     """
     Remove a like from one workout activity item.
     """
+    if not user_id or not target_type or not target_id:
+        return "All fields required"
+    try:
+        if int(user_id) < 0 or int(target_id) < 0:
+            return "Invalid ids"
+    except ValueError:
+        return "Invalid ids"
     if target_type != "workout":
         return "Invalid target type"
 
     result = unlike_target(user_id, target_type, target_id)
     if result is True:
         return "Like removed successfully"
-    return str(result)
+    return "Error removing like"
 
 
 def comment_on_item(user_id, target_type, target_id, content,owner_id):
