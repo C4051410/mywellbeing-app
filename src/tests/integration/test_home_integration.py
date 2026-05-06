@@ -1,6 +1,4 @@
 import datetime
-
-import pytest
 from database.connection import connect
 from home.home_services import retrieve_user_stats, retrieve_friends_activities
 from datetime import date

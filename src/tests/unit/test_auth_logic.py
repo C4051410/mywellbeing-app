@@ -1,3 +1,7 @@
+"""
+    UNIT TESTS: Validates the authentication logic in auth_services.py.
+    Covers credential validation, field checks, and error message triggering.
+"""
 from unittest.mock import patch
 
 import bcrypt
@@ -5,14 +9,14 @@ import pytest
 
 from auth.auth_services import login_user, register_user, check_setup_complete, save_setup
 
-"""
-    UNIT TESTS: Validates the authentication logic in auth_services.py.
-    Covers credential validation, field checks, and error message triggering.
-"""
 @patch('auth.auth_services.login')
 @patch('auth.auth_services.notification')
 @patch("auth.auth_services.retrieve_notification_status")
 class TestLogin():
+    """
+        UNIT TESTS: Validates that the login function works
+        as intended.
+    """
     #create valid variables to be used throught
     email = 'testingemail@outlook.com'
     password = 'PASSword1!'
@@ -61,6 +65,10 @@ class TestLogin():
 @patch('auth.auth_services.get_existing_user')
 @patch('auth.auth_services.resend.Emails.send')
 class TestRegister():
+    """
+        UNIT TESTS: Validates that the register function works
+        as intended.
+    """
     username = "TestUser"
     email = 'testingemail@outlook.com'
     password = 'Password1!'
@@ -127,6 +135,10 @@ class TestRegister():
 
 @patch('auth.auth_services.get_user_setup')
 class TestCheckSetup():
+    """
+        UNIT TESTS: Validates the check setup function works
+        as intended.
+    """
     def test_complete_setup(self,mock_get):
         #test valid setup
         mock_get.return_value = (1,)
@@ -149,6 +161,10 @@ class TestCheckSetup():
         assert setup == False
 @patch('auth.auth_services.commit_setup')
 class TestSaveSetup():
+    """
+        UNIT TESTS: Validates the save setup function works
+        as intended.
+    """
     def test_complete_setup(self,mock_commit):
         # Mock a successful setup save
         mock_commit.return_value = True

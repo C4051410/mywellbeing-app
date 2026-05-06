@@ -1,3 +1,9 @@
+"""
+    This module handles the End 2 End testing of our application
+    It uses appium and android emulators to load the application
+    into the emulator, and then perform the tests using appium
+    commands
+"""
 import os
 import time
 from datetime import datetime, timedelta
@@ -14,6 +20,10 @@ from selenium.webdriver.support import expected_conditions as EC
 
 @pytest.fixture
 def driver():
+    """
+    This fixture creates a new driver instance to allow
+    the test to connect to the android emulator
+    """
     #used to create the options, including details about the emulator
     options = UiAutomator2Options()
     options.platform_name = "Android"
@@ -36,6 +46,10 @@ def driver():
 
 @pytest.fixture
 def seed_test_user():
+    """
+    This fixture clears and adds all required db entries into the db,
+    allowing the application to function as required
+    """
     conn = connect()
     cur = conn.cursor()
     #creates and hashes passwords
@@ -118,7 +132,8 @@ def test_app_open(driver):
 
 def test_e2e_login(seed_test_user,driver):
     """
-        End 2 End Test: Check that the front end can properly operate with the backend
+        Full through test that tests that the user can log in and then access
+        each of the pages and perform their specific task
     """
     """
         Check that a user can log in using the front end objects and make it to the homepage
@@ -246,7 +261,7 @@ def test_e2e_login(seed_test_user,driver):
         EC.presence_of_element_located((AppiumBy.ACCESSIBILITY_ID, "Track progress with friends"))
     )
     """
-        Test Settings page loads as intended and displays correct information
+        Test Settings page loads as intended and displays correct information and logouts the user
     """
     #find and click the settings navbar button
     settings_navbar = driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="Settings")
@@ -265,7 +280,7 @@ def test_e2e_login(seed_test_user,driver):
 
 def test_e2e_register(seed_test_user,driver):
     """
-        End 2 End Test: Specifically Tests the Register and Setup Pages
+        Specifically Tests the Register and Setup Pages work as intended
     """
     """
         Checks that you can register account on register page
@@ -376,7 +391,7 @@ def test_e2e_register(seed_test_user,driver):
 
 def test_e2e_moderator(seed_test_user,driver):
     """
-        End to End Test, Specifically Testing Moderator Page
+        Specifically Testing Moderator Page and that they can perform the moderator tasks
     """
     # Set a 10-second wait limit to allow for delays in loading
     wait = WebDriverWait(driver, 10)
@@ -430,7 +445,7 @@ def test_e2e_moderator(seed_test_user,driver):
 
 def test_e2e_admin(seed_test_user,driver):
     """
-        End to End Test, Specifically Testing admin  Page
+         Specifically Testing Admin Page and check they can perform their admin abilities
     """
     # Set a 10-second wait limit to allow for delays in loading
     wait = WebDriverWait(driver, 10)

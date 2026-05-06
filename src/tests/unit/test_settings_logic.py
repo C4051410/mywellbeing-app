@@ -1,8 +1,10 @@
+"""
+    This module handles the unit tests for settings page
+    This tests that the functions used work as intended and
+    they return the correct response
+"""
 from unittest.mock import patch
-
 import bcrypt
-import pytest
-
 from settings.settings_services import update_password, update_goals, retrieve_notification_status, \
     update_notification_status, delete_account
 
@@ -10,8 +12,11 @@ from settings.settings_services import update_password, update_goals, retrieve_n
 #used to prevent functions within which could cause errors
 @patch('settings.settings_services.retrieve_current_password')
 @patch('settings.settings_services.commit_update_password')
-#used to test password update
 class TestPasswordUpdate():
+    """
+        UNIT TESTS: Tests that the password update function
+         works as intended.
+    """
     #sets values used in tests
     st_pwsd = "Password1!"
     hs_pswd = bcrypt.hashpw(st_pwsd.encode("utf-8"), bcrypt.gensalt(12))
@@ -102,8 +107,11 @@ class TestPasswordUpdate():
 
 
 @patch('settings.settings_services.commit_update_goals')
-#tests goal update
 class TestGoalUpdate():
+    """
+        UNIT TESTS: Tests that the goal update function
+        works as intended.
+    """
     #sets values
     calories = 2500
     water = 2600
@@ -144,6 +152,10 @@ class TestGoalUpdate():
 @patch('settings.settings_services.get_notification_status')
 @patch('settings.settings_services.commit_notification_status')
 class TestNotificationStatus():
+    """
+        UNIT TESTS: Tests that the notification status function
+        works as intended.
+    """
     #check that it works when intended
     def test_valid_retrieve(self,mock_commit,mock_notification_status):
         #used to mock successful response
@@ -182,6 +194,10 @@ class TestNotificationStatus():
 
 @patch('settings.settings_services.delete_user_account_db')
 class TestDeleteUserAccount():
+    """
+        UNIT TESTS: Tests that the delete user account function
+        works as intended.
+    """
     def test_valid_delete(self,mock_delete_user_account):
         #check for when the account is deleted successfully
         mock_delete_user_account.return_value = True

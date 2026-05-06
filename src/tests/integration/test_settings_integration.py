@@ -1,5 +1,4 @@
 from unittest.mock import patch
-import pytest
 import bcrypt
 from database.connection import connect
 from settings.settings_services import update_password, update_goals, delete_account
