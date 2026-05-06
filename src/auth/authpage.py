@@ -1,6 +1,9 @@
+"""
+    This module is used to display the login and register page which
+    is used by users to access their accounts, while also providing
+    information when the user comes into issues with logging in
+"""
 import flet as ft
-from auth.register import register
-from auth.login import login
 from auth.auth_services import login_user, register_user, refresh_inactivity_timer, save_session
 
 

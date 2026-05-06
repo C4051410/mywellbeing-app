@@ -1,3 +1,8 @@
+"""
+    Settings Queries Layer
+    Used to access the db and return the information
+    retrieved
+"""
 import bcrypt
 from database.connection import connect
 

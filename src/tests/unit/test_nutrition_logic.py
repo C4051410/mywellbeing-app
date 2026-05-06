@@ -1,5 +1,9 @@
-import pytest
-from unittest.mock import patch, MagicMock
+"""
+    This module handles the unit tests for nutrition page
+    This tests that the functions used work as intended and
+    they return the correct response
+"""
+from unittest.mock import patch
 from datetime import date
 from nutrition.nutrition_services import search_food_db, save_foodlog, retrieve_daily_stats, retrieve_user_goals
 

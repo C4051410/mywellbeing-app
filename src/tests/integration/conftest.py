@@ -5,7 +5,7 @@ from database.connection import connect
 @pytest.fixture(autouse=True)
 def db_wipe():
     """
-    Automatically runs before every test to ensure a clean, responsive DB.
+    Automatically runs before every integration test to ensure a clean, responsive DB.
     """
     conn = connect()
     cur = conn.cursor()

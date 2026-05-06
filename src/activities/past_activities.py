@@ -1,3 +1,9 @@
+"""
+    This module allows the users to enter their
+    past exercises, allowing them to search from
+    an array of example exercises, while also
+    letting them enter an range of different values
+"""
 from datetime import datetime
 import flet as ft
 from plyer import notification
@@ -26,7 +32,10 @@ exercises = [
     "Side Plank",
 ]
 def main_past_activities(page: ft.Page):
+    """used to create the past activities page"""
+
     async def handle_item_selected(e):
+        """used to let user select the dropdown items from search bar"""
         # retrieve the value in the search bar
         exercise_search.value = e.control.data
         # pauses the function until the dropdown closes
@@ -35,6 +44,7 @@ def main_past_activities(page: ft.Page):
         exercise_search.update()
 
     def handle_search_change(e):
+        """used to display the search bar dynamically"""
         search_query = e.data.lower()
 
         filtered_exercises = [
@@ -62,13 +72,16 @@ def main_past_activities(page: ft.Page):
 
     # used to open the search bar
     async def open_search(e):
+        """used to open the search bar drop down"""
         # waits for list to appear before
         await exercise_search.open_view()
 
     def go_back(e):
+        """return the user back to activities.py page"""
         page.go("/activities")
 
     def get_duration():
+        """used to get the duration from the search bar"""
         h = hours.value
         if h is not None:
             h = int(hours.value)
@@ -89,6 +102,7 @@ def main_past_activities(page: ft.Page):
 
 
     def save_and_finish():
+        """used to save the past activities"""
         duration_seconds = get_duration()
         if exercise_search.value != "" and calories_input.value != "":
             exercise = exercise_search.value

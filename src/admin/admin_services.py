@@ -1,3 +1,8 @@
+"""
+    Admin Service Layer
+    This file contains the business logic for the admin module.
+    It sits between the UI and the database queries.
+"""
 from admin.admin_queries import get_admin, get_users_admin, delete_users_admin, update_moderators_admin
 
 

@@ -1,3 +1,8 @@
+"""
+    Moderator Queries Layer
+    Used to access the db and return the information
+    retrieved
+"""
 from database.connection import connect
 
 def get_posts_moderators(search_query=""):

@@ -1,3 +1,8 @@
+"""
+    This module handles the unit tests for activities page
+    This tests that the functions used work as intended and
+    they return the correct response
+"""
 import pytest
 from unittest.mock import patch, MagicMock
 from datetime import datetime, timedelta

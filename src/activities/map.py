@@ -15,6 +15,7 @@ from activities.activities_services import save_activity
 
 
 def calculate_distance(lat1, lon1, lat2, lon2):
+    """used to calculate distance between two points"""
     R = 6371.0
     dlat, dlon = math.radians(lat2 - lat1), math.radians(lon2 - lon1)
     a = (math.sin(dlat / 2) ** 2 + math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) * math.sin(
@@ -23,6 +24,7 @@ def calculate_distance(lat1, lon1, lat2, lon2):
 
 
 def main_map(page: ft.Page):
+    """creates map page"""
     # --- State Variables ---
     #used to create list of lists so path points can be seperated after pauses
     path_points = [[]]
@@ -75,6 +77,7 @@ def main_map(page: ft.Page):
 
     # --- CORE LOGIC ---
     def on_position_change(e):
+        """used to track the users change in location"""
         nonlocal total_dist, is_tracking, current_gps_loc
         lat = e.latitude if hasattr(e, 'latitude') else e.position.latitude
         lon = e.longitude if hasattr(e, 'longitude') else e.position.longitude
@@ -124,6 +127,7 @@ def main_map(page: ft.Page):
 
     # Background task to tick the stopwatch every second!
     async def run_stopwatch():
+        """used to create a stopwatch for the user"""
         while page.route in ["/map", "/map/"]:
             #used to calcuate total time and display it
             if is_tracking:
@@ -150,10 +154,11 @@ def main_map(page: ft.Page):
 
     # --- BUTTON HANDLERS ---
     def go_back(e):
+        """return user back to activities"""
         page.go("/activities")
 
-    #used to create centre that suits page better
     def get_offset_location(loc, offset=-0.006):
+        """used to set the location on the map including an offset"""
         #able to customise location based on centre
         return ftm.MapLatitudeLongitude(loc.latitude + offset, loc.longitude)
 
@@ -162,8 +167,8 @@ def main_map(page: ft.Page):
         await map_ctrl.move_to(get_offset_location(current_gps_loc), zoom=14)
         page.update()
 
-    #used to start the tracking of the run
     async def start_tracking(e):
+        """used to start the tracking"""
         nonlocal is_tracking, activity_start_time
         #set tracking to true and set teh start time
         is_tracking = True
@@ -191,8 +196,9 @@ def main_map(page: ft.Page):
                 longitude = -1.6178
 
             on_position_change(MockEvent())
-    #used to pause runs
+
     def pause_tracking(e):
+        """used to pause the tracking"""
         nonlocal is_tracking, total_time_seconds
         #stop tracking and find total time between pauses
         is_tracking = False
@@ -201,8 +207,9 @@ def main_map(page: ft.Page):
         tracking_row.visible = False
         paused_row.visible = True
         page.update()
-    #used to resume runs after pause
+
     def resume_tracking(e):
+        """used to resume the tracking"""
         nonlocal is_tracking, activity_start_time
         is_tracking = True
         activity_start_time = time.time()
@@ -212,8 +219,9 @@ def main_map(page: ft.Page):
         paused_row.visible = False
         tracking_row.visible = True
         page.update()
-    #used to finish run
+
     def finish_and_save(e):
+        """used to finish and save the activity"""
         nonlocal is_tracking, total_dist, total_time_seconds, activity_start_time
         #stop tracking if It's still tracking
         if is_tracking:

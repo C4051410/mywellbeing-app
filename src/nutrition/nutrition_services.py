@@ -1,6 +1,10 @@
+"""
+    Nutrition Service Layer
+    This file contains the business logic for the nutrition module.
+    It sits between the UI and the database queries.
+"""
 import difflib
 from datetime import date, timedelta
-import flet as ft
 from plyer import notification
 
 from nutrition.nutrition_queries import get_foodlog, get_waterlog, commit_foodlog, commit_waterlog, \

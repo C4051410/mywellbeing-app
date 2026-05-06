@@ -1,3 +1,8 @@
+"""
+    Home Service Layer
+    This file contains the business logic for the home module.
+    It sits between the UI and the database queries.
+"""
 from home.home_queries import get_friends_activities, get_user_stats
 
 #gets username

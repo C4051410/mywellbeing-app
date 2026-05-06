@@ -1,3 +1,8 @@
+"""
+    Admin Queries Layer
+    Used to access the db and return the information
+    retrieved
+"""
 from database.connection import connect
 
 def get_users_admin(search_query=""):

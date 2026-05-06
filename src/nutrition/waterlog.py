@@ -1,4 +1,8 @@
-from plyer import notification
+"""
+    This module is used to allow users to create a water log
+    so the users can keep track of the amount of water they have
+    drunk.
+"""
 
 from nutrition.nutrition_services import save_waterlog
 from datetime import date

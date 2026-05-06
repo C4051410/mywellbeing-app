@@ -1,3 +1,8 @@
+"""
+    Settings Service Layer
+    This file contains the business logic for the settings module.
+    It sits between the UI and the database queries.
+"""
 import os
 import re
 

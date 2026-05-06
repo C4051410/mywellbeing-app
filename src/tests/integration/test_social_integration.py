@@ -1,4 +1,3 @@
-import pytest
 from database.connection import connect
 from social.social_service import (
     add_friend_by_username,

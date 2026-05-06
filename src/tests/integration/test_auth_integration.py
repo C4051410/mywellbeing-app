@@ -1,6 +1,4 @@
 from unittest.mock import patch
-
-import pytest
 from auth.auth_services import register_user, login_user
 from database.connection import connect
 

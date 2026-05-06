@@ -1,4 +1,3 @@
-import pytest
 from database.connection import connect
 from moderator.moderator_services import retrieve_posts_moderator, remove_posts_moderator
 

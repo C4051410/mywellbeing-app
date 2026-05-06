@@ -1,7 +1,5 @@
 from datetime import date
 from unittest.mock import patch
-import pytest
-
 from database.connection import connect
 from nutrition.nutrition_services import retrieve_foodlogs,save_foodlog
 

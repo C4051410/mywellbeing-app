@@ -1,12 +1,18 @@
+"""
+    This module handles the unit tests for admin page
+    This tests that the functions used work as intended and
+    they return the correct response
+"""
 from unittest.mock import patch
-
-
 from admin.admin_services import check_admin, retrieve_users_admin, remove_users_admin, make_moderators_admin
 
 #mocks db queries to avoid using actual db
 @patch('admin.admin_services.get_admin')
-#used to test check_admin
 class TestCheckAdmin():
+    """
+        UNIT TESTS: Test that the function used to authenticate
+        and admin account works as intended
+    """
     #tests valid result
     def test_valid_check(self, mock_admin):
         mock_admin.return_value = "admin"
@@ -34,8 +40,11 @@ class TestCheckAdmin():
         assert success == False
 
 @patch('admin.admin_services.get_users_admin')
-#tests retrieve_users_admin
 class TestRetrieveUsers():
+    """
+        UNIT TESTS: Test that the function used to retrieve users
+        works as intended
+    """
     #create fake rows which would be returned by db query
     rows = [
         ("Runner1","ILUVRUN@gmail.com","user",2),
@@ -56,8 +65,11 @@ class TestRetrieveUsers():
         assert len(returned_rows) == 0
 
 @patch('admin.admin_services.delete_users_admin')
-#test remove_users_admin
 class TestRemoveUsers():
+    """
+        UNIT TESTS: Test that the function used to remove users
+        works as intended
+    """
     #test valid return
     def test_valid_remove(self, mock_admin):
         deleted_user = remove_users_admin(1)
@@ -74,8 +86,11 @@ class TestRemoveUsers():
         assert deleted_user == False
 
 @patch('admin.admin_services.update_moderators_admin')
-#tests make_moderators_admin
 class TestUpdateModerators():
+    """
+    UNIT TESTS: Test that the function used to update moderators
+    works as intended
+    """
     #test valid update
     def test_valid_update(self, mock_admin):
         update_mod = make_moderators_admin(1)
