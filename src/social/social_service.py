@@ -3,6 +3,9 @@ Social Service Layer
 This file contains the business logic for the social module.
 It sits between the UI and the database queries.
 """
+import os
+
+import resend
 
 from social.social_queries import (
     get_user_by_username,
@@ -22,7 +25,7 @@ from social.social_queries import (
 # Basic moderation list for comments.
 # This is only a placeholder example for now.
 BLACKLIST = {"word1", "word2"}
-
+CURRENT_DIR = os.path.dirname(__file__)
 def contains_blacklisted_word(text):
     """
     Check if text contains banned words.
@@ -127,6 +130,29 @@ def comment_on_item(user_id, target_type, target_id, content):
 
     result = add_comment(user_id, target_type, target_id, cleaned_content)
     if result is True:
+        #try and send an email to the user
+        try:
+            #will be replaced if full deployment occurred
+            email = "m.austoni2@newcastle.ac.uk"
+            #get the friends username and comment
+            friend = get_user_by_id(user_id)[1]
+            comment = str(content)
+            #find the directory to the html and retrieve it
+            template_path = os.path.join(CURRENT_DIR, "comment.html")
+            with open(template_path, 'r') as file:
+                content = file.read()
+            # Replace the placeholder with the actual variable
+            content = content.replace("{{friend}}", friend)
+            content = content.replace("{{comment}}", comment)
+            #try and send the email
+            resend.Emails.send({
+                "from": "MyWellBeing <reminders@resend.dev>",
+                "to": email,
+                "subject": "New comment",
+                "html": content
+            })
+        except Exception as e:
+            print(e)
         return "Comment added successfully"
     return str(result)
 
