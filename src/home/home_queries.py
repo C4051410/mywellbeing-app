@@ -1,3 +1,8 @@
+"""
+    Home Queries Layer
+    Used to access the db and return the information
+    retrieved
+"""
 from datetime import date
 
 from database.connection import connect
