@@ -1,12 +1,12 @@
+"""
+    This module is used to create the food logs by displaying the user
+    with a range of options to provide nutritional values for each food
+    as it also contains a database of common foods with pre-stored values
+"""
 import csv
-import difflib
 import os
 from datetime import date
-
-from plyer import notification
-
 import flet as ft
-
 from nutrition.nutrition_services import search_food_db, save_foodlog
 
 
