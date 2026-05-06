@@ -117,15 +117,17 @@ to be running as well. The test was made with help from Appium Inspector, allowi
 details of objects. test_app_open is used to test that the application opens correctly.
 All E2E testing is done in test_e2e_appium.py, different sections will be clearly labeled.
 
-| End to End Tests | What it Tests                                                                                                           |
-|-----------------|-------------------------------------------------------------------------------------------------------------------------|
-| Login           | Tests that the user can successfully navigate and login and end up on the homepage                                      |
-| Activities      | Tests that the user can navigate to activities page, and create a new activity, and see the new activity                |
-| Nutrition       | Tests that the user can navigate to the nutrition page and create a new food log, and see the new log                   |
-| Social          | Tests that the user can navigate to the social page                                                                     |
-| Settings        | Tests that the user can navigate to the settings page                                                                   |
-| Registration    | Tests that the user can successfully navigate and create a new account and end up on the homepage                       |
-| Setup           | Tests that the user can successfully navigate and enter all the required feilds in the setup and end up on the homepage |
+| End to End Tests | What it Tests                                                                                                                            |
+|------------------|------------------------------------------------------------------------------------------------------------------------------------------|
+| Login            | Tests that the user can successfully navigate and login and end up on the homepage                                                       |
+| Activities       | Tests that the user can navigate to activities page, and create a new activity, and see the new activity                                 |
+| Nutrition        | Tests that the user can navigate to the nutrition page and create a new food log, and see the new log                                    |
+| Social           | Tests that the user can navigate to the social page                                                                                      |
+| Settings         | Tests that the user can navigate to the settings page and log out of their account                                                       |
+| Registration     | Tests that the user can successfully navigate and create a new account and end up on the homepage                                        |
+| Setup            | Tests that the user can successfully navigate and enter all the required fields in the setup and end up on the homepage                  |
+| Moderator        | Tests that the moderator is successfully logged into their page and that they can delete users posts                                     |
+| Admin            | Tests that the admin is successfully logged into their page and that they can delete users accounts and also promote users to moderators |
 
 We also conducted a Google Lighthouse Search to find the performance of our application and how well it going between pages.
 The tests are normally conducted on websites, so our tests maybe less accurate as it's based on an application.
