@@ -1,3 +1,8 @@
+"""
+    Moderator Service Layer
+    This file contains the business logic for the moderator module.
+    It sits between the UI and the database queries.
+"""
 from moderator.moderator_queries import get_posts_moderators, get_mod, delete_posts_moderator
 
 

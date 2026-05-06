@@ -1,8 +1,11 @@
+"""
+    This module is used to create and display the moderator page,
+    allowing the moderator to access user posts and comments and
+    can delete them.
+"""
 import flet as ft
-
 from auth.auth_services import clear_session
 from components.responsive import Responsive
-from database.connection import connect
 from moderator.moderator_services import retrieve_posts_moderator, remove_posts_moderator
 
 
