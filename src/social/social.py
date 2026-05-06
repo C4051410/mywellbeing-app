@@ -223,6 +223,7 @@ class SocialPage(ft.Column):
         self.activity_data = [
             {
                 "name": item["username"],
+                "owner_user_id": item["owner_user_id"],
                 "activity_type": item["activity_type"],
                 "title": item["title"],
                 "calories": item["calories"],
@@ -654,7 +655,8 @@ class SocialPage(ft.Column):
             result_message = like_item(
                 self.user_id,
                 activity_item["activity_type"],
-                activity_item["target_id"]
+                activity_item["target_id"],
+                activity_item["owner_user_id"]
             )
 
         self.show_snack(result_message)
@@ -728,7 +730,8 @@ class SocialPage(ft.Column):
                     on_click=lambda e: self.submit_comment(
                         activity_item["activity_type"],
                         activity_item["target_id"],
-                        comment_input.value
+                        comment_input.value,
+                        activity_item["owner_user_id"],
                     )
                 )
             ]
@@ -738,8 +741,9 @@ class SocialPage(ft.Column):
         self.this_page.show_dialog(dialog)
 
     # Submit a comment, close the dialog and refresh the social overview
-    def submit_comment(self, target_type, target_id, content):
-        result_message = comment_on_item(self.user_id, target_type, target_id, content)
+    def submit_comment(self, target_type, target_id, content,owner_user_id):
+        result_message = comment_on_item(self.user_id, target_type,
+                                         target_id, content,owner_user_id)
 
         # Close the current dialog first.
         self.this_page.pop_dialog()
