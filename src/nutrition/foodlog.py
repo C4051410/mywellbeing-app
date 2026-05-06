@@ -82,6 +82,12 @@ def main_foodlog(page:ft.Page):
         fats = fats_input.value
         carbohydrates = carbs_input.value
 
+        calories = int(calories) if calories else 0.0
+        salts = float(salts) if salts else 0.0
+        proteins = float(proteins) if proteins else 0.0
+        fats = float(fats) if fats else 0.0
+        carbohydrates = float(carbohydrates) if carbohydrates else 0.0
+
         #retrievs all values from fields and tries to save
         success,message = save_foodlog(food, calories, salts, proteins, fats, carbohydrates, date.today(),mealtype,page.user_id)
         #if failed, will return snack bar with problem
