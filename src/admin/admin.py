@@ -1,10 +1,13 @@
-
+"""
+    This module is used to display the front end of the admin page
+    which allows the admin to search for users and moderators and
+    change their roles or delete their accounts as required
+"""
 import flet as ft
 
 from admin.admin_services import retrieve_users_admin, remove_users_admin, make_moderators_admin
 from auth.auth_services import clear_session
 from components.responsive import Responsive
-from database.connection import connect
 
 
 
