@@ -7,8 +7,9 @@ from social.social_service import (
     get_social_overview,
     list_friends
 )
+@patch("social.social_service.retrieve_notification_status")
 @patch("social.social_service.resend")
-def test_social_integration_flow(mock_resend):
+def test_social_integration_flow(mock_resend,mock_retrieve_notification_status):
     """
     INTEGRATION TEST: Verifies friend management, interactions, and feed logic
     can be stored and retrieved from the db.

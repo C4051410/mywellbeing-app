@@ -72,9 +72,10 @@ class TestSocialInteractionLogic:
     UNIT TESTS: Social Interactions (Likes/Comments)
     Validates content moderation, length constraints, and ownership.
     """
+    @patch("social.social_service.retrieve_notification_status")
     @patch("social.social_service.resend")
     @patch("social.social_service.add_comment")
-    def test_add_comment(self,mock_add_comment,mock_resend):
+    def test_add_comment(self,mock_add_comment,mock_resend,mock_notification_status):
         mock_add_comment.return_value = True
         result = comment_on_item(2,"workout",101,"Valid Comment",2)
         assert result == "Comment added successfully"
@@ -114,9 +115,10 @@ class TestSocialInteractionLogic:
         # Checking that the service converted the date to a string as intended
         assert isinstance(comments[0]["created_at"], str)
 
+    @patch("social.social_service.retrieve_notification_status")
     @patch("social.social_service.resend")
     @patch("social.social_service.like_target")
-    def test_like_item(self, mock_like,mock_resend):
+    def test_like_item(self, mock_like,mock_resend,mock_notification_status):
         #test valid like
         mock_like.return_value = True
         result = like_item(1, "workout", 10,2)
