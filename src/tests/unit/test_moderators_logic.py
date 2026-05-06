@@ -1,13 +1,19 @@
+"""
+    This module handles the unit tests for moderator page
+    This tests that the functions used work as intended and
+    they return the correct response
+"""
 from unittest.mock import patch
-
-from moderator import moderator_services
 from moderator.moderator_services import check_mod, retrieve_posts_moderator, remove_posts_moderator
 
 
 #mocks queries to avoid using actual db
 @patch('moderator.moderator_services.get_mod')
-#tests check_mod
 class TestCheckModerator():
+    """
+        UNIT TESTS: Tests that moderator validation works
+        as intended.
+    """
     #test valid result
     def test_valid_check(self, mock_get_mod):
         mock_get_mod.return_value = "moderator"
@@ -37,6 +43,10 @@ class TestCheckModerator():
 @patch('moderator.moderator_services.get_posts_moderators')
 #test retrieve_posts_moderator
 class TestRetrievePosts():
+    """
+        UNIT TESTS: Tests that retrieving posts function
+        works as intended.
+    """
     #creates fake response to function
     rows = [
         ("Pizza","PizzaKing1",2),
@@ -62,6 +72,10 @@ class TestRetrievePosts():
 @patch('moderator.moderator_services.delete_posts_moderator')
 #tests remove_posts_moderator
 class TestRemovePosts():
+    """
+        UNIT TESTS: Tests that removing posts function
+        works as intended.
+    """
     #test that valid result
     def test_valid_remove(self, mock_delete_posts_moderator):
         deleted_post = remove_posts_moderator(1,"food")

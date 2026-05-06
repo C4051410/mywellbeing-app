@@ -1,3 +1,8 @@
+"""
+    This module handles the unit tests for home page
+    This tests that the functions used work as intended and
+    they return the correct response
+"""
 from datetime import datetime
 
 import pytest

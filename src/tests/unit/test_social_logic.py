@@ -1,4 +1,8 @@
-import pytest
+"""
+    This module handles the unit tests for settings page
+    This tests that the functions used work as intended and
+    they return the correct response
+"""
 from unittest.mock import patch, MagicMock
 from social.social_service import (
     add_friend_by_username,

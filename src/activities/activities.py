@@ -1,12 +1,18 @@
+"""
+    This module is used to display the main activities page
+    and also display the detailed activities when clicked
+    it provides access for users to view their activities
+    and also log new activities.
+"""
 from datetime import datetime, timedelta
 import flet as ft
-
 from activities.activities_services import retrieve_activities
 from activities.strava_api import connect_strava, get_saved_activities, format_strava_activities, save_tokens_for_user, load_tokens_for_user
 from components.bottom_nav import NavBar
 from components.responsive import Responsive
 
 def format_time(seconds):
+    """Format the time correctly"""
     if seconds == 0:
         return "0s"
     hours = seconds // 3600
@@ -21,6 +27,7 @@ def format_time(seconds):
 
 
 def load_activity_data(page):
+    """Load the activity data and display"""
     total_distance = 0.0
     total_runs = 0
     total_seconds = 0
@@ -98,6 +105,13 @@ ACTIVITY_DISPLAY = {
 DEFAULT_DISPLAY = {"label": lambda act: f"{act['dist']} km in {act['time']}"}
 
 class ActivitiesPage(ft.Column):
+    """
+        Activities page, this is used to create the page
+        for displaying all the general information about the
+        activities, displaying the list of activities,
+        allowing users to log new activities, and view
+        details of their past activities.
+    """
     def __init__(self, page: ft.Page):
         super().__init__()
         self.main_page = page
@@ -346,18 +360,22 @@ class ActivitiesPage(ft.Column):
 
     # --- EVENT HANDLERS ---
     def make_activity_click(self, activity):
+        """take users to detailed page"""
         def on_click(e):
             self.main_page.activity_detail = activity
             self.main_page.go("/activity-detail")
         return on_click
 
     def start_activity(self, e):
+        """take user to map.py page"""
         self.main_page.go("/map")
 
     def past_activity(self, e):
+        """take user to past_activities.py page"""
         self.main_page.go("/past_activities")
 
     def connect_strava_clicked(self, e):
+        """connect to strava account"""
         try:
             current_user_id = getattr(self.main_page, "user_id", None)
 
@@ -393,9 +411,15 @@ class ActivitiesPage(ft.Column):
             self.main_page.update()
 
     def format_time(self, seconds: int) -> str:
+        """used to call on format time"""
         return format_time(seconds)
 
 class ActivityDetailPage(ft.Column):
+    """
+        Activity Detail Page, this is used to display
+        the detailed inforamtion of exercises when the
+        user clicks on them on the activities page.
+    """
     def __init__(self, page: ft.Page):
         super().__init__()
         self.main_page = page
@@ -419,6 +443,7 @@ class ActivityDetailPage(ft.Column):
         )
         # activity statistics
         def stat_row(label, value, icon, icon_color=ft.Colors.BLUE):
+            """Used to display the correct activity and details"""
             return ft.Container(
                 bgcolor=ft.Colors.WHITE,
                 border_radius=10,
@@ -478,10 +503,13 @@ class ActivityDetailPage(ft.Column):
         self.alignment = ft.MainAxisAlignment.SPACE_BETWEEN
 
     def go_back(self, e):
+        """return the user back to the main page"""
         self.main_page.go("/activities")
 
 def main_activity_detail(page: ft.Page):
+    """used to return the activity detail page"""
     return ActivityDetailPage(page)
 
 def main_activities(page: ft.Page):
+    """used to return the activity page"""
     return ActivitiesPage(page)

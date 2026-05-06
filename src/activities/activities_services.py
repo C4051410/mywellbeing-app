@@ -1,12 +1,16 @@
+"""
+    Activities Service Layer
+    This file contains the business logic for the activities module.
+    It sits between the UI and the database queries.
+"""
 from datetime import datetime
-
 from plyer import notification
-
 from activities.activity_queries import commit_activity, commit_past_activity, get_activities
 from settings.settings_services import retrieve_notification_status
 
 
 def save_activity(user_id,activity_type,distance_km,duration_seconds,start_date):
+    """Save User Activities from map.py"""
     #make sure all fields are filled, have to do this to allow 0
     fields = [user_id,activity_type,distance_km,duration_seconds,start_date]
     if any(field is None for field in fields):
@@ -45,6 +49,7 @@ def save_activity(user_id,activity_type,distance_km,duration_seconds,start_date)
     return True
 
 def save_past_activity(user_id, title,calories,duration_seconds,reps,distance,start_date):
+    """Save User Activities from past_activities.py"""
     #check that none of the values are None
     fields = [user_id,title,calories,reps,duration_seconds,distance,start_date]
     if any(field is None for field in fields):
@@ -84,6 +89,7 @@ def save_past_activity(user_id, title,calories,duration_seconds,reps,distance,st
     return True
 
 def retrieve_activities(user_id):
+    """retrieve all the users activities"""
     if not user_id:
         return []
     try:

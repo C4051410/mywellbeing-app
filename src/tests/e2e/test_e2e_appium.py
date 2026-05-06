@@ -1,5 +1,12 @@
+"""
+    This module handles the End 2 End testing of our application
+    It uses appium and android emulators to load the application
+    into the emulator, and then perform the tests using appium
+    commands
+"""
 import os
 import time
+from datetime import datetime, timedelta
 from pathlib import Path
 import bcrypt
 import pytest
@@ -13,6 +20,10 @@ from selenium.webdriver.support import expected_conditions as EC
 
 @pytest.fixture
 def driver():
+    """
+    This fixture creates a new driver instance to allow
+    the test to connect to the android emulator
+    """
     #used to create the options, including details about the emulator
     options = UiAutomator2Options()
     options.platform_name = "Android"
@@ -35,20 +46,37 @@ def driver():
 
 @pytest.fixture
 def seed_test_user():
+    """
+    This fixture clears and adds all required db entries into the db,
+    allowing the application to function as required
+    """
     conn = connect()
     cur = conn.cursor()
     #creates and hashes passwords
     password = "Password1!"
     hashed_password = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt(12)).decode("utf-8")
     try:
+        cur.execute("""
+            SELECT pg_terminate_backend(pid)
+            FROM pg_stat_activity
+            WHERE pid <> pg_backend_pid()
+            AND datname = current_database();
+        """)
+        conn.commit()
         #try and delete user if it exists
-        cur.execute("DELETE FROM users WHERE email = %s", ("newuser@gmail.com",))
-        cur.execute("DELETE FROM users WHERE email = %s", ("NewUserEmail@email.com",))
+        cur.execute("DELETE FROM workouts")
+        cur.execute("DELETE FROM user_stats")
+        cur.execute("DELETE FROM users")
+        cur.execute("ALTER SEQUENCE users_id_seq RESTART WITH 1")
         conn.commit()
         #insert the new user into DB
         cur.execute(
-            "INSERT INTO users (username, email, password) VALUES (%s, %s, %s)",
-            ("NewUser", "newuser@gmail.com", hashed_password)
+            "INSERT INTO users (username, email, password,role) VALUES (%s, %s, %s,%s),"
+            "(%s, %s, %s,%s),(%s, %s, %s,%s),(%s, %s, %s,%s)",
+            ("NewUser", "newuser@gmail.com", hashed_password,"user",
+             "ModAccount","modemail@gmail.com",hashed_password,"moderator",
+             "AdminAccount","adminemail@gmail.com",hashed_password,"admin",
+             "MockUser","mockemail@gmail.com",hashed_password,"user")
         )
         conn.commit()
         #get the users ID
@@ -61,6 +89,19 @@ def seed_test_user():
                     INSERT INTO user_stats (user_id, age, gender, height_cm, current_weight_kg, weight_goal_kg, calorie_goal, salts_goal, proteins_goal, water_goal)
                     VALUES (%s, 25, 'Male', 180, 75, 70, 2000, 5, 150, 2000)
                 """, (user_id,))
+
+        activity_data = (
+            4,
+            "Run",
+            "Run",
+            10.5,
+            3600,
+            datetime.now() - timedelta(seconds=30)
+        )
+        cur.execute("""
+            INSERT INTO workouts (user_id, activity_type,title, distance_km, duration_seconds, start_date)
+            VALUES (%s, %s,%s, %s, %s, %s)
+        """,(activity_data))
         conn.commit()
         #wait until the test is finished
         yield
@@ -89,9 +130,10 @@ def test_app_open(driver):
 
 
 
-def test_e2e_login(driver,seed_test_user):
+def test_e2e_login(seed_test_user,driver):
     """
-        End 2 End Test: Check that the front end can properly operate with the backend
+        Full through test that tests that the user can log in and then access
+        each of the pages and perform their specific task
     """
     """
         Check that a user can log in using the front end objects and make it to the homepage
@@ -129,6 +171,7 @@ def test_e2e_login(driver,seed_test_user):
     assert wait.until(
         EC.presence_of_element_located((AppiumBy.ACCESSIBILITY_ID, "Welcome NewUser!"))
     )
+    time.sleep(7)
     """
         Check that a user can log an activity by accessing the activities page
     """
@@ -218,7 +261,7 @@ def test_e2e_login(driver,seed_test_user):
         EC.presence_of_element_located((AppiumBy.ACCESSIBILITY_ID, "Track progress with friends"))
     )
     """
-        Test Settings page loads as intended and displays correct information
+        Test Settings page loads as intended and displays correct information and logouts the user
     """
     #find and click the settings navbar button
     settings_navbar = driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="Settings")
@@ -235,9 +278,9 @@ def test_e2e_login(driver,seed_test_user):
         EC.presence_of_element_located((AppiumBy.ACCESSIBILITY_ID, "Register"))
     )
 
-def test_e2e_register(driver,seed_test_user):
+def test_e2e_register(seed_test_user,driver):
     """
-        End 2 End Test: Specifically Tests the Register and Setup Pages
+        Specifically Tests the Register and Setup Pages work as intended
     """
     """
         Checks that you can register account on register page
@@ -330,3 +373,151 @@ def test_e2e_register(driver,seed_test_user):
     assert wait.until(
         EC.presence_of_element_located((AppiumBy.ACCESSIBILITY_ID, "Welcome NewUser1!"))
     )
+    time.sleep(7)
+    # find and click the settings navbar button
+    settings_navbar = driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="Settings")
+    settings_navbar.click()
+    # check that the settings page as been properly loaded
+    assert wait.until(
+        EC.presence_of_element_located((AppiumBy.ACCESSIBILITY_ID, "Manage your account"))
+    )
+    # find the logout button on the setting page and click it
+    logout_btn = driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="Logout\nSign out of your account")
+    logout_btn.click()
+    # check the user has been returned to the auth page for full circle testing.
+    assert wait.until(
+        EC.presence_of_element_located((AppiumBy.ACCESSIBILITY_ID, "Register"))
+    )
+
+def test_e2e_moderator(seed_test_user,driver):
+    """
+        Specifically Testing Moderator Page and that they can perform the moderator tasks
+    """
+    # Set a 10-second wait limit to allow for delays in loading
+    wait = WebDriverWait(driver, 10)
+
+    # look for the button to switch from registration to login
+    switch_to_login = wait.until(
+        EC.presence_of_element_located((AppiumBy.ACCESSIBILITY_ID, "Already have an account? Login"))
+    )
+    switch_to_login.click()
+
+    # looks for the email text field on the page, using the Xpath collected using appium inspector
+    email_field = wait.until(EC.presence_of_element_located(
+        (AppiumBy.XPATH, "//android.widget.EditText[1]")
+    ))
+    # click on the text field
+    email_field.click()
+    # enter the into the field the user email
+    email_field.send_keys("modemail@gmail.com")
+
+    # repeat the same as above but for password field
+    pass_field = wait.until(EC.presence_of_element_located(
+        (AppiumBy.XPATH, "//android.widget.EditText[2]")
+    ))
+    pass_field.click()
+    pass_field.send_keys("Password1!")
+
+    # Finds the login button and clicks it
+    login_btn = driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="Login")
+    login_btn.click()
+    time.sleep(10)
+    #verify we have entered mod page by finding its text field
+    assert wait.until(
+        EC.presence_of_element_located((AppiumBy.XPATH, "//android.widget.EditText"))
+    )
+    #verify that the activity and name of the user is correct
+    assert wait.until(
+        EC.presence_of_element_located((AppiumBy.ACCESSIBILITY_ID,"Run"))
+    )
+    assert wait.until(
+        EC.presence_of_element_located((AppiumBy.ACCESSIBILITY_ID,"MockUser"))
+    )
+    #try and delete the post
+    del_btn = driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="DEL")
+    del_btn.click()
+    #check to see if its not on the page
+    is_gone = wait.until(
+        EC.invisibility_of_element_located((AppiumBy.ACCESSIBILITY_ID, "MockUser"))
+    )
+    #check its gone
+    assert is_gone
+
+def test_e2e_admin(seed_test_user,driver):
+    """
+         Specifically Testing Admin Page and check they can perform their admin abilities
+    """
+    # Set a 10-second wait limit to allow for delays in loading
+    wait = WebDriverWait(driver, 10)
+
+    # look for the button to switch from registration to login
+    switch_to_login = wait.until(
+        EC.presence_of_element_located((AppiumBy.ACCESSIBILITY_ID, "Already have an account? Login"))
+    )
+    switch_to_login.click()
+
+    # looks for the email text field on the page, using the Xpath collected using appium inspector
+    email_field = wait.until(EC.presence_of_element_located(
+        (AppiumBy.XPATH, "//android.widget.EditText[1]")
+    ))
+    # click on the text field
+    email_field.click()
+    # enter the into the field the user email
+    email_field.send_keys("adminemail@gmail.com")
+
+    # repeat the same as above but for password field
+    pass_field = wait.until(EC.presence_of_element_located(
+        (AppiumBy.XPATH, "//android.widget.EditText[2]")
+    ))
+    pass_field.click()
+    pass_field.send_keys("Password1!")
+
+    # Finds the login button and clicks it
+    login_btn = driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="Login")
+    login_btn.click()
+    time.sleep(10)
+    #check that we have reached the admin page
+    assert wait.until(
+        EC.presence_of_element_located((AppiumBy.ACCESSIBILITY_ID, "ADMIN PAGE"))
+    )
+    #find the search field
+    search_field = wait.until(EC.presence_of_element_located(
+        (AppiumBy.XPATH, "//android.widget.EditText")
+    ))
+    #click and enter Mod into the search field
+    search_field.click()
+    search_field.send_keys("Mod")
+    #find the mod account which should be the only one returned
+    assert wait.until(EC.presence_of_element_located(
+        (AppiumBy.ACCESSIBILITY_ID, "ModAccount")
+    ))
+    #find the delete button amd click it
+    del_btn = wait.until(EC.presence_of_element_located(
+        (AppiumBy.ACCESSIBILITY_ID, "DEL")
+    ))
+    del_btn.click()
+    #check that the mod account is gone from the page
+    is_gone = wait.until(
+        EC.invisibility_of_element_located((AppiumBy.ACCESSIBILITY_ID, "ModAccount"))
+    )
+    assert is_gone
+    #clear the field and find the mock user
+    search_field.click()
+    search_field.clear()
+    search_field.send_keys("Mock")
+    #check the mock user is returned
+    assert wait.until(EC.presence_of_element_located(
+        (AppiumBy.ACCESSIBILITY_ID, "MockUser")
+    ))
+    #find and click the mod button
+    mod_btn = wait.until(EC.presence_of_element_located(
+        (AppiumBy.ACCESSIBILITY_ID, "MOD")
+    ))
+    mod_btn.click()
+    #clear the search field
+    search_field.click()
+    search_field.clear()
+    #check that the mock user has been updated
+    assert wait.until(EC.presence_of_element_located(
+        (AppiumBy.ACCESSIBILITY_ID, "moderator")
+    ))

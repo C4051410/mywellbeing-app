@@ -1,3 +1,7 @@
+"""
+    Module is used to create the navigation bar at the bottom of each
+    of the main pages to allow the users to connect with each other
+"""
 import flet as ft
 from .responsive import Responsive
 

@@ -5,7 +5,7 @@ from database.connection import connect
 @pytest.fixture(autouse=True)
 def db_wipe():
     """
-    Automatically runs before every test to ensure a clean, responsive DB.
+    Automatically runs before every integration test to ensure a clean, responsive DB.
     """
     conn = connect()
     cur = conn.cursor()
@@ -14,7 +14,7 @@ def db_wipe():
         cur.execute("""
                     SELECT pg_terminate_backend(pid)
                     FROM pg_stat_activity
-                    WHERE datname = 'csc2033_test'
+                    WHERE datname = current_database()
                       AND pid <> pg_backend_pid();
                 """)
         # Clear all tables involved in integration tests

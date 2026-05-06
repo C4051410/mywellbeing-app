@@ -1,5 +1,8 @@
 '''
+Strava API: This is used to access the Strava API for the activities page
+allowing the users to connect their strava information on our application
 IMPORTANT - This Strava integration is currently limited to one user/athlete
+On deployment we would be able to handle more accounts.
 '''
 import os
 import urllib.parse
@@ -29,7 +32,7 @@ SCOPES = "read,activity:read_all"
 strava_result = {"token_data": None, "error": None}
 
 def refresh_access_token(user_id, refresh_token):
-    # POST request to strava to refresh expired tokens
+    """POST request to strava to refresh expired tokens"""
     response = requests.post("https://www.strava.com/api/v3/oauth/token", data={"client_id": CLIENT_ID,
     "client_secret": CLIENT_SECRET, "grant_type": "refresh_token", "refresh_token": refresh_token,}, timeout=30,)
 
@@ -42,7 +45,7 @@ def refresh_access_token(user_id, refresh_token):
         return None
 
 def get_activities(access_token):
-    # GET request to strava api to fetch activities
+    """GET request to strava api to fetch activities"""
     response = requests.get(
         "https://www.strava.com/api/v3/athlete/activities",
         headers={"Authorization": f"Bearer {access_token}"},
@@ -58,7 +61,7 @@ def get_activities(access_token):
         return []
 
 def get_saved_activities(user_id):
-    # load token
+    """load token"""
     token_data = load_tokens_for_user(user_id)
 
     if not token_data:
@@ -76,6 +79,7 @@ def get_saved_activities(user_id):
     return get_activities(access_token)
 
 def format_time(seconds):
+    """format the strava time corretcly"""
     if seconds == 0:
         return "0s"
 
@@ -91,6 +95,7 @@ def format_time(seconds):
         return f"{secs}s"
 
 def format_strava_activities(strava_activities):
+    """format the strava activities"""
     formatted = []
 
     # loop through each activity
@@ -131,8 +136,9 @@ def format_strava_activities(strava_activities):
 
     return formatted
 
-# handles the callback request that strava sends to the app
+
 class StravaHandler(BaseHTTPRequestHandler):
+    """handles the callback request that strava sends to the app"""
     def do_GET(self):
         # splits url to read its query parameters
         parsed = urllib.parse.urlparse(self.path)

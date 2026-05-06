@@ -1,5 +1,3 @@
-from unittest.mock import patch
-import pytest
 from database.connection import connect
 from admin.admin_services import retrieve_users_admin, delete_users_admin, make_moderators_admin, remove_users_admin
 
