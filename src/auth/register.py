@@ -1,3 +1,8 @@
+"""
+    Register Queries Layer
+    Used to access the db and return the information
+    retrieved
+"""
 import re
 import bcrypt
 from database.connection import connect

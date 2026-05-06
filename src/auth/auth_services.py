@@ -1,3 +1,8 @@
+"""
+    Auth Service Layer
+    This file contains the business logic for the auth module.
+    It sits between the UI and the database queries.
+"""
 import os
 import re
 import json
