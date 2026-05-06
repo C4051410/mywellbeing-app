@@ -3,7 +3,11 @@ Social Service Layer
 This file contains the business logic for the social module.
 It sits between the UI and the database queries.
 """
+import os
 
+import resend
+
+from settings.settings_services import retrieve_notification_status
 from social.social_queries import (
     get_user_by_username,
     get_user_by_id,
@@ -22,7 +26,7 @@ from social.social_queries import (
 # Basic moderation list for comments.
 # This is only a placeholder example for now.
 BLACKLIST = {"word1", "word2"}
-
+CURRENT_DIR = os.path.dirname(__file__)
 def contains_blacklisted_word(text):
     """
     Check if text contains banned words.
@@ -82,7 +86,7 @@ def list_friends(user_id):
 
 
 # Social Interaction - like and comments
-def like_item(user_id, target_type, target_id):
+def like_item(user_id, target_type, target_id,owner_id):
     """
     Add a like to one workout activity item.
     """
@@ -91,6 +95,32 @@ def like_item(user_id, target_type, target_id):
 
     result = like_target(user_id, target_type, target_id)
     if result is True:
+        #check if user has notification on
+        if retrieve_notification_status(owner_id):
+            # try and email the user
+            try:
+                # will be replaced if full deployment occurred
+                email = "m.austoni2@newcastle.ac.uk"
+                #get posters username
+                username = get_user_by_id(owner_id)[1]
+                # get the friends username
+                friend = get_user_by_id(user_id)[1]
+                # find the directory to the html and retrieve it
+                template_path = os.path.join(CURRENT_DIR, "like.html")
+                with open(template_path, 'r') as file:
+                    content = file.read()
+                # Replace the placeholder with the actual variable
+                content = content.replace("{{friend}}", friend)
+                content = content.replace("{{username}}", username)
+                # try and send the email
+                resend.Emails.send({
+                    "from": "MyWellBeing <reminders@resend.dev>",
+                    "to": email,
+                    "subject": "New Like",
+                    "html": content
+                })
+            except Exception as e:
+                print(e)
         return "Liked successfully"
     return str(result)
 
@@ -107,7 +137,7 @@ def unlike_item(user_id, target_type, target_id):
     return str(result)
 
 
-def comment_on_item(user_id, target_type, target_id, content):
+def comment_on_item(user_id, target_type, target_id, content,owner_id):
     """
     Add a comment to one workout activity item.
     """
@@ -127,6 +157,34 @@ def comment_on_item(user_id, target_type, target_id, content):
 
     result = add_comment(user_id, target_type, target_id, cleaned_content)
     if result is True:
+        # check if user has notification on
+        if retrieve_notification_status(owner_id):
+            #try and send an email to the user
+            try:
+                #will be replaced if full deployment occurred
+                email = "m.austoni2@newcastle.ac.uk"
+                #get posters username
+                username = get_user_by_id(owner_id)[1]
+                #get the friends username and comment
+                friend = get_user_by_id(user_id)[1]
+                comment = str(content)
+                #find the directory to the html and retrieve it
+                template_path = os.path.join(CURRENT_DIR, "comment.html")
+                with open(template_path, 'r') as file:
+                    content = file.read()
+                # Replace the placeholder with the actual variable
+                content = content.replace("{{friend}}", friend)
+                content = content.replace("{{comment}}", comment)
+                content = content.replace("{{username}}", username)
+                #try and send the email
+                resend.Emails.send({
+                    "from": "MyWellBeing <reminders@resend.dev>",
+                    "to": email,
+                    "subject": "New comment",
+                    "html": content
+                })
+            except Exception as e:
+                print(e)
         return "Comment added successfully"
     return str(result)
 
