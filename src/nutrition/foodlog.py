@@ -44,6 +44,8 @@ def main_foodlog(page:ft.Page):
             calories_input.value = str(data['calories'])
             salts_input.value = str(data['salts'])
             proteins_input.value = str(data['proteins'])
+            fats_input.value = str(data.get('fats',0))
+            carbs_input.value = str(data.get('carbohydrates',0))
             calories_input.update()
             salts_input.update()
             proteins_input.update()
@@ -77,8 +79,17 @@ def main_foodlog(page:ft.Page):
         salts = salts_input.value
         proteins = proteins_input.value
         mealtype = meal_type.value
+        fats = fats_input.value
+        carbohydrates = carbs_input.value
+
+        calories = int(calories) if calories else 0.0
+        salts = float(salts) if salts else 0.0
+        proteins = float(proteins) if proteins else 0.0
+        fats = float(fats) if fats else 0.0
+        carbohydrates = float(carbohydrates) if carbohydrates else 0.0
+
         #retrievs all values from fields and tries to save
-        success,message = save_foodlog(food, calories, salts, proteins,date.today(),mealtype,page.user_id)
+        success,message = save_foodlog(food, calories, salts, proteins, fats, carbohydrates, date.today(),mealtype,page.user_id)
         #if failed, will return snack bar with problem
         if success == False:
             page.overlay.append(ft.SnackBar(
@@ -115,6 +126,16 @@ def main_foodlog(page:ft.Page):
     proteins_input = ft.TextField(
         hint_text="Proteins (g)",
         input_filter=ft.InputFilter(allow=True,regex_string=r"^\d*\.?\d*$",replacement_string=""),
+        height=40
+    )
+    fats_input = ft.TextField(
+        hint_text="Fats (g)",
+        input_filter=ft.InputFilter(allow=True, regex_string=r"^\d*\.?\d*$", replacement_string=""),
+        height=40
+    )
+    carbs_input = ft.TextField(
+        hint_text="Carbs (g)",
+        input_filter=ft.InputFilter(allow=True, regex_string=r"^\d*\.?\d*$", replacement_string=""),
         height=40
     )
     #gives a selection of options
@@ -156,6 +177,10 @@ def main_foodlog(page:ft.Page):
             salts_input,
             ft.Text("Proteins"),
             proteins_input,
+            ft.Text("Fats"),
+            fats_input,
+            ft.Text("Carbohydrates"),
+            carbs_input,
             ft.Text("Meal Type"),
             meal_type,
             save_button,

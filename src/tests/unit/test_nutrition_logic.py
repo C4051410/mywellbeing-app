@@ -80,6 +80,7 @@ class TestFoodSearch:
         assert match_type is None
         assert result is None
 
+
 #patches certain functions to block/give mock results,
 @patch("nutrition.nutrition_services.commit_foodlog")
 @patch("nutrition.nutrition_services.notification")
@@ -93,7 +94,7 @@ class TestSaveFoodLog:
     def test_save_food_success(self,mock_status, mock_notify, mock_commit):
         #valid foodlog should be stored successfully
         mock_status.return_value = True
-        success, message = save_foodlog("Pizza", 500, 2, 15, date.today(), "Dinner", 1)
+        success, message = save_foodlog("Pizza", 500, 2, 15, 10, 10, date.today(), "Dinner", 1)
         assert success is True
         assert message == "Successful"
         #check the commit_foodlog was only called once
@@ -101,7 +102,7 @@ class TestSaveFoodLog:
 
     def test_save_food_negative_values(self,mock_status, mock_notify, mock_commit):
         #checks calories cannot be negative
-        success, message = save_foodlog("Pizza", -500, 2, 15, date.today(), "Dinner", 1)
+        success, message = save_foodlog("Pizza", -500, 2, 15, 10, 12, date.today(), "Dinner", 1)
         assert success is False
         assert message == "Values Cannot be Negative"
         #check commit wasnt called
@@ -109,7 +110,7 @@ class TestSaveFoodLog:
 
     def test_save_food_missing_fields(self,mock_status, mock_notify, mock_commit):
         #checks values cant be missing or None
-        success, message = save_foodlog("", None, 2, 15, date.today(), "Dinner", 1)
+        success, message = save_foodlog("", None, 2, 15, 10, 11, date.today(), "Dinner", 1)
         assert success is False
         assert message == "All Fields Required"
         mock_commit.assert_not_called()
@@ -156,29 +157,34 @@ class TestDailyStatsLogic:
 
     def test_retrieve_stats(self, mock_get_stats):
         # mocking DB return: Food data (cals, salt, protein) and Water data
-        mock_food = [(200, 1.5, 10.0), (300, 0.5, 5.0)]
+        mock_food = [(200, 1.5, 10.0, 2.0, 50.0), (300, 0.5, 5.0, 1.0, 60.0)]
         mock_water = [(500,), (250,)]
         mock_get_stats.return_value = (mock_food, mock_water)
         #calls on function
-        c, s, p, w = retrieve_daily_stats(1, date.today())
+        c, s, p, f, carbs, w = retrieve_daily_stats(1, date.today())
 
         #check the totals add up of daily stats
         assert c == 500  # 200 + 300
         assert s == 2.0  # 1.5 + 0.5
         assert p == 15.0  # 10.0 + 5.0
         assert w == 750  # 500 + 250
+        assert f == 3.0
+        assert carbs == 110.0
 
     def test_retrieve_stats_with_nones(self, mock_get_stats):
         # test resilience against NULL values in the database
-        mock_food = [(None, 1.0, None)]
+        mock_food = [(None, 1.0, None, None, None)]
         mock_water = [(100,)]
         mock_get_stats.return_value = (mock_food, mock_water)
         #checks the values default to 0
-        c, s, p, w = retrieve_daily_stats(1, date.today())
+        c, s, p, f, carbs, w = retrieve_daily_stats(1, date.today())
         assert c == 0
         assert s == 1.0
         assert p == 0.0
         assert w == 100
+        assert f == 0.0
+        assert carbs == 0.0
+
 
 @patch("nutrition.nutrition_services.get_user_goals")
 class TestUserGoalsLogic:
@@ -191,16 +197,21 @@ class TestUserGoalsLogic:
         mock_goals = (2000,6,40,3000)
         mock_get_goals.return_value = mock_goals
         #calls on function
-        c,s,p,w = retrieve_user_goals(1)
+        c,s,p,f,carbs,w = retrieve_user_goals(1)
         assert c == 2000
         assert s == 6.0
         assert p == 40.0
         assert w == 3000
+        assert f == 50
+        assert carbs == 200
+
     def test_retrieve_goals_with_nones(self, mock_get_goals):
         mock_goals = (None,6,None,3000)
         mock_get_goals.return_value = mock_goals
-        c,s,p,w = retrieve_user_goals(1)
+        c,s,p,f,carbs,w = retrieve_user_goals(1)
         assert c == 1 #default to 1 to avoid /0
         assert s == 6.0
-        assert p == 1.0 #defaults to 1 to avoid /0
+        assert p == 100.0 #defaults to 100 to avoid /0
         assert w == 3000
+        assert f == 50
+        assert carbs == 200

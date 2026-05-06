@@ -31,13 +31,13 @@ def test_nutrition_integration(mock_notification, ):
     salts = 0
     proteins = 0.6
     #call function which should save to db using query tools
-    success, message = save_foodlog(test_title, calories, salts, proteins,date.today(),"Snack",1)
+    success, message = save_foodlog(test_title, calories, salts, proteins,10, 10,date.today(),"Snack",1)
     #check it was successful and it returns correct message
     assert success is True
     assert message == "Successful"
 
     #check that data is actually in the database by using query
-    cur.execute("SELECT title,calories,salts,proteins FROM foodlog WHERE title =%s",(test_title,))
+    cur.execute("SELECT title,calories,salts,proteins,fats,carbohydrates FROM foodlog WHERE title =%s",(test_title,))
     row = cur.fetchone()
     #make sure results match
     assert row[0] == "Apple"
