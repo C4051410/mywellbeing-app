@@ -1,6 +1,7 @@
 from unittest.mock import patch
-from auth.auth_services import register_user, login_user
+from auth.auth_services import register_user, login_user, check_setup_complete,save_setup
 from database.connection import connect
+
 
 @patch("auth.auth_services.notification")
 @patch("auth.auth_services.resend")
@@ -39,7 +40,21 @@ def test_full_registration_integration(mock_resend,mock_notification):
     assert success is True
     #check id username matches current user
     assert message[1] == test_user
-
+    #check that the user hasn't been set up
+    setup = check_setup_complete(message[0])
+    assert setup is False
+    #try and complete the setup
+    complete =  save_setup(message[0],20,"Male",185,
+                           85,75,2000,
+                           2,50,1000,4)
+    assert complete is True
+    #check that setup was complete
+    cur.execute("SELECT user_id FROM user_stats WHERE user_id = %s", (message[0],))
+    row = cur.fetchone()
+    assert row is not None
+    #check that now set up is recognised
+    setup = check_setup_complete(message[0])
+    assert setup is True
 
     #cleans up db after testing is complete
     cur.execute("DELETE FROM users WHERE username = %s", (test_user,))
