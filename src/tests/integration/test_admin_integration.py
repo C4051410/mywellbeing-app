@@ -31,10 +31,11 @@ def test_admin_integration():
     remove_users_admin(2)
     #use select to check the db for users
     cur.execute("SELECT username,email,role,id FROM users")
-    row = cur.fetchone()
+    row = cur.fetchall()
     #check that the correct user is returned
-    assert row[0] == "UserTester"
-    assert row[2] == "user"
+    assert len(row) == 1
+    assert row[0][0] == "UserTester"
+    assert row[0][2] == "user"
     #try and make the user the moderator
     make_moderators_admin(1)
     cur.execute("SELECT username,email,role,id FROM users")
