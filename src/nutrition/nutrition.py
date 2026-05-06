@@ -97,8 +97,8 @@ class NutritionPage(ft.Column):
         #creates a header
         self.header = ft.Container(content=ft.Row(controls=[ft.Text("Nutrition",size=32,weight=ft.FontWeight.BOLD),self.userpfp],alignment=ft.MainAxisAlignment.SPACE_BETWEEN))
         #used to retrieve daily stats and goals
-        total_calories, total_salts, total_proteins, total_water = retrieve_daily_stats(user_id, date.today())
-        goal_calories, goal_salts, goal_proteins, goal_water = retrieve_user_goals(user_id)
+        total_calories, total_salts, total_proteins, total_fats, total_carbs, total_water = retrieve_daily_stats(user_id, date.today())
+        goal_calories, goal_salts, goal_proteins, goal_fats, goal_carbs, goal_water = retrieve_user_goals(user_id)
         #creates texts and progress bars of above
         self.calories_text = ft.Text(f"{total_calories:.0f} / {goal_calories:.0f}",size=15,weight=ft.FontWeight.BOLD,color=ft.Colors.WHITE70)
         self.calories_bar = ft.ProgressBar(width=150, height=15, color=ft.Colors.WHITE, border_radius=10, bgcolor="#EFD8B3",value=total_calories / goal_calories)
@@ -111,10 +111,9 @@ class NutritionPage(ft.Column):
 
         # carbs and fats placeholders
         self.carbs_text = ft.Text(f"200", size=15, weight=ft.FontWeight.BOLD, color=ft.Colors.WHITE70)
-        self.carbs_text = ft.Text(f"200", size=15, weight=ft.FontWeight.BOLD, color=ft.Colors.WHITE70)
-        self.carbs_bar = ft.ProgressBar(width=75, height=10, color=ft.Colors.GREEN, border_radius=10, bgcolor="#EFD8B3", value=10 / 200)
+        self.carbs_bar = ft.ProgressBar(value=total_carbs / goal_carbs if goal_carbs > 0 else 0, width=75, height=10, color=ft.Colors.GREEN, border_radius=10, bgcolor="#EFD8B3")
         self.fats_text = ft.Text(f"200", size=15, weight=ft.FontWeight.BOLD, color=ft.Colors.WHITE70)
-        self.fats_bar = ft.ProgressBar(width=75, height=10, color=ft.Colors.PURPLE, border_radius=10, bgcolor="#EFD8B3",value=10 / 200)
+        self.fats_bar = ft.ProgressBar(value=total_fats / goal_fats if goal_fats > 0 else 0, width=75, height=10, color=ft.Colors.PURPLE, border_radius=10, bgcolor="#EFD8B3")
 
         self.calories_container = ft.Container(
             bgcolor=ft.Colors.WHITE,

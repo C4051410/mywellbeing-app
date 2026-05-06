@@ -6,13 +6,13 @@
 from database.connection import connect
 
 #commits foodlog to database
-def commit_foodlog(food,calories,salts,proteins,date,mealtype,user_id):
+def commit_foodlog(food,calories,salts,proteins, fats, carbohydrates, date,mealtype,user_id):
     conn = connect()
     cur = conn.cursor()
     #query to store all the data under the correct user_id
     cur.execute(
-        "INSERT INTO foodlog (title,calories,salts,proteins,date,mealtype,user_id) VALUES (%s,%s,%s,%s,%s,%s,%s)  ",
-        (food, calories, salts, proteins, date, mealtype, user_id,))
+        "INSERT INTO foodlog (title,calories,salts,proteins,fats,carbohydrates,date,mealtype,user_id) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)  ",
+        (food, calories, salts, proteins, fats, carbohydrates, date, mealtype, user_id,))
     conn.commit()
     cur.close()
     conn.close()
@@ -33,7 +33,7 @@ def get_foodlog(user_id,date):
     cur = conn.cursor()
     #selects all rows from foodlog where user_id matches and is within a set time
     cur.execute(
-        "SELECT title,calories,salts,proteins,mealtype,date FROM foodlog WHERE user_id = %s AND date > (%s) ORDER BY date DESC",
+        "SELECT title,calories,salts,proteins,fats,carbohydrates,mealtype,date FROM foodlog WHERE user_id = %s AND date > (%s) ORDER BY date DESC",
         (user_id, date))
     rows = cur.fetchall()
     cur.close()
@@ -60,7 +60,7 @@ def get_daily_stats(user_id,date):
     conn = connect()
     cur = conn.cursor()
     #retrievs all foodlog stats from a user within a time
-    cur.execute("SELECT calories,salts,proteins FROM foodlog WHERE user_id = %s AND date = %s",
+    cur.execute("SELECT calories,salts,proteins,fats,carbohydrates FROM foodlog WHERE user_id = %s AND date = %s",
                 (user_id, date,))
     food_rows = cur.fetchall()
     #retrievs all waterlogs from a user within a time

@@ -52,9 +52,9 @@ def search_food_db(search_query,food_db):
     return None,None
 
 #saves entered foodlogs
-def save_foodlog(food, calories, salts, proteins,date,mealtype,user_id):
+def save_foodlog(food, calories, salts, proteins,fats,carbohydrates,date,mealtype,user_id):
     #returns false and message if not all fields are entered
-    fields = [food,calories,salts,proteins,date,mealtype,user_id]
+    fields = [food,calories,salts,proteins,fats,carbohydrates,date,mealtype,user_id]
     if any(field is None for field in fields):
         return False, "All Fields Required"
     #tests for if user enters something not a number
@@ -66,7 +66,7 @@ def save_foodlog(food, calories, salts, proteins,date,mealtype,user_id):
         #returns false and message
         return False, str(e)
     #food is safe to enter so commits to db
-    commit_foodlog(food,calories,salts,proteins,date,mealtype,user_id)
+    commit_foodlog(food,calories,salts,proteins,fats,carbohydrates,date,mealtype,user_id)
     #checks if notifications are enabled, then tries to send one
     if retrieve_notification_status(user_id):
         try:
@@ -106,6 +106,8 @@ def save_waterlog(water,date,user_id):
 #used to retrieve daily stats
 def retrieve_daily_stats(user_id,date):
     #defaults all stats to 0
+    total_f=0.0
+    total_carbs=0.0
     total_c = 0
     total_s = 0.0
     total_p = 0.0
@@ -117,23 +119,31 @@ def retrieve_daily_stats(user_id,date):
         #goes through all rows
         for data in food_stats:
             #checks if not none before adding
-            if data[0] is not None:
-                total_c += data[0]
-            if data[1] is not None:
-                total_s += data[1]
-            if data[2] is not None:
-                total_p += data[2]
+            calories, salts, proteins, fats, carbs = data
+            if calories is not None:
+                total_c += calories
+            if salts is not None:
+                total_s += salts
+            if proteins is not None:
+                total_p += proteins
+            if fats is not None:
+                total_f += fats
+            if carbs is not None:
+                total_carbs += carbs
+
     #same with water
     if water_stat:
         for data in water_stat:
             total_w += data[0]
     #returns all values
-    return total_c, total_s, total_p, total_w
+    return total_c, total_s, total_p, total_f, total_carbs, total_w
 def retrieve_user_goals(user_id):
     #defaults all values
+    goal_f=50
+    goal_carbs=200
     goal_c = 1
     goal_s = 1.0
-    goal_p = 1.0
+    goal_p = 100.0
     goal_w = 1
     #retrievs all goals from db
     goals = get_user_goals(user_id)
@@ -149,7 +159,7 @@ def retrieve_user_goals(user_id):
         if goals[3] is not None and goals[3] > 0:
             goal_w = goals[3]
     #returns all values
-    return goal_c, goal_s, goal_p, goal_w
+    return goal_c, goal_s, goal_p, goal_f, goal_carbs, goal_w
 
 
 
