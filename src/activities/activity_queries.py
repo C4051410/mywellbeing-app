@@ -1,7 +1,13 @@
+"""
+    Activity Queries Layer
+    Used to access the db and return the information
+    retrieved
+"""
 from datetime import date, timedelta
 from database.connection import connect
 
 def retrieve_streak(user_id):
+    """retrieves streak info from db"""
     conn = connect()
     try:
         cur = conn.cursor()
@@ -20,6 +26,7 @@ def retrieve_streak(user_id):
         print(e)
 
 def update_streak(user_id):
+    """updates streak info in db"""
     conn = connect()
     try:
         cur = conn.cursor()
@@ -65,6 +72,7 @@ def update_streak(user_id):
 
 
 def commit_activity(user_id, activity_type, distance_km, duration_seconds, start_date, source="manual"):
+    """commit activity info to db"""
     conn = connect()
     try:
         cur = conn.cursor()
@@ -85,6 +93,7 @@ def commit_activity(user_id, activity_type, distance_km, duration_seconds, start
 
 
 def commit_past_activity(user_id, title,calories,duration_seconds,reps,distance,start_date, source="manual",activity_type="Workout"):
+    """commit past activity info to db"""
     conn = connect()
     try:
         cur = conn.cursor()
@@ -100,6 +109,7 @@ def commit_past_activity(user_id, title,calories,duration_seconds,reps,distance,
         print(e)
 
 def get_activities(user_id):
+    """returns activities info from db"""
     conn = connect()
     try:
         cur = conn.cursor()
@@ -115,6 +125,7 @@ def get_activities(user_id):
 
 
 def save_tokens_for_user(user_id, token_data):
+    """save strava token in db"""
     conn = connect()
     cur = conn.cursor()
 
@@ -146,6 +157,7 @@ def save_tokens_for_user(user_id, token_data):
     conn.close()
 
 def load_tokens_for_user(user_id):
+    """load strava tokens from db"""
     conn = connect()
     cur = conn.cursor()
 
