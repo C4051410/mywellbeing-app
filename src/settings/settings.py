@@ -21,7 +21,7 @@ class SettingsPage(ft.Column):
 
         #checks the notification status
         self.is_enabled = retrieve_notification_status(user_id)
-        self.uerpfp = Userpfp(page)
+        self.userpfp = Userpfp(page)
 
         # container for the page header and text and profile picture
         header = ft.Container(
@@ -31,10 +31,12 @@ class SettingsPage(ft.Column):
                         expand=True,
                         controls=[
                             ft.Text("Settings", size=35, weight=ft.FontWeight.BOLD, color=ft.Colors.BLACK),
-                            ft.Text("Manage your account", size=13, color=ft.Colors.GREY_500)
+                            ft.Text("Manage your account", size=13, color=ft.Colors.GREY_500),
+
                         ],
                         spacing=2
                     ),
+                    self.userpfp
                 ],
                 alignment=ft.MainAxisAlignment.SPACE_BETWEEN
             ),
@@ -71,7 +73,7 @@ class SettingsPage(ft.Column):
         )
 
         # wraps the notifications into a styled white card
-        notification_card = ft.Container(
+        self.notification_card = ft.Container(
             bgcolor=ft.Colors.WHITE,
             border_radius=15,
             padding=5,
@@ -110,7 +112,7 @@ class SettingsPage(ft.Column):
                 account_card,
                 ft.Container(height=10),
                 ft.Text("PREFERENCES", size=12, weight=ft.FontWeight.BOLD, color=ft.Colors.GREY_500),
-                notification_card,
+                self.notification_card,
                 ft.Container(height=10),
                 ft.Text("SESSION", size=12, weight=ft.FontWeight.BOLD, color=ft.Colors.GREY_500),
                 logout_card
@@ -140,11 +142,11 @@ class SettingsPage(ft.Column):
         system = platform.system()
         try:
             if system == "Android":
-                await self.page.launch_url("app-settings:")
+                await self.this_page.launch_url("app-settings:")
             elif system == "Windows":
-                await self.page.launch_url("ms-settings:notifications")
+                await self.this_page.launch_url("ms-settings:notifications")
             elif system == "Darwin":
-                await self.page.launch_url("app-settings:")
+                await self.this_page.launch_url("app-settings:")
         except Exception as e:
             print(e)
 
@@ -163,9 +165,12 @@ class SettingsPage(ft.Column):
 
         # if turning ON, updates icon to green active bell, show success snackbar, and opens OS settings
         if self.is_enabled:
-            self.notification_icon.name = ft.Icons.NOTIFICATIONS_ACTIVE
-            self.notification_icon.color = ft.Colors.GREEN
-            self.page.overlay.append(ft.SnackBar(
+            self.notification_card.content.leading = ft.Icon(
+                ft.Icons.NOTIFICATIONS_ACTIVE,
+                color=ft.Colors.GREEN,
+                size=30
+            )
+            self.this_page.overlay.append(ft.SnackBar(
                 content=ft.Text("Notification Turned On"),
                 bgcolor=ft.Colors.GREEN_400,
                 open=True
@@ -175,15 +180,21 @@ class SettingsPage(ft.Column):
 
         # if turning OFF, update icon to red disabled bell and show snackbar
         else:
-            self.notification_icon.name = ft.Icons.NOTIFICATIONS_OFF
-            self.notification_icon.color = ft.Colors.RED
-            self.page.overlay.append(ft.SnackBar(
+            self.notification_card.content.leading = ft.Icon(
+                ft.Icons.NOTIFICATIONS_OFF,
+                color=ft.Colors.RED,
+                size=30
+            )
+            self.this_page.overlay.append(ft.SnackBar(
                 content=ft.Text("Notification Turned Off"),
                 bgcolor=ft.Colors.RED_400,
                 open=True
             ))
 
         # updates the UI to reflect changes
+        self.notification_icon.update()
+        self.notification_switch.update()
+        self.notification_card.update()
         self.this_page.update()
 
     def handle_logout(self, e):
