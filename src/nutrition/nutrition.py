@@ -1,9 +1,7 @@
 '''
 File for nutrition page - accessible by clicking 'nutrition' on nav bar
 '''
-import csv
-import os
-from datetime import date, timedelta
+from datetime import date
 import flet as ft
 
 from components.userpfp import Userpfp

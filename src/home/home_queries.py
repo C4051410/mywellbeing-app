@@ -55,7 +55,7 @@ def get_friends_activities(user_id,date):
         conn.close()
         return rows
     #return None if connection fails
-    except Exception as e:
+    except Exception:
         conn.close()
         return None
 

@@ -14,7 +14,7 @@ def check_admin(user_id):
     try:
         if int(user_id) < 0:
             return False
-    except ValueError as e:
+    except ValueError:
         return False
     #retrieves user role from db
     admin = get_admin(user_id)
@@ -41,7 +41,7 @@ def remove_users_admin(user_id):
     try:
         if int(user_id) < 0:
             return False
-    except ValueError as e:
+    except ValueError:
         return False
     #deletes user and returns True
     delete_users_admin(user_id)
@@ -53,7 +53,7 @@ def make_moderators_admin(user_id):
     try:
         if int(user_id) < 0:
             return False
-    except ValueError as e:
+    except ValueError:
         return False
     update_moderators_admin(user_id)
     return True

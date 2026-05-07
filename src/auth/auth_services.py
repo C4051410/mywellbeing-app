@@ -45,7 +45,7 @@ def login_user(email, password):
                 message=f"Welcome Back {user[1]}",
                 app_name="MyWellBeing",
             )
-        except Exception as e:
+        except Exception:
             pass
     #return true with user data
     return True,user
@@ -101,7 +101,7 @@ def register_user(username,email, password):
             "html": html_body,
         })
     #catches any issues
-    except Exception as e:
+    except Exception:
         pass
     #return true with user data
     return True,user_id

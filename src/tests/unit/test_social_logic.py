@@ -3,7 +3,7 @@
     This tests that the functions used work as intended and
     they return the correct response
 """
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 import pytest
 

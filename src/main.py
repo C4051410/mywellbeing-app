@@ -4,7 +4,6 @@ from admin.admin import main_admin
 from auth.auth_services import check_setup_complete, load_session
 from auth.authpage import authPage
 from activities.activities import main_activities, main_activity_detail
-from database.connection import connect
 from home.homepage import main_homepage
 from activities.map import main_map
 from activities.past_activities import main_past_activities
