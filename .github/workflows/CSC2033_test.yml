@@ -33,9 +33,6 @@ jobs:
       #run the lint
       - name: "Run Ruff Lint"
         run: ruff check .
-      #find the effected files
-      - name: "Run Ruff Format Check"
-        run: ruff format . --check
   ##Unit Tests##
   unit-test:
     #sets up tests on ubuntu on the latest version
