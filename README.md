@@ -9,6 +9,7 @@
 | **GUI: Clever and Interesting Design**       | [Screenshots](screenshots/)                               |
 | **Testing Documentation**                    | [Testing](src/tests/TESTING.md)                           |
 | **Functionality and Features**               | [Features and Functionality](FEATURES.md)                 |
+| **Contribution Matrix**                      | [Contribution Matrix](CONTRIBUTION_MATRIX.md)             |
 
 ***
 ## Documentation
