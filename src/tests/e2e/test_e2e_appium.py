@@ -251,7 +251,7 @@ def test_e2e_login(seed_test_user,driver):
     )
     time.sleep(7)
     """
-        Test Social Page loads as intended and displays correct information
+        Test Social Page loads as intended and can add friend
     """
     #find and click social page button on navbar
     social_navbar = driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="Social")
@@ -259,6 +259,25 @@ def test_e2e_login(seed_test_user,driver):
     #check that social page has loaded properly
     assert wait.until(
         EC.presence_of_element_located((AppiumBy.ACCESSIBILITY_ID, "Track progress with friends"))
+    )
+    #scroll to bottom
+    driver.find_element(AppiumBy.ANDROID_UIAUTOMATOR,
+                        'new UiScrollable(new UiSelector().scrollable(true)).scrollToEnd(10)')
+    #find the friend text and enter the friends name
+    friend_text = wait.until(EC.presence_of_element_located(
+        (AppiumBy.XPATH, "//android.widget.EditText")
+    ))
+    friend_text.click()
+    friend_text.send_keys("MockUser")
+    #find and click the enter button
+    friend_btn = driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="Enter")
+    friend_btn.click()
+    time.sleep(7)
+    #scroll back to bottom and find that the user has been added correctly
+    driver.find_element(AppiumBy.ANDROID_UIAUTOMATOR,
+                        'new UiScrollable(new UiSelector().scrollable(true)).scrollToEnd(10)')
+    assert wait.until(
+        EC.presence_of_element_located((AppiumBy.ACCESSIBILITY_ID,"mockemail@gmail.com"))
     )
     """
         Test Settings page loads as intended and displays correct information and logouts the user

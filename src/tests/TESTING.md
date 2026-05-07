@@ -126,7 +126,7 @@ All E2E testing is done in [test_e2e_appium.py](e2e/test_e2e_appium.py), differe
 | Login            | Tests that the user can successfully navigate and login and end up on the homepage                                                       |
 | Activities       | Tests that the user can navigate to activities page, and create a new activity, and see the new activity                                 |
 | Nutrition        | Tests that the user can navigate to the nutrition page and create a new food log, and see the new log                                    |
-| Social           | Tests that the user can navigate to the social page                                                                                      |
+| Social           | Tests that the user can navigate to the social page and add a friend                                                                     |
 | Settings         | Tests that the user can navigate to the settings page and log out of their account                                                       |
 | Registration     | Tests that the user can successfully navigate and create a new account and end up on the homepage                                        |
 | Setup            | Tests that the user can successfully navigate and enter all the required fields in the setup and end up on the homepage                  |
