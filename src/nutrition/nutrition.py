@@ -22,6 +22,8 @@ class NutritionPage(ft.Column):
         self.main_page = page
         #lets page access size and layout
         self.r = Responsive(page)
+        #used to resize
+        self.resize = self.resize
         #stores foodlogs, adds header
         self.foodlog_list = ft.Column()
         self.foodlog_list.controls.append(ft.Text("ALL RECENT FOOD LOGS", size=12, weight=ft.FontWeight.BOLD, color=ft.Colors.GREY_500))
@@ -298,6 +300,12 @@ class NutritionPage(ft.Column):
     #take user to waterlog page
     def enter_waterlog(self, e):
         self.main_page.go("/log-water")
+
+    def resize(self,e ):
+        self.r = Responsive(self.page)
+        self.userpfp.resize()
+        self.nav_bar.resize()
+        self.update()
 
 
 
