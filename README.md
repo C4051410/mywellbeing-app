@@ -55,7 +55,18 @@ GitHub Actions:https://docs.github.com/en/actions
    ```bash
    pip install -r requirements.txt
    ```
+4. **Download and Install PostgreSQL**
 
+    Download At https://www.postgresql.org/download/windows/
+    
+    Set Up PostgresSQL and Create a Database using the [database.sql](database.sql)
+    ```bash
+    psql -U postgres -d database_name -f database.sql
+    ```
+    Add link to .env as DATABASE_URL to link the Database to connection.py
+    postgresql://username:password@localhost:5432/database_name
+5. Include other .env connections like Resend and Strava API
+   (Cant be provided as secret)
 ***
 ## How to Run Application
 * To run within windows, run:
