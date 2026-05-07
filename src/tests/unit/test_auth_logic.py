@@ -186,5 +186,5 @@ class TestSaveSetup():
         setup = save_setup("Invalid","Invalid", "Male",
                            "Invalid","Invalid","Invalid",
                            "Invalid","Invalid","Invalid",
-                           "Invalid","Invalid")
+                           "Invalid","Invalid","Invalid","Invalid")
         assert setup == False
