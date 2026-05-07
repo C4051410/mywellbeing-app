@@ -6,7 +6,7 @@
 | **Team Standards: Documentation**            | Below                                                     |
 | **Team Standards: Version Control Workflow** | [Git Conventions](GIT_CONVENTION.md)                      |
 | **Design & Structure**                       | [Design](DESIGN.md)                                       |
-| **GUI: Clever and Interesting Design**       | [Screenshots](screenshots/)                               |
+| **GUI: Clever and Interesting Design**       | [Graphical User Interface](GUI.md)                        |
 | **Testing Documentation**                    | [Testing](src/tests/TESTING.md)                           |
 | **Functionality and Features**               | [Features and Functionality](FEATURES.md)                 |
 | **Contribution Matrix**                      | [Contribution Matrix](CONTRIBUTION_MATRIX.md)             |
