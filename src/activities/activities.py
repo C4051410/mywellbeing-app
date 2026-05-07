@@ -10,6 +10,7 @@ from activities.activities_services import retrieve_activities
 from activities.strava_api import connect_strava, get_saved_activities, format_strava_activities, save_tokens_for_user, load_tokens_for_user
 from components.bottom_nav import NavBar
 from components.responsive import Responsive
+from components.userpfp import Userpfp
 
 def format_time(seconds):
     """Format the time correctly"""
@@ -116,14 +117,29 @@ class ActivitiesPage(ft.Column):
         super().__init__()
         self.main_page = page
         self.r = Responsive(page)
+        self.userpfp = Userpfp(page)
+        page.on_resize = self.resize
+
+        self.header_title = ft.Text("Activities", size=32, weight=ft.FontWeight.BOLD)
+        self.header_subtitle = ft.Text("Track Your Fitness Journey", color=ft.Colors.GREY, size=10)
 
         # --- LOAD REAL DATA FROM CSV ---
         tot_dist, tot_time, activity_count, activities_list = load_activity_data(self.main_page)
         self.main_page.weekly_activity_count = int(activity_count)
         # 1. Page Header
         header = ft.Container(
-            content=ft.Text("Activities", size=32, weight=ft.FontWeight.BOLD),
-            padding=ft.padding.only(top=20, left=10)
+            padding=ft.padding.only(top=20, left=10, right=10),
+            content=ft.Row(
+                alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                vertical_alignment=ft.CrossAxisAlignment.CENTER,
+                controls=[ft.Column(controls=[
+                    self.header_title,
+                    self.header_subtitle,
+                ]),
+                    self.userpfp
+                ]
+
+            )
         )
 
         if load_tokens_for_user(self.main_page.user_id):
@@ -141,36 +157,42 @@ class ActivitiesPage(ft.Column):
                 side=ft.BorderSide(color=ft.Colors.DEEP_ORANGE),
             )
         )
-
+        self.weekly_title = ft.Text("THIS WEEK'S TOTALS", size=12, weight=ft.FontWeight.BOLD, color=ft.Colors.GREY_500)
+        self.km_total =  ft.Text(tot_dist, size=28, weight=ft.FontWeight.BOLD, color=ft.Colors.BLUE)
+        self.time_total = ft.Text(tot_time, size=28, weight=ft.FontWeight.BOLD)
+        self.act_total = ft.Text(activity_count, size=28, weight=ft.FontWeight.BOLD)
+        self.km_label = ft.Text("KM", size=12, weight=ft.FontWeight.BOLD, color=ft.Colors.GREY_400)
+        self.time_label = ft.Text("TIME", size=12, weight=ft.FontWeight.BOLD, color=ft.Colors.GREY_400)
+        self.act_label = ft.Text("ACTIVITIES", size=12, weight=ft.FontWeight.BOLD, color=ft.Colors.GREY_400)
         # 2. Weekly Stats Dashboard (Totals Only)
-        stats_card = ft.Container(
+        self.stats_card = ft.Container(
             bgcolor=ft.Colors.WHITE,
             border_radius=15,
             padding=20,
             shadow=ft.BoxShadow(spread_radius=1, blur_radius=10, color=ft.Colors.BLACK12),
             content=ft.Column([
-                ft.Text("THIS WEEK'S TOTALS", size=12, weight=ft.FontWeight.BOLD, color=ft.Colors.GREY_500),
+                self.weekly_title,
                 ft.Divider(height=5, color=ft.Colors.TRANSPARENT),
                 ft.Row(
                     alignment=ft.MainAxisAlignment.SPACE_EVENLY,
                     controls=[
                         ft.Column([
-                            ft.Text(tot_dist, size=28, weight=ft.FontWeight.BOLD, color=ft.Colors.BLUE),
-                            ft.Text("KM", size=12, weight=ft.FontWeight.BOLD, color=ft.Colors.GREY_400)
+                            self.km_total,
+                            self.km_label
                         ], horizontal_alignment=ft.CrossAxisAlignment.CENTER, spacing=0),
 
                         ft.Container(width=1, height=40, bgcolor=ft.Colors.GREY_200),
 
                         ft.Column([
-                            ft.Text(tot_time, size=28, weight=ft.FontWeight.BOLD),
-                            ft.Text("TIME", size=12, weight=ft.FontWeight.BOLD, color=ft.Colors.GREY_400)
+                            self.time_total,
+                            self.time_label
                         ], horizontal_alignment=ft.CrossAxisAlignment.CENTER, spacing=0),
 
                         ft.Container(width=1, height=40, bgcolor=ft.Colors.GREY_200),
 
                         ft.Column([
-                            ft.Text(activity_count, size=28, weight=ft.FontWeight.BOLD),
-                            ft.Text("ACTIVITIES", size=12, weight=ft.FontWeight.BOLD, color=ft.Colors.GREY_400)
+                            self.act_total,
+                            self.act_label
                         ], horizontal_alignment=ft.CrossAxisAlignment.CENTER, spacing=0),
                     ]
                 )
@@ -178,13 +200,13 @@ class ActivitiesPage(ft.Column):
         )
 
         # 3. Individual Activities Feed OR Empty State
-        feed_column = ft.Column(spacing=15)
+        self.feed_column = ft.Column(spacing=15)
 
-        feed_column.controls.append(
+        self.feed_column.controls.append(
             ft.Text("ALL RECENT ACTIVITIES", size=12, weight=ft.FontWeight.BOLD, color=ft.Colors.GREY_500)
         )
 
-        record_btn = ft.ElevatedButton(
+        self.record_btn = ft.ElevatedButton(
             content=ft.Row([
                 ft.Icon(ft.Icons.ADD_CIRCLE_OUTLINE, color=ft.Colors.WHITE, size=14),
                 ft.Text("New Activity", size=12, weight=ft.FontWeight.W_600, color=ft.Colors.WHITE)
@@ -196,7 +218,7 @@ class ActivitiesPage(ft.Column):
             on_click=self.start_activity
         )
 
-        past_exercises = ft.ElevatedButton(
+        self.past_exercises = ft.ElevatedButton(
             content=ft.Row([
                 ft.Icon(ft.Icons.ADD_CIRCLE_OUTLINE, color=ft.Colors.BLUE, size=14),
                 ft.Text("Manual Activity", size=12, weight=ft.FontWeight.W_600, color=ft.Colors.BLUE)
@@ -211,14 +233,14 @@ class ActivitiesPage(ft.Column):
             on_click=self.past_activity
         )
 
-        activity_buttons = ft.Row(
-            controls=[record_btn, past_exercises],
+        self.activity_buttons = ft.Row(
+            controls=[self.record_btn, self.past_exercises],
             alignment=ft.MainAxisAlignment.CENTER,
             spacing=10
         )
         if not activities_list:
             # Empty State
-            feed_column.controls.append(
+            self.feed_column.controls.append(
                 ft.Container(
                     content=ft.Column(
                         horizontal_alignment=ft.CrossAxisAlignment.CENTER,
@@ -277,7 +299,7 @@ class ActivitiesPage(ft.Column):
                 else:
                     subtitle_text = act['time']
 
-                feed_column.controls.append(
+                self.feed_column.controls.append(
                     ft.Container(
                         bgcolor=ft.Colors.WHITE,
                         border_radius=10,
@@ -338,25 +360,55 @@ class ActivitiesPage(ft.Column):
         # 4. Add Navigation Bar
         self.nav_bar = NavBar(page)
 
+
         # Main Layout Assembly
         content_column = ft.Column(
             controls=[
                 header,
                 ft.Container(content=self.strava_button, padding=ft.padding.symmetric(horizontal=15),
                              margin=ft.margin.only(bottom=16)),
-                ft.Container(content=stats_card, padding=ft.padding.symmetric(horizontal=15),
+                ft.Container(content=self.stats_card, padding=ft.padding.symmetric(horizontal=15),
                              margin=ft.margin.only(bottom=16)),
-                ft.Container(content=activity_buttons, padding=ft.padding.symmetric(horizontal=15),
+                ft.Container(content=self.activity_buttons, padding=ft.padding.symmetric(horizontal=15),
                              margin=ft.margin.only(bottom=16)),
-                ft.Container(content=feed_column, padding=ft.padding.symmetric(horizontal=15), expand=True)
+                ft.Container(content=self.feed_column, padding=ft.padding.symmetric(horizontal=15), expand=True)
             ],
             scroll=ft.ScrollMode.AUTO,
             expand=True
         )
 
+
+
         self.controls = [content_column, self.nav_bar]
         self.expand = True
         self.alignment = ft.MainAxisAlignment.SPACE_BETWEEN
+
+    def resize(self, e):
+        self.r = Responsive(self.main_page)
+        self.set_text_size()
+        self.userpfp.resize()
+        self.nav_bar.resize()
+        self.strava_button.spacing = self.r.w(0.02)
+        self.header_title.size = self.r.w(0.09)
+        self.header_subtitle.size = self.r.w(0.03)
+        self.stats_card.spacing = self.r.w(0.02)
+        self.activity_buttons.spacing = self.r.w(0.02)
+        self.feed_column.spacing = self.r.w(0.02)
+        self.weekly_title.size = self.r.w(0.05)
+        self.km_label.size = self.r.w(0.045)
+        self.time_label.size = self.r.w(0.045)
+        self.act_label.size = self.r.w(0.045)
+        self.km_total.size = self.r.w(0.045)
+        self.time_total.size = self.r.w(0.045)
+        self.act_total.size = self.r.w(0.045)
+        self.record_btn.width = self.r.w(0.05)
+        self.past_exercises.width = self.r.w(0.05)
+        self.update()
+
+    def set_text_size(self):
+        # Example scaling (adjust ratios as needed)
+        self.header_title.size = self.r.w(0.08)
+        self.header_subtitle.size = self.r.w(0.035)
 
     # --- EVENT HANDLERS ---
     def make_activity_click(self, activity):
@@ -501,6 +553,7 @@ class ActivityDetailPage(ft.Column):
         self.controls = [content_column, nav_bar]
         self.expand = True
         self.alignment = ft.MainAxisAlignment.SPACE_BETWEEN
+
 
     def go_back(self, e):
         """return the user back to the main page"""
