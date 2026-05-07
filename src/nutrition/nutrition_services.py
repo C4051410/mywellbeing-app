@@ -60,7 +60,8 @@ def save_foodlog(food, calories, salts, proteins,fats,carbohydrates,date,mealtyp
     #tests for if user enters something not a number
     try:
         # if the value is negative return false and message
-        if float(calories) < 0 or float(salts) < 0 or float(proteins) < 0:
+        if float(calories) < 0 or float(salts) < 0 or float(proteins) < 0\
+                or float(fats) < 0 or float(carbohydrates) < 0:
             return False, "Values Cannot be Negative"
     except Exception as e:
         #returns false and message
