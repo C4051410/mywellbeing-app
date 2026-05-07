@@ -145,7 +145,7 @@ class NutritionPage(ft.Column):
         self.protein_text = ft.Text(f"{total_proteins:.0f} / {goal_proteins:.0f}",size=12, weight=ft.FontWeight.BOLD,color=ft.Colors.GREY_400)
         self.protein_bar = ft.ProgressBar(width=75, height=10, color=ft.Colors.RED, border_radius=10, bgcolor="#EFD8B3",value=total_proteins / goal_proteins)
         self.salts_text = ft.Text(f"{total_salts:.0f} / {goal_salts:.0f}",size=12,weight=ft.FontWeight.BOLD,color=ft.Colors.GREY_400)
-        self.salts_bar = ft.ProgressBar(width=100, height=20,color=ft.Colors.LIGHT_GREEN_400,value=total_salts / goal_salts)
+        self.salts_bar = ft.ProgressBar(width=75, height=10, color=ft.Colors.ORANGE, border_radius=10, bgcolor="#EFD8B3",value=total_salts / goal_salts)
         self.water_text = ft.Text(f"{total_water:.0f} / {goal_water:.0f}", size=15, weight=ft.FontWeight.BOLD, color=ft.Colors.WHITE70)
         self.water_bar = ft.ProgressBar(width=150, height=15, color=ft.Colors.WHITE, border_radius=10, bgcolor="#EFD8B3", value=total_water / goal_water)
 
@@ -190,51 +190,6 @@ class NutritionPage(ft.Column):
             )
 
         )
-
-        self.protein_container = ft.Container(
-            bgcolor=ft.Colors.WHITE,
-            border_radius=15,
-            padding=20,
-            shadow=ft.BoxShadow(spread_radius=1, blur_radius=10, color=ft.Colors.BLACK12),
-            content=ft.Column(
-                alignment=ft.MainAxisAlignment.START,
-                controls=[
-                    ft.Text("Protein", color=ft.Colors.RED, size=15, weight=ft.FontWeight.BOLD),
-                    self.protein_text,
-                    self.protein_bar,
-                ]
-            )
-        )
-
-        self.carbs_container = ft.Container(
-            bgcolor=ft.Colors.WHITE,
-            border_radius=15,
-            padding=20,
-            shadow=ft.BoxShadow(spread_radius=1, blur_radius=10, color=ft.Colors.BLACK12),
-            content=ft.Column(
-                    alignment=ft.MainAxisAlignment.START,
-                controls=[
-                    ft.Text("Carbs", color=ft.Colors.GREEN, size=15, weight=ft.FontWeight.BOLD),
-                    self.carbs_text,
-                    self.carbs_bar,
-                ]
-            )
-        )
-
-        self.fats_container = ft.Container(
-            bgcolor=ft.Colors.WHITE,
-            border_radius=15,
-            padding=20,
-            shadow=ft.BoxShadow(spread_radius=1, blur_radius=10, color=ft.Colors.BLACK12),
-            content=ft.Column(
-                alignment=ft.MainAxisAlignment.START,
-                controls=[
-                    ft.Text("Fats", color=ft.Colors.PURPLE, size=15, weight=ft.FontWeight.BOLD),
-                    self.fats_text,
-                    self.fats_bar,
-                ]
-            )
-        )
         #creates container used to display the users totals from the day compared to their goals
         self.stats_card=ft.Container(
             bgcolor=ft.Colors.WHITE,
@@ -250,17 +205,12 @@ class NutritionPage(ft.Column):
                             ft.Text("Protein", color=ft.Colors.RED, size=15, weight=ft.FontWeight.BOLD),
                             self.protein_text,
                             self.protein_bar,
-                        ]
-                    ),
-                    ft.VerticalDivider(width=1, color=ft.Colors.GREY_200),
-                    ft.Column(
-                        horizontal_alignment=ft.CrossAxisAlignment.START,
-                        controls=[
                             ft.Text("Carbs", color=ft.Colors.GREEN, size=15, weight=ft.FontWeight.BOLD),
                             self.carbs_text,
                             self.carbs_bar,
                         ]
                     ),
+                    ft.VerticalDivider(width=1, color=ft.Colors.GREY_200),
                     ft.VerticalDivider(width=1, color=ft.Colors.GREY_200),
                     ft.Column(
                         horizontal_alignment=ft.CrossAxisAlignment.START,
@@ -268,8 +218,12 @@ class NutritionPage(ft.Column):
                             ft.Text("Fats", color=ft.Colors.PURPLE, size=15, weight=ft.FontWeight.BOLD),
                             self.fats_text,
                             self.fats_bar,
+                            ft.Text("Salts", color=ft.Colors.ORANGE, size=15, weight=ft.FontWeight.BOLD),
+                            self.salts_text,
+                            self.salts_bar,
                         ]
                     ),
+                    ft.VerticalDivider(width=1, color=ft.Colors.GREY_200),
                 ]
             )
         )
