@@ -4,7 +4,7 @@
     they return the correct response
 """
 import pytest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 from datetime import datetime, timedelta
 from activities.activities_services import save_activity, save_past_activity, retrieve_activities
 

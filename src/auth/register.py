@@ -3,10 +3,8 @@
     Used to access the db and return the information
     retrieved
 """
-import re
 import bcrypt
 from database.connection import connect
-from plyer import notification
 
 #registers user into db
 def register(username, email, password):

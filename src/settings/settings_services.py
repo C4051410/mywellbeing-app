@@ -50,7 +50,7 @@ def update_goals(user_id, calorie_goal, water_goal, weekly_activity_goal):
         if int(weekly_activity_goal) < 0 or int(weekly_activity_goal) > 7:
             return False, "Weekly Activity Goal Must Be Between 0 and 7"
     #if of wrong type return false
-    except ValueError as e:
+    except ValueError:
         return False, "Invalid Value"
     #commit changes
     success = commit_update_goals(user_id, calorie_goal, water_goal, weekly_activity_goal)

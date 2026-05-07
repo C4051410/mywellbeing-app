@@ -21,24 +21,22 @@ functions which are called within the classes.
 
 ## Use of Directory and Packages
 
-Python files and other files (.csv, .png. .TTF etc.), are stored in suitable folders to 
+Python files and other files (.csv, .png, .TTF, .html etc.), are stored in suitable folders to 
 allow for easy organization of files
 
 ### Root Directory:
 ```
-├── main.py               # This is where the main application is run from, bringing all resources together
-├── .env                  # Used to store Enviorment Variables like DB and API Keys, to protect them from being stolen
 ├── .gitignore            # Define which files should and should not be committed to git
 ├── requirements.txt      # A list of all the python dependencies that need to be installed before running
-├── CSC2033_test.yml      # Defines how the CI/CD automated testing runs on Github Actions
 ├── pyproject.toml        # Stores details like ruff programming style and how the application should be deployed
+├── database.sql          # Used to create the db with complete schema
 ```
 ### File Structure:
-All Program Files and .env are Located in src/
+All Program Files and .env are Located in [src/](src/)
 
-CI/CD tests are stored in .github/
+CI/CD tests are stored in [.github/workflows/](.github/workflows/CSC2033_test.yml)
 
-Screenshots are stored in screenshots/
+Screenshots are stored in [screenshots/](screenshots/)
 
 Files that dont affect code like .toml and .gitignore remain in project folder
 #### Within src:
@@ -55,6 +53,8 @@ Files that dont affect code like .toml and .gitignore remain in project folder
 ├── settings/       # Manages the displayment and how the user is able to update information about their account
 ├── social/         # Manages the displayment of the comparision between users and their stats
 ├── tests/          # A range of different testing methods including how to run them
+├── main.py         # This is where the main application is run from, bringing all resources together
+├── .env            # Used to store Enviorment Variables like DB and API Keys, to protect them from being stolen
 ```
 ### Justification For Modularity
 The structure of our package is effective, as its successfully separates core features and pages,

@@ -6,7 +6,6 @@
 """
 from datetime import datetime
 import flet as ft
-from plyer import notification
 from activities.activities_services import save_past_activity
 
 exercises = [

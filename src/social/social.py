@@ -107,7 +107,6 @@ class SocialPage(ft.Column):
         self.friend_username_input = ft.TextField(
             hint_text="Enter a username",
             border_radius=8,
-            on_submit=self.handle_add_friend
         )
 
         # Button for adding a friend.
@@ -122,6 +121,7 @@ class SocialPage(ft.Column):
                 controls=[
                     ft.Text("Add a Friend", size=self.r.w(page_desc_size), weight=ft.FontWeight.BOLD),
                     self.friend_username_input,
+                    ft.ElevatedButton("Enter",on_click=self.handle_add_friend),
                 ]
             )
         )

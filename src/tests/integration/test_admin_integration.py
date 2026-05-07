@@ -1,5 +1,5 @@
 from database.connection import connect
-from admin.admin_services import retrieve_users_admin, delete_users_admin, make_moderators_admin, remove_users_admin
+from admin.admin_services import retrieve_users_admin, make_moderators_admin, remove_users_admin
 
 def test_admin_integration():
     """

@@ -221,10 +221,10 @@ def test_e2e_login(seed_test_user,driver):
     nutrition_navbar.click()
     #check activities page appears by checking for calories in page
     assert wait.until(
-        EC.presence_of_element_located((AppiumBy.ACCESSIBILITY_ID,"Calories"))
+        EC.presence_of_element_located((AppiumBy.ACCESSIBILITY_ID,"Calories Today"))
     )
     #find and click the enter food button
-    add_food = driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="Enter A Food")
+    add_food = driver.find_element(AppiumBy.XPATH, '//*[@content-desc="Log Food"]')
     add_food.click()
     #find the enter value button and click it
     food_name = wait.until(EC.presence_of_element_located(
@@ -251,7 +251,7 @@ def test_e2e_login(seed_test_user,driver):
     )
     time.sleep(7)
     """
-        Test Social Page loads as intended and displays correct information
+        Test Social Page loads as intended and can add friend
     """
     #find and click social page button on navbar
     social_navbar = driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="Social")
@@ -259,6 +259,25 @@ def test_e2e_login(seed_test_user,driver):
     #check that social page has loaded properly
     assert wait.until(
         EC.presence_of_element_located((AppiumBy.ACCESSIBILITY_ID, "Track progress with friends"))
+    )
+    #scroll to bottom
+    driver.find_element(AppiumBy.ANDROID_UIAUTOMATOR,
+                        'new UiScrollable(new UiSelector().scrollable(true)).scrollToEnd(10)')
+    #find the friend text and enter the friends name
+    friend_text = wait.until(EC.presence_of_element_located(
+        (AppiumBy.XPATH, "//android.widget.EditText")
+    ))
+    friend_text.click()
+    friend_text.send_keys("MockUser")
+    #find and click the enter button
+    friend_btn = driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="Enter")
+    friend_btn.click()
+    time.sleep(7)
+    #scroll back to bottom and find that the user has been added correctly
+    driver.find_element(AppiumBy.ANDROID_UIAUTOMATOR,
+                        'new UiScrollable(new UiSelector().scrollable(true)).scrollToEnd(10)')
+    assert wait.until(
+        EC.presence_of_element_located((AppiumBy.ACCESSIBILITY_ID,"mockemail@gmail.com"))
     )
     """
         Test Settings page loads as intended and displays correct information and logouts the user
@@ -357,15 +376,28 @@ def test_e2e_register(seed_test_user,driver):
     ))
     water_field.click()
     water_field.send_keys("1000")
+    # used to scroll down page so they can reach button
+    driver.find_element(AppiumBy.ANDROID_UIAUTOMATOR,
+                        'new UiScrollable(new UiSelector().scrollable(true)).scrollToEnd(10)')
+    #find the fat field and enter your value
+    fats_field = wait.until(EC.presence_of_element_located(
+        (AppiumBy.XPATH, "//android.widget.EditText[7]")
+    ))
+    fats_field.click()
+    fats_field.send_keys("1")
+    #find the carbs field and enter the value
+    carbs_field = wait.until(EC.presence_of_element_located(
+        (AppiumBy.XPATH, "//android.widget.EditText[8]")
+    ))
+    carbs_field.click()
+    carbs_field.send_keys("100")
     exercise_field = wait.until(EC.presence_of_element_located(
         (AppiumBy.XPATH, "//android.widget.Button[2]")
     ))
     exercise_field.click()
     light_exercise = driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="Light: exercise 1-3 times/week")
     light_exercise.click()
-    #used to scroll down page so they can reach button
-    driver.find_element(AppiumBy.ANDROID_UIAUTOMATOR,
-                        'new UiScrollable(new UiSelector().scrollable(true)).scrollToEnd(10)')
+
     #find and click button
     finish_btn = driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="Continue")
     finish_btn.click()

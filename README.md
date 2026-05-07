@@ -2,13 +2,14 @@
 
 | **Criteria**                                 | **Where to Find It (File Paths, Links, or Explanations)** |
 |----------------------------------------------|-----------------------------------------------------------|
-| **Team Standards: Cohesion**                 | STYLE_GUIDE.md                                            |
+| **Team Standards: Cohesion**                 | [Style Guide Markdown](STYLE_GUIDE.md)                    |
 | **Team Standards: Documentation**            | Below                                                     |
-| **Team Standards: Version Control Workflow** | GIT_CONVENTION.md                                         |
-| **Design & Structure**                       | DESIGN.md                                                 |
-| **GUI: Clever and Interesting Design**       | screenshots/                                              |
-| **Testing Documentation**                    | src/tests/TESTING.md                                      |
-| **Functionality and Features**               | FEATURES.md                                               |
+| **Team Standards: Version Control Workflow** | [Git Conventions](GIT_CONVENTION.md)                      |
+| **Design & Structure**                       | [Design](DESIGN.md)                                       |
+| **GUI: Clever and Interesting Design**       | [Graphical User Interface](GUI.md)                        |
+| **Testing Documentation**                    | [Testing](src/tests/TESTING.md)                           |
+| **Functionality and Features**               | [Features and Functionality](FEATURES.md)                 |
+| **Contribution Matrix**                      | [Contribution Matrix](CONTRIBUTION_MATRIX.md)             |
 
 ***
 ## Documentation
@@ -19,11 +20,28 @@ documentation so that they can be better explained to others. We have also provi
 project properly and how to run the application, either via running through the terminal or creating it as it
 own executable.
 
+### Example:
+
+```python
+"""
+This is used to explain how the file or specific function works
+"""
+def function():
+    # explains inline code
+    return
+```
+
 API Documentation: 
 
 Strava: https://developers.strava.com/docs/reference/
 
 Resend:https://resend.com/docs/api-reference/
+
+Flet:https://flet.dev/docs/
+
+Appium:https://appium.io/docs/en/latest/
+
+GitHub Actions:https://docs.github.com/en/actions
 
 ***
 ## Installation Tutorial
@@ -38,7 +56,18 @@ Resend:https://resend.com/docs/api-reference/
    ```bash
    pip install -r requirements.txt
    ```
+4. **Download and Install PostgreSQL**
 
+    Download At https://www.postgresql.org/download/windows/
+    
+    Set Up PostgresSQL and Create a Database using the [database.sql](database.sql)
+    ```bash
+    psql -U postgres -d database_name -f database.sql
+    ```
+    Add link to .env as DATABASE_URL to link the Database to connection.py
+    postgresql://username:password@localhost:5432/database_name
+5. Include other .env connections like Resend and Strava API
+   (Cant be provided as secret)
 ***
 ## How to Run Application
 * To run within windows, run:
@@ -53,7 +82,12 @@ Resend:https://resend.com/docs/api-reference/
 | **Android** | Install [Android Studio](https://developer.android.com/studio). Ensure **Android SDK** and **Java (JDK)** are in your system path. | `flet build apk` |
 | **iOS** | Requires **macOS** with [Xcode](https://developer.apple.com/xcode/) and **CocoaPods** installed. | `flet build ios` |
  
-* To make sure that all requirements are installed with executables, make sure pyproject.toml is included,
+* To make sure that all requirements are installed with executables, make sure [pyproject.toml](pyproject.toml) is included,
 as it uses it to install all dependencies in the apps.
 
 <sub>* Some AI has been used in the development of this product *</sub>
+
+***
+Copyright, 2026, Newcastle University
+
+You may copy this repository as part of our assessment and feedback at Newcastle University.

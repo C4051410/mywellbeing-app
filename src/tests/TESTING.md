@@ -10,6 +10,8 @@ easily if a piece of code has broken a test. E2E testing isn't completed due to 
 that it would simply take too long to create the APK and open the emulator in GitHub,
 it would not be practical to wait 15+ minutes to get the CI/CD back.
 
+[.github/workflows/CSC2033_test.yml](../../.github/workflows/CSC2033_test.yml)
+
 ## How To Run Unit Tests
 
 1.  **Create and Activate the Virtual Enviorment**:
@@ -44,7 +46,8 @@ it would not be practical to wait 15+ minutes to get the CI/CD back.
 
     Download At https://www.postgresql.org/download/windows/
     
-    Set Up PostgresSQL and Create a Database
+    Set Up PostgresSQL and Create a Database using 
+    [schema.sql](integration/schema.sql)
     
     run within integration: 
     ```bash
@@ -110,27 +113,29 @@ it would not be practical to wait 15+ minutes to get the CI/CD back.
     pytest src/tests/e2e
     ```
 
+Testing results can be found in [report.html](report.html)
 ## End to End Testing
 The end-to-end testing is done in one file, this is to simplify the task, as it requires the use
 of external tools like android studio, and a constantly running emulator, Appium is also required 
 to be running as well. The test was made with help from Appium Inspector, allowing us to view the 
 details of objects. test_app_open is used to test that the application opens correctly.
-All E2E testing is done in test_e2e_appium.py, different sections will be clearly labeled.
+All E2E testing is done in [test_e2e_appium.py](e2e/test_e2e_appium.py), different sections will be clearly labeled.
 
 | End to End Tests | What it Tests                                                                                                                            |
 |------------------|------------------------------------------------------------------------------------------------------------------------------------------|
 | Login            | Tests that the user can successfully navigate and login and end up on the homepage                                                       |
 | Activities       | Tests that the user can navigate to activities page, and create a new activity, and see the new activity                                 |
 | Nutrition        | Tests that the user can navigate to the nutrition page and create a new food log, and see the new log                                    |
-| Social           | Tests that the user can navigate to the social page                                                                                      |
+| Social           | Tests that the user can navigate to the social page and add a friend                                                                     |
 | Settings         | Tests that the user can navigate to the settings page and log out of their account                                                       |
 | Registration     | Tests that the user can successfully navigate and create a new account and end up on the homepage                                        |
 | Setup            | Tests that the user can successfully navigate and enter all the required fields in the setup and end up on the homepage                  |
 | Moderator        | Tests that the moderator is successfully logged into their page and that they can delete users posts                                     |
 | Admin            | Tests that the admin is successfully logged into their page and that they can delete users accounts and also promote users to moderators |
 
-We also conducted a Google Lighthouse Search to find the performance of our application and how well it going between pages.
+We also conducted a [Google Lighthouse Search](e2e/GoogleLightHouseE2E.pdf) to find the performance of our application and how well it going between pages.
 The tests are normally conducted on websites, so our tests maybe less accurate as it's based on an application.
+![Example Appium](../../screenshots/exampleappium.png)
 
 ## Login and Registration Testing
 
@@ -144,7 +149,7 @@ The tests are normally conducted on websites, so our tests maybe less accurate a
 | **MT5** | Invalid Account Login  | Test that when account is missing during login                  | Pass: Page remains on login and displays account doesnt exists text         | Test that you can only log into an account that exists                  |
 
 ### Unit Testing
-Unit testing done in test_auth_logic.py testing the logic of the functions is correct
+Unit testing done in [test_auth_logic.py](unit/test_auth_logic.py) testing the logic of the functions is correct
 
 
 | Test Class     | What it Tests                                                                                      |
@@ -155,7 +160,8 @@ Unit testing done in test_auth_logic.py testing the logic of the functions is co
 | TestSetupSave  | Test that setup saves properly, successfully checking that each vairable is valid before committing |
 
 ### Integration Testing
-Integration testing is done within test_auth_integration which tests that the functions can be properly implemented with the db.
+Integration testing is done within [test_auth_integration.py](integration/test_auth_integration.py) 
+which tests that the functions can be properly implemented with the db.
 
 | Test Function                      | What it Tests                                                                                           |
 |------------------------------------|---------------------------------------------------------------------------------------------------------|
@@ -173,15 +179,15 @@ Integration testing is done within test_auth_integration which tests that the fu
 
 
 ### Unit Testing
-Unit testing done in test_home_logic.py testing the logic of the functions is correct
+Unit testing done in [test_home_logic.py](unit/test_home_logic.py) testing the logic of the functions is correct
 
 | Test Class    | What it Tests                                                                                |
 |---------------|----------------------------------------------------------------------------------------------|
 | TestHomeLogic | Tests the home functions including returning username, friends_activities and current streak |
 
 ### Integration Testing
-Integration testing is done within test_home_integration which tests that the functions can be properly implemented 
-with the db.
+Integration testing is done within [test_home_integration.py](integration/test_home_integration.py) 
+which tests that the functions can be properly implemented with the db.
 
 | Test Function         | What it Tests                                                                     |
 |-----------------------|-----------------------------------------------------------------------------------|
@@ -199,7 +205,7 @@ with the db.
 | **MT5** | Invalid Values       | Check that user cannot enter impossible details like negative numbers for distance or reps         | Pass: Text fields prevent impossible entries from being entered                   |                                                 |
 
 ### Unit Testing
-Unit testing done in test_activities_logic.py testing the logic of the functions is correct
+Unit testing done in [test_activities_logic.py](unit/test_activities_logic.py) testing the logic of the functions is correct
 
 | Test Class              | What it Tests                                                                         |
 |-------------------------|---------------------------------------------------------------------------------------|
@@ -208,8 +214,8 @@ Unit testing done in test_activities_logic.py testing the logic of the functions
 | TestActivityRetrieval   | Tests that retrieval function for activities returns activities or catches any issues |
 
 ### Integration Testing
-Integration testing is done within test_activities_integration which tests that the functions can be properly implemented 
-with the db.
+Integration testing is done within [test_activities_integration.py](integration/test_activities_integration.py) 
+which tests that the functions can be properly implemented with the db.
 
 | Test Function               | What it Tests                                                                               |
 |-----------------------------|---------------------------------------------------------------------------------------------|
@@ -226,7 +232,7 @@ with the db.
 | **MT3** | Invalid Water log Values | Make sure that users cannot enter invalid water log value like negatives | Pass: Text fields prevent erroneous data from being entered  | Test that water logs catches any errors with data |
 
 ### Unit Testing
-Unit testing done in test_nutrition_logic.py testing the logic of the functions is correct
+Unit testing done in [test_nutrition_logic.py](unit/test_nutrition_logic.py) testing the logic of the functions is correct
 
 | Test Class          | What it Tests                                                                                       |
 |---------------------|-----------------------------------------------------------------------------------------------------|
@@ -236,8 +242,8 @@ Unit testing done in test_nutrition_logic.py testing the logic of the functions 
 | TestUserGoalsLogic  | Tests that retrieve goals returns either correct values or defaults values if error occurs          |
 
 ### Integration Testing
-Integration testing is done within test_nutrition_integration.py which tests that the functions can be properly implemented 
-with the db.
+Integration testing is done within [test_nutrition_integration.py](integration/test_nutrition_integration.py) 
+which tests that the functions can be properly implemented with the db.
 
 | Test Function              | What it Tests                                                                                    |
 |----------------------------|--------------------------------------------------------------------------------------------------|
@@ -254,7 +260,7 @@ with the db.
 | **MT5** | Check Add/Remove Friends  | Check users can add and remove friends                                                | Pass: Users can add and remove friends                          | Tests friends work as intended      |
 
 ### Unit Testing
-Unit testing done in test_social_logic.py testing the logic of the functions is correct
+Unit testing done in [test_social_logic.py](unit/test_social_logic.py) testing the logic of the functions is correct
 
 | Test Class                 | What it Tests                                                                                                  |
 |----------------------------|----------------------------------------------------------------------------------------------------------------|
@@ -263,7 +269,8 @@ Unit testing done in test_social_logic.py testing the logic of the functions is 
 | TestSocialFeedLogic        | Test that user feed returns as expected and correct response is returned                                       |
 
 ### Integration Testing
-Integration testing is done within test_social_integration.py which tests that the functions can be properly implemented with the db.
+Integration testing is done within [test_social_integration.py](integration/test_social_integration.py)
+which tests that the functions can be properly implemented with the db.
 
 | Test Function           | What it Tests                                                                                              |
 |-------------------------|------------------------------------------------------------------------------------------------------------|
@@ -282,7 +289,7 @@ Integration testing is done within test_social_integration.py which tests that t
 | **MT6** | Change Notification | Check that users can change their notification settings                                                     | Pass: Users can chang their notification setting   | Tests that users can change their notification settings |
 
 ### Unit Testing
-Unit testing done in test_settings_logic.py testing the logic of the functions is correct
+Unit testing done in [test_settings_logic.py](unit/test_settings_logic.py) testing the logic of the functions is correct
 
 | Test Class             | What it Tests                                                                                                                           |
 |------------------------|-----------------------------------------------------------------------------------------------------------------------------------------|
@@ -292,7 +299,8 @@ Unit testing done in test_settings_logic.py testing the logic of the functions i
 | TestDeleteUserAccount  | Test that delete account works as intended and that it catches any errors                                                               |
 
 ### Integration Testing
-Integration testing is done within test_settings_integration.py which tests that the functions can be properly implemented with the db.
+Integration testing is done within [test_settings_integration.py](integration/test_settings_integration.py)
+which tests that the functions can be properly implemented with the db.
 
 | Test Function             | What it Tests                                                                                                  |
 |---------------------------|----------------------------------------------------------------------------------------------------------------|
@@ -306,10 +314,10 @@ Integration testing is done within test_settings_integration.py which tests that
 |:--------|:---------------|:-------------------------------------------------------------|:-------------------------------------------------------------|:--------------------------------------------------------|
 | **MT1** | Search Users   | Check that admin can search for a specific user or moderator | Pass: Search Bar works as intended and returns specific user | Tests that admin can return a specific user             |
 | **MT2** | Delete User    | Check that admin can delete a user or moderator              | Pass: Admin can delete a specific user                       | Tests the admin power of deleting account               |
-| **MT3** | Make Moderator | Check that an admin can turn a normal user into a modeartor  | Pass: Admin can make a normal user into a moderator          | Tests the admin power of creating a moderator of a user |
+| **MT3** | Make Moderator | Check that an admin can turn a normal user into a moderator  | Pass: Admin can make a normal user into a moderator          | Tests the admin power of creating a moderator of a user |
 
 ### Unit Testing
-Unit testing done in test_admin_logic.py testing the logic of the functions is correct
+Unit testing done in [test_admin_logic.py](unit/test_admin_logic.py) testing the logic of the functions is correct
 
 | Test Class           | What it Tests                                                        |
 |----------------------|----------------------------------------------------------------------|
@@ -319,7 +327,8 @@ Unit testing done in test_admin_logic.py testing the logic of the functions is c
 | TestUpdateModerators | Test that users can have their role changed from users to moderators |
 
 ### Integration Testing
-Integration testing is done within test_admin_integration.py which tests that the functions can be properly implemented with the db.
+Integration testing is done within [test_admin_integration.py](integration/test_admin_integration.py) 
+which tests that the functions can be properly implemented with the db.
 
 | Test Function          | What it Tests                                                                                                                 |
 |------------------------|-------------------------------------------------------------------------------------------------------------------------------|
@@ -335,7 +344,7 @@ Integration testing is done within test_admin_integration.py which tests that th
 | **MT1** | Delete Post  | Check that moderators can delete a post              | Pass: Delete feature remove the post from the DB | Tests that moderators can delete posts        |
 
 ### Unit Testing
-Unit testing done in test_moderators_logic.py testing the logic of the functions is correct
+Unit testing done in [test_moderators_logic.py](unit/test_moderators_logic.py) testing the logic of the functions is correct
 
 | Test Class         | What it Tests                                                          |
 |--------------------|------------------------------------------------------------------------|
@@ -344,7 +353,8 @@ Unit testing done in test_moderators_logic.py testing the logic of the functions
 | TestRemovePosts    | Test that the delete posts removes them from the database              |
 
 ### Integration Testing
-Integration testing is done within test_moderator_integration.py which tests that the functions can be properly implemented with the db.
+Integration testing is done within [test_moderator_integration.py](integration/test_moderator_integration.py) 
+which tests that the functions can be properly implemented with the db.
 
 | Test Function              | What it Tests                                                                 |
 |----------------------------|-------------------------------------------------------------------------------|
