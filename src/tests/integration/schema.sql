@@ -77,6 +77,8 @@ CREATE TABLE foodlog (
     calories INTEGER,
     salts REAL,
     proteins REAL,
+    fats REAL,
+    carbohydrates REAL,
     user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     date DATE,
     mealtype TEXT

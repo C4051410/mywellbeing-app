@@ -64,14 +64,14 @@ def test_nutrition_integration(mock_notification, ):
     assert len(waterlogs) == 1
     assert waterlogs[0][0] == 1000
     #retrieve the total values of the stats
-    total_c, total_s, total_p, total_w = retrieve_daily_stats(1,date.today())
+    total_c, total_s, total_p,total_f,total_carbs,total_w = retrieve_daily_stats(1,date.today())
     #check all the stats match up
     assert total_c == 200
     assert total_s == 0
     assert total_p == 0.6
     assert total_w == 1000
     #retrieve the users goal
-    goal_c, goal_s, goal_p, goal_w = retrieve_user_goals(1)
+    goal_c, goal_s, goal_p,goal_f,goal_carbs,goal_w = retrieve_user_goals(1)
     #check that values match up
     assert goal_c == 2000
     assert goal_s == 4
