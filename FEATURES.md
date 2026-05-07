@@ -104,7 +104,7 @@ We use a wide range of different API's and Services
 * We use Strava API to allow users to connect their strava account to our application, allowing them to store
 strava activities to create a nice synergy between the two applications
 * We also use Resend API as mentioned above to create email notifications to send to users.
-
+![Example Email](screenshots/exampleemail.png)
 [src/activities/activities_services](src/activities/activities_services.py)
 
 #### Services

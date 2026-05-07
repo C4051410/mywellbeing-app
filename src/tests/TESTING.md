@@ -135,6 +135,7 @@ All E2E testing is done in [test_e2e_appium.py](e2e/test_e2e_appium.py), differe
 
 We also conducted a [Google Lighthouse Search](e2e/GoogleLightHouseE2E.pdf) to find the performance of our application and how well it going between pages.
 The tests are normally conducted on websites, so our tests maybe less accurate as it's based on an application.
+![Example Appium](../../screenshots/exampleappium.png)
 
 ## Login and Registration Testing
 
