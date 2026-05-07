@@ -10,7 +10,7 @@ easily if a piece of code has broken a test. E2E testing isn't completed due to 
 that it would simply take too long to create the APK and open the emulator in GitHub,
 it would not be practical to wait 15+ minutes to get the CI/CD back.
 
-[.github/workflows/CSC2033_test.yml](.github/workflows/CSC2033_test.yml)
+[.github/workflows/CSC2033_test.yml](../../.github/workflows/CSC2033_test.yml)
 
 ## How To Run Unit Tests
 
