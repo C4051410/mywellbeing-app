@@ -221,10 +221,10 @@ def test_e2e_login(seed_test_user,driver):
     nutrition_navbar.click()
     #check activities page appears by checking for calories in page
     assert wait.until(
-        EC.presence_of_element_located((AppiumBy.ACCESSIBILITY_ID,"Calories"))
+        EC.presence_of_element_located((AppiumBy.ACCESSIBILITY_ID,"Calories Today"))
     )
     #find and click the enter food button
-    add_food = driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="Enter A Food")
+    add_food = driver.find_element(AppiumBy.XPATH, '//*[@content-desc="Log Food"]')
     add_food.click()
     #find the enter value button and click it
     food_name = wait.until(EC.presence_of_element_located(
@@ -357,15 +357,28 @@ def test_e2e_register(seed_test_user,driver):
     ))
     water_field.click()
     water_field.send_keys("1000")
+    # used to scroll down page so they can reach button
+    driver.find_element(AppiumBy.ANDROID_UIAUTOMATOR,
+                        'new UiScrollable(new UiSelector().scrollable(true)).scrollToEnd(10)')
+    #find the fat field and enter your value
+    fats_field = wait.until(EC.presence_of_element_located(
+        (AppiumBy.XPATH, "//android.widget.EditText[7]")
+    ))
+    fats_field.click()
+    fats_field.send_keys("1")
+    #find the carbs field and enter the value
+    carbs_field = wait.until(EC.presence_of_element_located(
+        (AppiumBy.XPATH, "//android.widget.EditText[8]")
+    ))
+    carbs_field.click()
+    carbs_field.send_keys("100")
     exercise_field = wait.until(EC.presence_of_element_located(
         (AppiumBy.XPATH, "//android.widget.Button[2]")
     ))
     exercise_field.click()
     light_exercise = driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="Light: exercise 1-3 times/week")
     light_exercise.click()
-    #used to scroll down page so they can reach button
-    driver.find_element(AppiumBy.ANDROID_UIAUTOMATOR,
-                        'new UiScrollable(new UiSelector().scrollable(true)).scrollToEnd(10)')
+
     #find and click button
     finish_btn = driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="Continue")
     finish_btn.click()

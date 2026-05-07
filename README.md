@@ -86,3 +86,8 @@ GitHub Actions:https://docs.github.com/en/actions
 as it uses it to install all dependencies in the apps.
 
 <sub>* Some AI has been used in the development of this product *</sub>
+
+***
+Copyright, 2026, Newcastle University
+
+You may copy this repository as part of our assessment and feedback at Newcastle University.

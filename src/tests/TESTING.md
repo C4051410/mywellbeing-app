@@ -113,6 +113,7 @@ it would not be practical to wait 15+ minutes to get the CI/CD back.
     pytest src/tests/e2e
     ```
 
+Testing results can be found in [report.html](report.html)
 ## End to End Testing
 The end-to-end testing is done in one file, this is to simplify the task, as it requires the use
 of external tools like android studio, and a constantly running emulator, Appium is also required 
