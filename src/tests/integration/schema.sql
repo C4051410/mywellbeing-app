@@ -47,6 +47,8 @@ CREATE TABLE user_stats (
     salts_goal REAL,
     proteins_goal REAL,
     water_goal INTEGER,
+    fats_goal REAL,
+    carbs_goal REAL,
     weekly_activity_goal INTEGER DEFAULT 3
 );
 

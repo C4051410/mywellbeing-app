@@ -21,8 +21,9 @@ def test_nutrition_integration(mock_notification, ):
     )
     cur.execute(
         "INSERT INTO user_stats (user_id,calorie_goal,salts_goal,"
-        "proteins_goal,water_goal) VALUES (%s, %s, %s, %s, %s)",
-        (1,2000,4,50,3000))
+        "proteins_goal,water_goal,fats_goal,carbs_goal) VALUES "
+        "(%s, %s, %s, %s, %s,%s,%s)",
+        (1,2000,4,50,3000,5,200))
     conn.commit()
     #used to call cleanup when function successeds or fails
     test_title = "Apple"
@@ -31,7 +32,7 @@ def test_nutrition_integration(mock_notification, ):
     salts = 0
     proteins = 0.6
     #call function which should save to db using query tools
-    success, message = save_foodlog(test_title, calories, salts, proteins,10, 10,date.today(),"Snack",1)
+    success, message = save_foodlog(test_title, calories, salts, proteins,10, 15,date.today(),"Snack",1)
     #check it was successful and it returns correct message
     assert success is True
     assert message == "Successful"
@@ -44,6 +45,8 @@ def test_nutrition_integration(mock_notification, ):
     assert row[1] == 200
     assert row[2] == 0
     assert row[3] == 0.6
+    assert row[4] == 10
+    assert row[5] == 15
     #try and retrieve the foodlogs for that user
     foodlogs = retrieve_foodlogs(1)
     #check only the single log returns with right name
@@ -69,6 +72,8 @@ def test_nutrition_integration(mock_notification, ):
     assert total_c == 200
     assert total_s == 0
     assert total_p == 0.6
+    assert total_f == 10
+    assert total_carbs == 15
     assert total_w == 1000
     #retrieve the users goal
     goal_c, goal_s, goal_p,goal_f,goal_carbs,goal_w = retrieve_user_goals(1)
@@ -76,6 +81,8 @@ def test_nutrition_integration(mock_notification, ):
     assert goal_c == 2000
     assert goal_s == 4
     assert goal_p == 50
+    assert goal_f == 5
+    assert goal_carbs == 200
     assert goal_w == 3000
     #cleans db to protect it from errors
     cur.execute("DELETE FROM foodlog WHERE title =%s",(test_title,))
