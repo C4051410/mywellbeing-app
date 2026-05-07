@@ -13,8 +13,32 @@ on:
       - main
 # the jobs that will be tested
 jobs:
+  # Ruff check
+  ruff-check:
+    name: Ruff Lint Check
+    runs-on: ubuntu-latest
+    continue-on-error: true
+
+    steps:
+      - name: "Checks Repository"
+        uses: actions/checkout@v4
+
+      - name: "Set Up Python"
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      #install ruff
+      - name: "Install Ruff"
+        run: pip install ruff
+      #run the lint
+      - name: "Run Ruff Lint"
+        run: ruff check .
+      #find the effected files
+      - name: "Run Ruff Format Check"
+        run: ruff format . --check
   ##Unit Tests##
   unit-test:
+    needs: ruff-check
     #sets up tests on ubuntu on the latest version
     runs-on: ubuntu-latest
     steps:
