@@ -33,6 +33,8 @@ def setupGoalsPage(user_id, on_setup_complete):
     goal_weight = ft.TextField(label="Goal Weight (kg)",input_filter=ft.InputFilter(allow=True,regex_string=r"^\d*\.?\d*$",replacement_string=""))
     goal_salts = ft.TextField(hint_text="Salts (g)",input_filter=ft.InputFilter(allow=True,regex_string=r"^\d*\.?\d*$",replacement_string=""),height=40)
     goal_proteins = ft.TextField(hint_text="Protein Goal (g)",input_filter=ft.InputFilter(allow=True,regex_string=r"^\d*\.?\d*$",replacement_string=""),height=40)
+    goal_fats = ft.TextField(hint_text="Fats Goal (g)",input_filter=ft.InputFilter(allow=True,regex_string=r"^\d*\.?\d*$",replacement_string=""),height=40)
+    goal_carbs = ft.TextField(hint_text="Carbohydrates Goal (g)",input_filter=ft.InputFilter(allow=True, regex_string=r"^\d*\.?\d*$",replacement_string=""), height=40)
     goal_water = ft.TextField(hint_text="Water (ml)",input_filter=ft.InputFilter(allow=True,regex_string=r"^[0-9]*$",replacement_string=""),height=40)
     #give options of different dropdown options
     activity_level = ft.Dropdown(label="Activity Level", options=[ft.dropdown.Option("Sedentary: no exercise"),
@@ -63,7 +65,10 @@ def setupGoalsPage(user_id, on_setup_complete):
             goal_weight_val = float(goal_weight.value)
             salts_val = float(goal_salts.value)
             protein_val = float(goal_proteins.value)
+            fats_val = float(goal_fats.value)
+            carbs_val = float(goal_carbs.value)
             water_val = int(goal_water.value)
+
 
 
             # input validation
@@ -116,7 +121,8 @@ def setupGoalsPage(user_id, on_setup_complete):
 
             weekly_activity_goal = map_activity_level_to_weekly_goal(activity_level.value)
             # save and store users setup data
-            success = save_setup(user_id, age_val, gender.value, height_val, current_weight_val, goal_weight_val, calorie_goal,salts_val,protein_val,water_val,weekly_activity_goal)
+            success = save_setup(user_id, age_val, gender.value, height_val, current_weight_val, goal_weight_val,
+                                 calorie_goal,salts_val,protein_val,fats_val,carbs_val,water_val,weekly_activity_goal)
             if not success:
                 fail_snackbar("Error Upon Completion, Please Try Again", e)
                 e.page.update()
@@ -160,7 +166,7 @@ def setupGoalsPage(user_id, on_setup_complete):
                         height, current_weight, goal_weight,
                         ft.Divider(height=8, color=ft.Colors.TRANSPARENT),
                         ft.Text("Nutrition Goals", size=12, weight=ft.FontWeight.BOLD, color=ft.Colors.DEEP_ORANGE),
-                        goal_salts, goal_proteins, goal_water,
+                        goal_salts, goal_proteins, goal_water,goal_fats,goal_carbs,
                         ft.Divider(height=8, color=ft.Colors.TRANSPARENT),
                         ft.Text("Activity Level", size=12, weight=ft.FontWeight.BOLD, color=ft.Colors.DEEP_ORANGE),
                         activity_level,

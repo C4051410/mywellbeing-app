@@ -60,7 +60,8 @@ def save_foodlog(food, calories, salts, proteins,fats,carbohydrates,date,mealtyp
     #tests for if user enters something not a number
     try:
         # if the value is negative return false and message
-        if float(calories) < 0 or float(salts) < 0 or float(proteins) < 0:
+        if float(calories) < 0 or float(salts) < 0 or float(proteins) < 0\
+                or float(fats) < 0 or float(carbohydrates) < 0:
             return False, "Values Cannot be Negative"
     except Exception as e:
         #returns false and message
@@ -159,6 +160,10 @@ def retrieve_user_goals(user_id):
             goal_p = goals[2]
         if goals[3] is not None and goals[3] > 0:
             goal_w = goals[3]
+        if goals[4] is not None and goals[4] > 0:
+            goal_f = goals[4]
+        if goals[5] is not None and goals[5] > 0:
+            goal_carbs = goals[5]
     #returns all values
     return goal_c, goal_s, goal_p, goal_f, goal_carbs, goal_w
 

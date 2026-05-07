@@ -76,7 +76,7 @@ def get_user_goals(user_id):
     conn = connect()
     cur = conn.cursor()
     #retrieve the goals from the specified user
-    cur.execute("SELECT calorie_goal, salts_goal, proteins_goal,water_goal FROM user_stats WHERE user_id = %s",
+    cur.execute("SELECT calorie_goal, salts_goal, proteins_goal,water_goal,fats_goal,carbs_goal FROM user_stats WHERE user_id = %s",
                 (user_id,))
     row = cur.fetchone()
     cur.close()

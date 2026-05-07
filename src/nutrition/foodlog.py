@@ -44,11 +44,13 @@ def main_foodlog(page:ft.Page):
             calories_input.value = str(data['calories'])
             salts_input.value = str(data['salts'])
             proteins_input.value = str(data['proteins'])
-            fats_input.value = str(data.get('fats',0))
-            carbs_input.value = str(data.get('carbohydrates',0))
+            fats_input.value = str(data.get('fats'))
+            carbs_input.value = str(data.get('carbs'))
             calories_input.update()
             salts_input.update()
             proteins_input.update()
+            carbs_input.update()
+            fats_input.update()
             page.overlay.append(ft.SnackBar(
                 content=ft.Text(f"Found values for '{data['name']}'"),
                 bgcolor=ft.Colors.BLUE_400,

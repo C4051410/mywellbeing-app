@@ -120,8 +120,11 @@ def check_setup_complete(user_id):
         return False
     return True
 
-def save_setup(user_id, age, gender, height_cm, current_weight_kg, weight_goal_kg, calorie_goal,salts_goal,protein_goal,water_goal,weekly_activity_goal):
-    fields = [user_id, age, gender, height_cm, current_weight_kg, weight_goal_kg, calorie_goal,salts_goal,protein_goal,water_goal,weekly_activity_goal]
+def save_setup(user_id, age, gender, height_cm, current_weight_kg, weight_goal_kg,
+               calorie_goal,salts_goal,protein_goal,fats_goal,carbs_goal,water_goal,weekly_activity_goal):
+    fields = [user_id, age, gender, height_cm, current_weight_kg,
+              weight_goal_kg, calorie_goal,salts_goal,protein_goal,
+              fats_goal,carbs_goal,water_goal,weekly_activity_goal]
     if any(field is None for field in fields):
         return False
     try:
@@ -141,13 +144,18 @@ def save_setup(user_id, age, gender, height_cm, current_weight_kg, weight_goal_k
             return False
         if float(protein_goal) < 0:
             return False
+        if float(fats_goal) < 0:
+            return False
+        if float(carbs_goal) < 0:
+            return False
         if int(water_goal) < 0:
             return False
         if int(weekly_activity_goal) < 0:
             return False
     except ValueError:
         return False
-    success = commit_setup(user_id, age, gender, height_cm, current_weight_kg, weight_goal_kg, calorie_goal,salts_goal,protein_goal,water_goal,weekly_activity_goal)
+    success = commit_setup(user_id, age, gender, height_cm, current_weight_kg, weight_goal_kg,
+                           calorie_goal,salts_goal,protein_goal,fats_goal,carbs_goal,water_goal,weekly_activity_goal)
     return success
 
 def load_template(file_path, username):

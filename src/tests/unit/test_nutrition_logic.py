@@ -168,8 +168,8 @@ class TestDailyStatsLogic:
         assert s == 2.0  # 1.5 + 0.5
         assert p == 15.0  # 10.0 + 5.0
         assert w == 750  # 500 + 250
-        assert f == 3.0
-        assert carbs == 110.0
+        assert f == 3.0 # 2.0 + 1.0
+        assert carbs == 110.0 # 50.0  + 60.0
 
     def test_retrieve_stats_with_nones(self, mock_get_stats):
         # test resilience against NULL values in the database
@@ -194,7 +194,7 @@ class TestUserGoalsLogic:
         """
     def test_retrieve_goals(self,mock_get_goals):
         #mock user goals return
-        mock_goals = (2000,6,40,3000)
+        mock_goals = (2000,6,40,3000,5,120)
         mock_get_goals.return_value = mock_goals
         #calls on function
         c,s,p,f,carbs,w = retrieve_user_goals(1)
@@ -202,16 +202,16 @@ class TestUserGoalsLogic:
         assert s == 6.0
         assert p == 40.0
         assert w == 3000
-        assert f == 50
-        assert carbs == 200
+        assert f == 5
+        assert carbs == 120
 
     def test_retrieve_goals_with_nones(self, mock_get_goals):
-        mock_goals = (None,6,None,3000)
+        mock_goals = (None,6,None,3000,None,None)
         mock_get_goals.return_value = mock_goals
         c,s,p,f,carbs,w = retrieve_user_goals(1)
         assert c == 1 #default to 1 to avoid /0
         assert s == 6.0
         assert p == 100.0 #defaults to 100 to avoid /0
         assert w == 3000
-        assert f == 50
-        assert carbs == 200
+        assert f == 50 #defaults to 50
+        assert carbs == 200 #defaults to 200

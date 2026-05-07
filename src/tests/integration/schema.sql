@@ -47,6 +47,8 @@ CREATE TABLE user_stats (
     salts_goal REAL,
     proteins_goal REAL,
     water_goal INTEGER,
+    fats_goal REAL,
+    carbs_goal REAL,
     weekly_activity_goal INTEGER DEFAULT 3
 );
 
@@ -77,6 +79,8 @@ CREATE TABLE foodlog (
     calories INTEGER,
     salts REAL,
     proteins REAL,
+    fats REAL,
+    carbohydrates REAL,
     user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     date DATE,
     mealtype TEXT

@@ -46,7 +46,7 @@ def test_full_registration_integration(mock_resend,mock_notification):
     #try and complete the setup
     complete =  save_setup(message[0],20,"Male",185,
                            85,75,2000,
-                           2,50,1000,4)
+                           2,50,5,100,1000,4)
     assert complete is True
     #check that setup was complete
     cur.execute("SELECT user_id FROM user_stats WHERE user_id = %s", (message[0],))

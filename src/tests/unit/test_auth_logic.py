@@ -171,20 +171,20 @@ class TestSaveSetup():
         #test valid setup
         setup = save_setup(1,18,"Male",185,
                            85,75,2500,
-                           5.0,100,4000,3)
+                           5.0,100,5,100,4000,3)
         assert setup == True
     def test_missing_setup(self,mock_commit):
         #test setup when fields are missing it fails
         setup = save_setup(None,None,None,None,
                            None,None,None,
-                           None,None,None,None)
+                           None,None,None,None,None,None)
         assert setup == False
     def test_invalid_fields(self,mock_commit):
         #test when fields are invalid
-        setup = save_setup(-1,-1,"Male",-1,-1.0,-1.0,-1,-1.0,-1.0,-1,-1)
+        setup = save_setup(-1,-1,"Male",-1,-1.0,-1.0,-1,-1.0,-1.0,-1.0,-1.0,-1,-1)
         assert setup == False
         setup = save_setup("Invalid","Invalid", "Male",
                            "Invalid","Invalid","Invalid",
                            "Invalid","Invalid","Invalid",
-                           "Invalid","Invalid")
+                           "Invalid","Invalid","Invalid","Invalid")
         assert setup == False
